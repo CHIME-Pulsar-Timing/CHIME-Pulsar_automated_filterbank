@@ -22,7 +22,7 @@ def run_sk_mad(fname,fil):
 
     return fnamenew
 
-def run_prepsubband(fname,tsamp,nsamp,dm,coherent_dm,sk_mad=False,coherent=True):
+def run_prepsubband(fname,tsamp,nsamp,dm,coherent_dm,coherent=True):
 
     if coherent:
         dms, ds, sb = pipeline_config.coherent_ddplan(tsamp, dm, coherent_dm)
@@ -33,10 +33,7 @@ def run_prepsubband(fname,tsamp,nsamp,dm,coherent_dm,sk_mad=False,coherent=True)
     if numout % 7 == 0:
         numout += (numout/7)
 
-    if sk_mad == True:
-        prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 200 -numout %d -downsamp %d -nsub %d -o %s %s.fil' %(dm,dms,numout,ds,sb,fname,fname)
-    else:
-        prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -numout %d -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,numout,ds,sb,fname,fname,fname)
+    prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -numout %d -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,numout,ds,sb,fname,fname,fname)
     run_prepsubband_cmd = subprocess.Popen([prepsubband_command],shell=True)
     run_prepsubband_cmd.wait()
 
@@ -196,6 +193,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--fil', type=str, help='Input filterbank file')
+    parser.add_argument('--dedisp',action='store_true',help='Run prepsubband and dedisperse the data')
     parser.add_argument('--sk_mad',action='store_true',help='Run sk_mad RFI excision instead of rfifind')
     parser.add_argument('--dm', type=float,help='DM of the candidate. This will determine the max DM to search for pulsar')
     parser.add_argument('--coherent',action='store_true',help='Use the coherent ddplan for searching')
@@ -209,6 +207,8 @@ if __name__ == '__main__':
     parser.add_argument('--sp',action='store_true',help='Run single pulse search')
     parser.add_argument('--fold',action='store_true',help='Fold the candidates')
     parser.add_argument('--speg',action='store_true',help='creates the SPEGID files')
+    parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
+    parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
     args = parser.parse_args()
 
     fil = args.fil
@@ -240,6 +240,9 @@ if __name__ == '__main__':
     sp = args.sp
     fold = args.fold
     speg = args.speg
+    fetch =args.fetch 
+    dedisp = args.dedisp
+    rfifind = args.rfifind
     print('Running RFI mitigation')
     if sk_mad:
         if os.path.exists('{}_sk_mad.fil'.format(fname)):
@@ -247,17 +250,17 @@ if __name__ == '__main__':
             fname = '{}_sk_mad'.format(fname)
         else:
             fname = run_sk_mad(fname,fil)
-    else:
+    if rfifind:
         run_rfifind(fname)
-
-    #dedispersion
-    if coherent:
-        dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
-        dmlist.append(0)
-    else:
-        dmlist = [i for i in pipeline_config.dm_set if i < source_dm+20]
-    for dm in dmlist:
-        run_prepsubband(fname,tsamp,nsamp,dm,source_dm,sk_mad,coherent)
+    if dedisp:
+        #dedispersion
+        if coherent:
+            dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
+            dmlist.append(0)
+        else:
+            dmlist = [i for i in pipeline_config.dm_set if i < source_dm+20]
+        for dm in dmlist:
+            run_prepsubband(fname,tsamp,nsamp,dm,source_dm,coherent)
 
     #run fft
     if fft:
@@ -277,6 +280,10 @@ if __name__ == '__main__':
         fold_candidates(fname, source_dm, coherent=coherent)
     #run SPEGID on candidates
     if speg:
+        from prep_speg import prep_speg
         #prep_speg
         #run SPEGID
-        pass
+        prep_speg(fname+'_rfifind.inf')
+    if fetch:
+        from prep_fetch import prep_fetch_csv
+        prep_fetch_csv(fname+'.fil',rank=2)

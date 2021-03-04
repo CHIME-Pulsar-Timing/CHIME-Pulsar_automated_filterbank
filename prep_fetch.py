@@ -53,6 +53,17 @@ def prep_fetch_scale_fil(filfile,burst_time,filterbank_len=5):
     my_spec.data = my_spec.data-np.min(my_spec.data)
     if np.max(my_spec.data)>255:
         my_spec.data = my_spec.data*(255/np.max(my_spec.data))
+    '''
+    print(np.max(my_spec.data))
+    print(np.min(my_spec.data))
+    import matplotlib.pyplot as plt
+    plt.imshow(my_spec.data)
+    plt.show()
+    plt.plot(np.sum(my_spec.data,1))
+    plt.figure()
+    plt.plot(np.sum(my_spec.data,1))
+    '''
+
     #modify the start time of the filterbank file
     fil.header['tstart'] = fil.header['tstart']+(burst_time/(60*60*24))
     filename=filfile.rstrip('.fil')+'_'+str(int(burst_sample*tsamp))+'.fil' 
@@ -60,5 +71,5 @@ def prep_fetch_scale_fil(filfile,burst_time,filterbank_len=5):
     return filename,filterbank_len
     
 
-prep_fetch_csv(sys.argv[1])
+#prep_fetch_csv(sys.argv[1])
  
