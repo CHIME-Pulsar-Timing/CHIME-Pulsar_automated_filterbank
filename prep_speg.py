@@ -15,7 +15,7 @@ def prep_speg(inffile):
     all_files= np.array(os.listdir(folder))
     sp_files =all_files[list(['.singlepulse' in file for file in all_files])]
     #find the postion of the 'DM' string
-    dtype =[('fn','U50'),('dm',float)]
+    dtype =[('fn','U200'),('dm',float)]
     unsorted=[]
     for file in sp_files:
         #parse the fn
@@ -52,4 +52,4 @@ def prep_speg(inffile):
         bw=info.BW
         writer.writerow([obj_n,ra,dec,fch,bw])
         
-prep_speg(sys.argv[1])
+#prep_speg(sys.argv[1])
