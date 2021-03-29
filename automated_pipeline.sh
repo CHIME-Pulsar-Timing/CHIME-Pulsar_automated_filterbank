@@ -15,17 +15,21 @@ do
     mv $fil $i
     cd $i
     #run pipeline and prep_fetch prep spegID
-    python $(dirname "$BASH_SOURCE")/gwg_cand_search_pipeline.py --dm 38 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $fil
+    python $(dirname "$BASH_SOURCE")/gwg_cand_search_pipeline.py --dm $3 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $fil
     mkdir data
     #remove all the large files that we no longer need
     rm *.dat
-    rm $fil
+    if [ $1 -gt 1 ]
+    then
+        rm $fil
+    fi
     #run FETCH
-    source ~/anaconda3/etc/profile.d/conda.sh    
-    conda activate fetch
+    #the following code is only valid for Adam's personal computer
+    #source ~/anaconda3/etc/profile.d/conda.sh    
+    #conda activate fetch
     candmaker.py --frequency_size 256 --time_size 256 --cand_param_file cands.csv --plot --fout data/
     predict.py --data_dir data/ --model a
-    conda deactivate
+    #conda deactivate
     cd ..
     ((i=i+1))
 done
