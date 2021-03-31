@@ -1,5 +1,9 @@
 #!/bin/bash
 #if we are not splitting then just set out as the fil file
+#argument:
+#1) segments
+#2) fil name
+#3) DM
 if [ $1 -gt 1 ]
 then
     out=`python $(dirname "$BASH_SOURCE")/split_filterbank.py $1 $2`
