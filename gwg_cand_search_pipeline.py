@@ -8,7 +8,7 @@ from presto.filterbank import FilterbankFile
 import pipeline_config
 from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
-
+#original GWG pipeline written by Chiamin
 def run_rfifind(fname):
 
     rfifind_command = 'rfifind -blocks %d -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,pipeline_config.zaplist,fname,fname)
@@ -33,7 +33,7 @@ def run_prepsubband(fname,tsamp,nsamp,dm,coherent_dm,coherent=True):
     if numout % 7 == 0:
         numout += (numout/7)
 
-    prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -numout %d -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,numout,ds,sb,fname,fname,fname)
+    prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,numout,ds,sb,fname,fname,fname)
     run_prepsubband_cmd = subprocess.Popen([prepsubband_command],shell=True)
     run_prepsubband_cmd.wait()
 
@@ -101,7 +101,7 @@ def run_ffa(fname):
         run_ffa_cmd.wait()
 
 def run_sp(fname):
-    sp_command = 'single_pulse_search.py %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py -f %s*.dat' %(fname)
     run_sp_cmd = subprocess.Popen([sp_command],shell=True)
     run_sp_cmd.wait()
 
