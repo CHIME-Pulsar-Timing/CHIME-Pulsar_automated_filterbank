@@ -1,5 +1,5 @@
 #!/bin/bash
-split_size=8
+split_size=3
 afp="/home/adamdong/scratch/CHIME-Pulsar_automated_filterbank/"
 dm=130
 for filfile in $@;
