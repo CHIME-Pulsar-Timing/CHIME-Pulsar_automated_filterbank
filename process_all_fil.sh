@@ -1,11 +1,13 @@
 #!/bin/bash
 split_size=8
+afp="/home/adamdong/scratch/CHIME-Pulsar_automated_filterbank/"
+dm=130
 for filfile in $@;
 do
     foldername=$(echo "$filfile" | cut -f 1 -d '.')
     mkdir $foldername
-    mv $filfile $foldername
+    cp -d $filfile $foldername
     cd $foldername
-    $(dirname "$BASH_SOURCE")/split_files.sh $split_size $filfile
+    sbatch $afp/automated_filterbank_batch.sh $split_size $filfile $dm $afp
     cd ..
 done
