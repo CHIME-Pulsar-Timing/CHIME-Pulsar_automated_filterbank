@@ -22,18 +22,14 @@ def run_sk_mad(fname,fil):
 
     return fnamenew
 
-def run_prepsubband(fname,tsamp,nsamp,dm,coherent_dm,coherent=True):
+def run_prepsubband(fname,tsamp,dm,coherent_dm,coherent=True):
 
     if coherent:
         dms, ds, sb = pipeline_config.coherent_ddplan(tsamp, dm, coherent_dm)
     else:
         dms, ds, sb = pipeline_config.ddplan(tsamp, dm)
-
-    numout = (((nsamp / (2400*256))+1)*(2400*256))/ds
-    if numout % 7 == 0:
-        numout += (numout/7)
-
-    prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,numout,ds,sb,fname,fname,fname)
+    
+    prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,ds,sb,fname,fname,fname)
     run_prepsubband_cmd = subprocess.Popen([prepsubband_command],shell=True)
     run_prepsubband_cmd.wait()
 
@@ -185,7 +181,7 @@ def run_spp_regular(fil):
     dm_list = [dm,dm+20,dm+40]
     for dm in dmlist:
         #don't need coherent dm value.
-        run_prepsubband(fname,tsamp,nsamp,dm,123,sk_mad,coherent)
+        run_prepsubband(fname,tsamp,dm,123,sk_mad,coherent)
     run_sp(fname)
 
 if __name__ == '__main__':
@@ -260,7 +256,7 @@ if __name__ == '__main__':
         else:
             dmlist = [i for i in pipeline_config.dm_set if i < source_dm+20]
         for dm in dmlist:
-            run_prepsubband(fname,tsamp,nsamp,dm,source_dm,coherent)
+            run_prepsubband(fname,tsamp,dm,source_dm,coherent)
 
     #run fft
     if fft:
