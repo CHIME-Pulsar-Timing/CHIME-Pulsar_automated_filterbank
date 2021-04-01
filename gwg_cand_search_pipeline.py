@@ -15,14 +15,14 @@ def run_rfifind(fname):
     run_rfifind_cmd = subprocess.Popen([rfifind_command], shell=True)
     run_rfifind_cmd.wait()
 
-def run_sk_mad(fname,fil):
-
-    sk_mad_rfi_excision(fname,fil)
-    fnamenew = str(fname)+'_sk_mad'
+def run_sk_mad(fname,fil,slurm=''):
+    
+    sk_mad_rfi_excision(fname,fil,slurm)
+    fnamenew = os.path.join(str(slurm),str(fname)+'_sk_mad')
 
     return fnamenew
 
-def run_prepsubband(fname,tsamp,dm,coherent_dm,coherent=True):
+def run_prepsubband(fname,tsamp,dm,coherent_dm,slurm='',coherent=True):
 
     if coherent:
         dms, ds, sb = pipeline_config.coherent_ddplan(tsamp, dm, coherent_dm)
@@ -162,28 +162,6 @@ def fold_candidates(fname,source_dm,coherent=True):
                         continue
                     else:
                         run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad)
-
-def run_spp_regular(fil):
-    dm=7
-    fil = args.fil
-    fname = fil.rstrip('.fil')
-
-    #get some header details from the filterbank file
-    filfile = FilterbankFile(fil)
-    tsamp = filfile.dt
-    nsamp = filfile.nspec
-    nchan = filfile.nchan
-
-    sk_mad=False
-    coherent=False
-
-    run_rfifind(fname)
-    dm_list = [dm,dm+20,dm+40]
-    for dm in dmlist:
-        #don't need coherent dm value.
-        run_prepsubband(fname,tsamp,dm,123,sk_mad,coherent)
-    run_sp(fname)
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -205,11 +183,16 @@ if __name__ == '__main__':
     parser.add_argument('--speg',action='store_true',help='creates the SPEGID files')
     parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
     parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
+    parser.add_argument('--slurm',type=str,help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
+
     args = parser.parse_args()
 
     fil = args.fil
+    #get only the file name
     fname = fil.rstrip('.fil')
-
+    fname = fname.split('/')
+    fname = fname[-1]
+    
     if os.path.islink(fil):
         fil = os.readlink(fil)
         if not os.path.isfile(fil):
@@ -239,13 +222,14 @@ if __name__ == '__main__':
     fetch =args.fetch 
     dedisp = args.dedisp
     rfifind = args.rfifind
+    slurm=args.slurm
     print('Running RFI mitigation')
     if sk_mad:
         if os.path.exists('{}_sk_mad.fil'.format(fname)):
             print('sk mad cleaned data already exists')
             fname = '{}_sk_mad'.format(fname)
         else:
-            fname = run_sk_mad(fname,fil)
+            fname = run_sk_mad(fname,fil,slurm)
     if rfifind:
         run_rfifind(fname)
     if dedisp:

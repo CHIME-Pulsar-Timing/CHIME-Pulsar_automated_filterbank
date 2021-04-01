@@ -2,7 +2,7 @@ import sys
 from presto import filterbank as fb
 from presto.filterbank import FilterbankFile as fbf
 
-def split_fb(segments,filfile):
+def split_fb(segments,filfile,slurm=''):
     '''
     This function splits a filterbank file up for easier processing
     input
@@ -21,10 +21,15 @@ def split_fb(segments,filfile):
             #prevent us from running off the end
             segment_length = total_samples-i*segment_length
         my_specs = fil.get_spectra(i*segment_length,segment_length)
-        fname=filfile.rstrip('.fil')+'_'+str(i)+'.fil'
+        if slurm:
+            import os
+            fname=os.path.join(slurm,filfile.rstrip('.fil')+'_'+str(i)+'.fil')
+        
+        out_fname=filfile.rstrip('.fil')+'_'+str(i)+'.fil'
+
         fil.header['tstart'] = fil.header['tstart']+((segment_length*float(fil.header['tsamp']))/(60*60*24))
         fb.create_filterbank_file(fname,fil.header,spectra=my_specs.data.T,nbits=fil.header['nbits'])
-        fnames.append(fname)
+        fnames.append(out_fname)
     return fnames
 
 filnames=split_fb(int(sys.argv[1]),sys.argv[2])

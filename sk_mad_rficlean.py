@@ -24,7 +24,7 @@ def plot_bandpass_fig(fname,spectra):
     plt.plot(bandpass)
     plt.savefig(fname+'_bandpass.png')
 
-def sk_mad_rfi_excision(fname,fil,apply_sk=True,apply_mad=True,apply_chanthresh=False,plot_bandpass=False):
+def sk_mad_rfi_excision(fname,fil,slurm='',apply_sk=True,apply_mad=True,apply_chanthresh=False,plot_bandpass=False):
 
     outopts = ''
 
@@ -130,9 +130,7 @@ def sk_mad_rfi_excision(fname,fil,apply_sk=True,apply_mad=True,apply_chanthresh=
             #data[j, local_time_slice] = data[j, local_time_slice] - med_intensity
 
     if plot_bandpass:
-
         plot_bandpass_fig(fname+outopts,data)
-
     # rescaling the data
     data = ((data - np.min(data)) / (np.max(data)- np.min(data))) * 256
     data = data.astype(int)
@@ -140,7 +138,7 @@ def sk_mad_rfi_excision(fname,fil,apply_sk=True,apply_mad=True,apply_chanthresh=
     print(np.max(data))
 
     print('Saving masked filterbank file')
-    fb.create_filterbank_file(str(fname)+str(outopts)+'.fil',filfile.header,spectra=data.data.T,nbits=filfile.header['nbits'])    
+    fb.create_filterbank_file(os.path.join(slurm,str(fname)+str(outopts)+'.fil'),filfile.header,spectra=data.data.T,nbits=filfile.header['nbits'])    
    
 if __name__ == '__main__':
 
