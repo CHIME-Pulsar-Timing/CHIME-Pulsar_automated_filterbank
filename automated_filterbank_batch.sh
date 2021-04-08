@@ -11,7 +11,9 @@
 #2 is filterbank file
 #3 is DM
 #if we are not splitting then just set out as the fil file
-source ~/afp/bin/activate
+
+#source ~/afp/bin/activate
+#path to automated filterbank file script locations
 afp=$4
 
 if [ $1 -gt 1 ]
