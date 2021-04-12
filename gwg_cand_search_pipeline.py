@@ -15,15 +15,24 @@ def run_rfifind(fname):
     run_rfifind_cmd = subprocess.Popen([rfifind_command], shell=True)
     run_rfifind_cmd.wait()
 
-def run_sk_mad(fname,fil,slurm=''):
+def run_sk_mad(fname,fil):
     
-    sk_mad_rfi_excision(fname,fil,slurm)
-    fnamenew = os.path.join(str(slurm),str(fname)+'_sk_mad')
+    sk_mad_rfi_excision(fname,fil)
+    fnamenew = str(fname)+'_sk_mad'
 
     return fnamenew
 
-def run_prepsubband(fname,tsamp,dm,coherent_dm,slurm='',coherent=True):
-
+def run_ddplan(fname,dm):
+    dml=dm-20
+    dmh=dm+20
+    ddplan_command = "DDplan.py -l %.2f -d %.2f -o %s_ddplan -w %s.fil" %(dml,dmh,fname,fname)
+    run_ddplan = subprocess.Popen([ddplan_command],shell=True)
+    run_ddplan.wait()
+    prepsubband_command = "python dedisp_%s.py" %(fname)
+    run_ddplan_python = subprocess.Popen([prepsubband_command],shell=True)
+    run_ddplan_python.wait()
+def run_prepsubband(fname,tsamp,dm,ddplan,coherent_dm,slurm='',coherent=True):
+    #should replace this with ddplan
     if coherent:
         dms, ds, sb = pipeline_config.coherent_ddplan(tsamp, dm, coherent_dm)
     else:
@@ -97,7 +106,7 @@ def run_ffa(fname):
         run_ffa_cmd.wait()
 
 def run_sp(fname):
-    sp_command = 'single_pulse_search.py -f %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py %s*.dat' %(fname)
     run_sp_cmd = subprocess.Popen([sp_command],shell=True)
     run_sp_cmd.wait()
 
@@ -188,6 +197,26 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     fil = args.fil
+    sk_mad = args.sk_mad
+    source_dm = args.dm
+    coherent = args.coherent
+    fft = args.no_fft
+    rednoise = args.no_rednoise
+    zaplist = args.zaplist
+    binary = args.binary
+    zmax = args.zmax
+    wmax = args.wmax
+    ffa = args.ffa
+    sp = args.sp
+    fold = args.fold
+    speg = args.speg
+    fetch =args.fetch 
+    dedisp = args.dedisp
+    rfifind = args.rfifind
+    slurm=args.slurm
+    if slurm:
+        os.chdir(slurm)
+    print('Running RFI mitigation')
     #get only the file name
     fname = fil.rstrip('.fil')
     fname = fname.split('/')
@@ -206,33 +235,20 @@ if __name__ == '__main__':
     nsamp = filfile.nspec
     nchan = filfile.nchan
 
-    sk_mad = args.sk_mad
-    source_dm = args.dm
-    coherent = args.coherent
-    fft = args.no_fft
-    rednoise = args.no_rednoise
-    zaplist = args.zaplist
-    binary = args.binary
-    zmax = args.zmax
-    wmax = args.wmax
-    ffa = args.ffa
-    sp = args.sp
-    fold = args.fold
-    speg = args.speg
-    fetch =args.fetch 
-    dedisp = args.dedisp
-    rfifind = args.rfifind
-    slurm=args.slurm
-    print('Running RFI mitigation')
+
     if sk_mad:
         if os.path.exists('{}_sk_mad.fil'.format(fname)):
             print('sk mad cleaned data already exists')
             fname = '{}_sk_mad'.format(fname)
         else:
-            fname = run_sk_mad(fname,fil,slurm)
+            fname = run_sk_mad(fname,fil)
     if rfifind:
         run_rfifind(fname)
     if dedisp:
+        #deprecating to be run ddplan now
+        run_ddplan(fname,source_dm)
+
+        '''
         #dedispersion
         if coherent:
             dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
@@ -241,7 +257,7 @@ if __name__ == '__main__':
             dmlist = [i for i in pipeline_config.dm_set if i < source_dm+20]
         for dm in dmlist:
             run_prepsubband(fname,tsamp,dm,source_dm,coherent)
-
+        '''
     #run fft
     if fft:
         run_realfft(fname,rednoise,zaplist)
@@ -266,4 +282,4 @@ if __name__ == '__main__':
         prep_speg(fname+'_rfifind.inf')
     if fetch:
         from prep_fetch import prep_fetch_csv
-        prep_fetch_csv(fname+'.fil',rank=2)
+        prep_fetch_csv(fname+'.fil',root=slurm,rank=2)
