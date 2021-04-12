@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=10:00:00
-#SBATCH --mem=40GB
+#SBATCH --time=1:00:00
+#SBATCH --mem=1GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
@@ -11,7 +11,9 @@
 #2 is filterbank file
 #3 is DM
 #if we are not splitting then just set out as the fil file
-source ~/afp/bin/activate
+module load presto
+#module load psrchive
+source ~/afp2/bin/activate
 afp=$4
 
 if [ $1 -gt 1 ]

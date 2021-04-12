@@ -1,7 +1,7 @@
 #!/bin/bash
 split_size=3
 afp="/home/adamdong/scratch/CHIME-Pulsar_automated_filterbank/"
-dm=130
+dm=36
 for filfile in $@;
 do
     foldername=$(echo "$filfile" | cut -f 1 -d '.')
