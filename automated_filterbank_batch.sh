@@ -49,17 +49,19 @@ do
         #if we made the SK file then delete it too
         #rm "$SPFILES/$FIL"
     #fi
-
+    
     #run FETCH
     #the following code is only valid for Adam's personal computer
-    source ~/anaconda3/etc/profile.d/conda.sh    
-    conda activate fetch
-
+    #source ~/anaconda3/etc/profile.d/conda.sh    
+    #conda activate fetch
+    #need to activate FETCH
+    source ~/afp2/bin/activate
     candmaker.py --frequency_size 256 --time_size 256 --cand_param_file "$SPFILES/cands.csv" --plot --fout $DATA
-    echo $DATA 
     #don't do predict as we don't have GPU allocation... this can be done in seperate script
     #predict.py --data_dir data/ --model a
-    conda deactivate
+    #conda deactivate
+    #deactivating FETCH
+    deactivate
     ((i=i+1))
 done
 #now copy all the files back
