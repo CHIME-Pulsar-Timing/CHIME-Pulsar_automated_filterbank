@@ -31,8 +31,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.cluster import DBSCAN
 from scipy.special import erf
 from math import pi, log, ceil
-
-# os.chdir("/home/di/Documents/Paper_Module/test_data/56475/p2030.20130702.G33.79+00.82.N.b3.00000")
+from sys import exit
 
 """
 This section extracts MJD and the name of the beam (*), which will be used to verify that '*_inf.txt' and 
@@ -1125,23 +1124,29 @@ border_clusters = []
 cur_minPts = 5
 # divide into n_brDMs+1 sections
 for i in range(n_brDMs + 1):
-    print(i)
     cur_minPts = 5
-    if 0 < i < n_brDMs:
-        DM_upper_border = break_DMs[i]
-        DM_upper_limit = DM_upper_border - cur_minPts * cur_diffs[i]
-        DM_lower_border = break_DMs[i - 1]
-        DM_lower_limit = DM_lower_border - cur_minPts * cur_diffs[i - 1]
-    elif i == 0:  # no lower limit
-        DM_upper_border = break_DMs[i]
-        DM_upper_limit = DM_upper_border - cur_minPts * cur_diffs[i]
-        DM_lower_border = -0.01
-        DM_lower_limit = DM_lower_border
+    if n_brDMs==0:
+            #if it doesn't seem like there are any breaks
+            DM_upper_border = 20000.0
+            DM_upper_limit = DM_upper_border
+            DM_lower_border = -0.01
+            DM_lower_limit = DM_lower_border
     else:
-        DM_upper_border = 20000.0
-        DM_upper_limit = DM_upper_border
-        DM_lower_border = break_DMs[i - 1]
-        DM_lower_limit = DM_lower_border - cur_minPts * cur_diffs[i - 1]
+        if 0 < i < n_brDMs:
+            DM_upper_border = break_DMs[i]
+            DM_upper_limit = DM_upper_border - cur_minPts * cur_diffs[i]
+            DM_lower_border = break_DMs[i - 1]
+            DM_lower_limit = DM_lower_border - cur_minPts * cur_diffs[i - 1]
+        elif i == 0:  # no lower limit
+            DM_upper_border = break_DMs[i]
+            DM_upper_limit = DM_upper_border - cur_minPts * cur_diffs[i]
+            DM_lower_border = -0.01
+            DM_lower_limit = DM_lower_border
+        else:
+            DM_upper_border = 20000.0
+            DM_upper_limit = DM_upper_border
+            DM_lower_border = break_DMs[i - 1]
+            DM_lower_limit = DM_lower_border - cur_minPts * cur_diffs[i - 1]
 
     cur_DF = spe_DF_clean.loc[(spe_DF_clean['DM'] > DM_lower_limit) & (spe_DF_clean['DM'] < DM_upper_border), ].copy()
     print(cur_DF.shape)
@@ -1473,7 +1478,9 @@ for i in range(n_bright_SPEGs):
 
 print("after merging:")
 print(SPEG_rank - 1)
-np.save('spegs',bright_SPEGs)
+
+
+np.save('spegs',all_SPEGs)
 
 """
 open output files to write the SPEGs/clusters, and write header to both files

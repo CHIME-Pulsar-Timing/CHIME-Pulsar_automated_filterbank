@@ -32,7 +32,7 @@ def split_fb(segments,filfile,slurm=''):
         fnames.append(out_fname)
     return fnames
 
-filnames=split_fb(int(sys.argv[1]),sys.argv[2])
+filnames=split_fb(int(sys.argv[1]),sys.argv[2],sys.argv[3])
 returnstr=''
 for n in filnames:
     returnstr+=n+' '
