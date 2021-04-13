@@ -22,8 +22,8 @@ PROCESSED=$(find $1 -name 'cands.csv' -printf '%h\n' | sort -u)
 echo $PROCESSED
 for CAND_PATH in $PROCESSED;
 do
-    FP="$CAND_PATH/cands.csv"
-    DATA="$CAND_PATH/data/"
+    FP="$1/$CAND_PATH/cands.csv"
+    DATA="$1/$CAND_PATH/data/"
     if [ ! -d $DATA ]; then
         mkdir $DATA
     fi
