@@ -2,7 +2,7 @@
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
 #SBATCH --time=1:00:00
-#SBATCH --mem=1GB
+#SBATCH --mem=40GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
@@ -14,7 +14,6 @@
 
 #path to automated filterbank file script locations
 #this is set when you run a batch script by default
-SLURM_TMPDIR=/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0012+54/ddplan_tests/new
 #load the module needed
 module use /project/6004902/modulefiles
 module load presto
@@ -22,7 +21,7 @@ module load presto
 #module unload scipy-stack
 #load my own scipy stack
 #source ~/SPEGID/bin/activate
-AFP=$(dirname $0)
+AFP=$4
 #check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 if test -f "$2"; then
     if [ $1 -gt 1 ]
@@ -52,8 +51,9 @@ if test -f "$2"; then
     #uncomment this code if you want to make a folder and shove everything in there, if you're using process_all_fil.sh, it already makes folder for you.
     #now copy all the files back
     #if [ ! -d $2 ]; then
-    #    mkdir $2
+    	#FN=$(echo "$2" | cut -f 1 -d '.')
+	#mkdir $FN
     #fi
-    #cp -r ${SLURM_TMPDIR}/* $2
+    #cp -r ${SLURM_TMPDIR}/* $FN
     cp -r ${SLURM_TMPDIR}/* .
 fi
