@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=5:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=8GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=fetch
@@ -30,4 +30,5 @@ do
     candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP --plot --fout $DATA
     #don't do predict as we don't have GPU allocation... this can be done in seperate script
     predict.py --data_dir $DATA --model a
+    cat ${DATA}results_*.csv > combined_results.csv
 done
