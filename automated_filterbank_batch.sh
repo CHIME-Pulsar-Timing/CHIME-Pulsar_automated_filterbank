@@ -14,7 +14,7 @@
 
 #path to automated filterbank file script locations
 #this is set when you run a batch script by default
-#SLURM_TMPDIR=/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0012+54/ddplan_tests/new
+SLURM_TMPDIR=/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0012+54/ddplan_tests/new
 #load the module needed
 module use /project/6004902/modulefiles
 module load presto
@@ -22,35 +22,37 @@ module load presto
 #module unload scipy-stack
 #load my own scipy stack
 #source ~/SPEGID/bin/activate
-afp=$4
-echo ${SLURM_TMPDIR}
-if [ $1 -gt 1 ]
-then
-    OUT=`python $afp/split_filterbank.py $1 $2 ${SLURM_TMPDIR}`
-else
-    OUT=$2
-fi
-i=0
-for FIL in $OUT;
-do
-    echo $FIL
-    SPFILES="${SLURM_TMPDIR}/$i"
-    if [ ! -d $SPFILES ]; then
-        mkdir $SPFILES
+AFP=$(dirname $0)
+#check that the filterbank file exists this prevents accidental deletion of files with the later rm command
+if test -f "$2"; then
+    if [ $1 -gt 1 ]
+    then
+        OUT=`python $AFP/split_filterbank.py $1 $2 ${SLURM_TMPDIR}`
+    else
+        OUT=$2
     fi
-    FILFILE="${SLURM_TMPDIR}/$FIL"
-    cp $FILFILE $SPFILES
-    #run pipeline and prep_fetch prep spegID
-    python $afp/gwg_cand_search_pipeline.py --dm $3 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i"
-    #remove the extra fil files
-    rm "$SPFILES/$FIL"
-    #remove the .dat files
-    rm "$SPFILES/*.dat"
-    ((i=i+1))
-done
-#now copy all the files back
-if [ ! -d $2 ]; then
-    mkdir $2
-fi
+    i=0
+    for FIL in $OUT;
+    do
+        echo $FIL
+        SPFILES="${SLURM_TMPDIR}/$i"
+        if [ ! -d $SPFILES ]; then
+            mkdir $SPFILES
+        fi
+        FILFILE="${SLURM_TMPDIR}/$FIL"
+        cp $FILFILE $SPFILES
+        #run pipeline and prep_fetch prep spegID
+        python $AFP/gwg_cand_search_pipeline.py --dm $3 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i"
+        #remove the extra fil files
+        #rm "$SPFILES/$FIL"
+        #remove the .dat files
+        rm "$SPFILES"/*.dat
+        ((i=i+1))
+    done
+    #now copy all the files back
+    if [ ! -d $2 ]; then
+        mkdir $2
+    fi
 
-cp -r ${SLURM_TMPDIR}/* $2
+    cp -r ${SLURM_TMPDIR}/* $2
+fi
