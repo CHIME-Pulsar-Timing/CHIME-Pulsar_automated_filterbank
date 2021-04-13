@@ -13,8 +13,15 @@
 #if we are not splitting then just set out as the fil file
 
 #path to automated filterbank file script locations
-SLURM_TMPDIR=/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0012+54/ddplan_tests/new
-
+#this is set when you run a batch script by default
+#SLURM_TMPDIR=/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0012+54/ddplan_tests/new
+#load the module needed
+module use /project/6004902/modulefiles
+module load presto
+#unload scipy-stack because CC has an outdates version of scipy
+#module unload scipy-stack
+#load my own scipy stack
+#source ~/SPEGID/bin/activate
 afp=$4
 echo ${SLURM_TMPDIR}
 if [ $1 -gt 1 ]
