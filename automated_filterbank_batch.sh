@@ -42,33 +42,15 @@ do
     cp $FILFILE $SPFILES
     #run pipeline and prep_fetch prep spegID
     python $afp/gwg_cand_search_pipeline.py --dm $3 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i"
-    #python $afp/gwg_cand_search_pipeline.py --dm $3 --speg --fetch --fil $FIL --no_fft --slurm "${SLURM_TMPDIR}/$i"
-
-    DATA="${SPFILES}/data/"
-    if [ ! -d $DATA ]; then
-        mkdir $DATA
-    fi
-    #remove all the large files that we no longer need
-    #rm "$SPFILES/*.dat"
-    #if [ $1 -gt 1 ]
-    #then
-        #if we made the SK file then delete it too
-        #rm "$SPFILES/$FIL"
-    #fi
-    
-    #run FETCH
-    #the following code is only valid for Adam's personal computer
-    #source ~/anaconda3/etc/profile.d/conda.sh    
-    #conda activate fetch
-    #need to activate FETCH
-    source ~/afp2/bin/activate
-    candmaker.py --frequency_size 256 --time_size 256 --cand_param_file "$SPFILES/cands.csv" --plot --fout $DATA
-    #don't do predict as we don't have GPU allocation... this can be done in seperate script
-    #predict.py --data_dir data/ --model a
-    #conda deactivate
-    #deactivating FETCH
-    deactivate
+    #remove the extra fil files
+    rm "$SPFILES/$FIL"
+    #remove the .dat files
+    rm "$SPFILES/*.dat"
     ((i=i+1))
 done
 #now copy all the files back
-cp -r ${SLURM_TMPDIR}/* .
+if [ ! -d $2 ]; then
+    mkdir $2
+fi
+
+cp -r ${SLURM_TMPDIR}/* $2
