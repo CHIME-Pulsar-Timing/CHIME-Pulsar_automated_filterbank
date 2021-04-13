@@ -8,6 +8,6 @@ do
     mkdir $foldername
     cp -d $filfile $foldername
     cd $foldername
-    sbatch $afp/automated_filterbank_batch.sh $split_size $filfile $dm $afp
+    sbatch $afp/automated_filterbank_batch.sh $split_size $filfile $dm
     cd ..
 done

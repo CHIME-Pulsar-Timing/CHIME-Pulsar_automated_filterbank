@@ -49,10 +49,11 @@ if test -f "$2"; then
         rm "$SPFILES"/*.dat
         ((i=i+1))
     done
+    #uncomment this code if you want to make a folder and shove everything in there, if you're using process_all_fil.sh, it already makes folder for you.
     #now copy all the files back
-    if [ ! -d $2 ]; then
-        mkdir $2
-    fi
-
-    cp -r ${SLURM_TMPDIR}/* $2
+    #if [ ! -d $2 ]; then
+    #    mkdir $2
+    #fi
+    #cp -r ${SLURM_TMPDIR}/* $2
+    cp -r ${SLURM_TMPDIR}/* .
 fi
