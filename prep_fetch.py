@@ -2,21 +2,19 @@ import numpy as np
 import sys
 import os
 import csv
-def prep_fetch_csv(filfile,root='',rank=1):
+def prep_fetch_csv(filfile,rank=1):
     #get spegid_python3 speg
     from SPEGID_Python3 import SinglePulseEventGroup
     spegs = np.load('spegs.npy',allow_pickle=1)
     #get only rank lower than the rank
     spegs = list([speg for speg in spegs if (speg.group_rank<=rank)&(speg.group_rank>0)])
-    print(root)
     with open('cands.csv','w',newline='') as cands:
         writer=csv.writer(cands,delimiter=',')
         for speg in spegs:
-
             boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
             fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time)
             #fetch takes log2 of the downfact
-            writer.writerow([os.path.join(root,fn),speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w])
+            writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w])
 
 def prep_fetch_scale_fil(filfile,burst_time,filterbank_len=5):
     '''

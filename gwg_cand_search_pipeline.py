@@ -282,4 +282,4 @@ if __name__ == '__main__':
         prep_speg(fname+'_rfifind.inf')
     if fetch:
         from prep_fetch import prep_fetch_csv
-        prep_fetch_csv(fname+'.fil',root=slurm,rank=2)
+        prep_fetch_csv(fname+'.fil',rank=2)

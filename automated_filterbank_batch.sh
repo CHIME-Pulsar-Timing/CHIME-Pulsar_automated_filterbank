@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=1:00:00
+#SBATCH --time=8:00:00
 #SBATCH --mem=40GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -39,13 +39,18 @@ if test -f "$2"; then
             mkdir $SPFILES
         fi
         FILFILE="${SLURM_TMPDIR}/$FIL"
-        cp $FILFILE $SPFILES
+        mv $FILFILE $SPFILES
         #run pipeline and prep_fetch prep spegID
         python $AFP/gwg_cand_search_pipeline.py --dm $3 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i"
         #remove the extra fil files
-        #rm "$SPFILES/$FIL"
+        rm "$SPFILES/"*.fil
         #remove the .dat files
         rm "$SPFILES"/*.dat
+	#tarball the infs and singlepulse files
+	tar cf "$SPFILES/${FIL}_singlepulse.tar.gz" "$SPFILES/"*.singlepulse
+	tar cf "$SPFILES/${FIL}_inf.tar.gz" "$SPFILES/"*DM*.inf
+	rm "$SPFILES"/*DM*.inf
+	rm "$SPFILES"/*DM*.singlepulse
         ((i=i+1))
     done
     #uncomment this code if you want to make a folder and shove everything in there, if you're using process_all_fil.sh, it already makes folder for you.

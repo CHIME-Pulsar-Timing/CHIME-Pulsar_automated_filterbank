@@ -1,15 +1,28 @@
 #!/bin/bash
-SPLIT_SIZE=3
+i=0
+#first argument is split size
+#second argument is DM
+SPLIT_SIZE=$1
 AFP="/home/adamdong/scratch/CHIME-Pulsar_automated_filterbank/"
-DM=36
+DM=$2
+if [ "$#" -le 2 ]; then
+    echo "not enough arguments, need 3 at least first is split size, second is DM, rest are filterbank files"
+    exit 1
+fi
+echo $@
+echo $#
 for FIL in $@;
 do
-    FN=$(echo "$FIL" | cut -f 1 -d '.')
-    if [ ! -d $FN ]; then
-    	mkdir $FN
+    if [ $i -gt 1 ]; then
+	FN=$(echo "$FIL" | cut -f 1 -d '.')
+	if [ ! -d $FN ]; then
+	    mkdir $FN
+	fi
+	cp -d $FIL $FN
+	cd $FN
+	sbatch $AFP/automated_filterbank_batch.sh $SPLIT_SIZE $FIL $DM $AFP
+	cd ..
+	
     fi
-    cp -d $FIL $FN
-    cd $FN
-    sbatch $AFP/automated_filterbank_batch.sh $SPLIT_SIZE $FIL $DM $AFP
-    cd ..
+    i=$((i+1))
 done
