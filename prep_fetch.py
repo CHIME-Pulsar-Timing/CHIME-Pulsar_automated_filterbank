@@ -14,7 +14,7 @@ def prep_fetch_csv(filfile,rank=1):
             boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
             fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time)
             #fetch takes log2 of the downfact
-            writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w])
+            writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w,fn,'killfile.txt'])
 
 def prep_fetch_scale_fil(filfile,burst_time,filterbank_len=5):
     '''

@@ -25,7 +25,7 @@ def run_sk_mad(fname,fil):
 def run_ddplan(fname,dm):
     dml=dm-20
     dmh=dm+20
-    ddplan_command = "DDplan.py -l %.2f -d %.2f -o %s_ddplan -w %s.fil" %(dml,dmh,fname,fname)
+    ddplan_command = "DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(dml,dmh,fname,fname)
     run_ddplan = subprocess.Popen([ddplan_command],shell=True)
     run_ddplan.wait()
     prepsubband_command = "python dedisp_%s.py" %(fname)
@@ -246,15 +246,14 @@ if __name__ == '__main__':
         run_rfifind(fname)
     if dedisp:
         #deprecating to be run ddplan now
-        run_ddplan(fname,source_dm)
-
-        '''
+        run_ddplan(fname,source_dm) 
         #dedispersion
+        '''
         if coherent:
             dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
             dmlist.append(0)
         else:
-            dmlist = [i for i in pipeline_config.dm_set if i < source_dm+20]
+            dmlist = [i for i in pipeline_config.dm_set if (i < source_dm+20)&(i > source_dm-20)]
         for dm in dmlist:
             run_prepsubband(fname,tsamp,dm,source_dm,coherent)
         '''
