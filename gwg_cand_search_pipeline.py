@@ -25,7 +25,10 @@ def run_sk_mad(fname,fil):
 def run_ddplan(fname,dm):
     dml=dm-20
     dmh=dm+20
-    ddplan_command = "DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(dml,dmh,fname,fname)
+    #run the ddplan in my current directory, it's got the rfi masking included
+    import pathlib
+    path=pathlib.Path(__file__).parent.absolute()
+    ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
     run_ddplan = subprocess.Popen([ddplan_command],shell=True)
     run_ddplan.wait()
     prepsubband_command = "python dedisp_%s.py" %(fname)
@@ -248,7 +251,7 @@ if __name__ == '__main__':
         #deprecating to be run ddplan now
         run_ddplan(fname,source_dm) 
         #dedispersion
-        '''
+        '''        
         if coherent:
             dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
             dmlist.append(0)

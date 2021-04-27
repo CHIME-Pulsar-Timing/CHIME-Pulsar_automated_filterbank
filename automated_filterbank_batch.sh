@@ -2,7 +2,7 @@
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
 #SBATCH --time=8:00:00
-#SBATCH --mem=40GB
+#SBATCH --mem=16GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
@@ -24,7 +24,7 @@
 #source ~/SPEGID/bin/activate
 AFP=$4
 #check that the filterbank file exists this prevents accidental deletion of files with the later rm command
-SLURM_TMPDIR='new'
+#SLURM_TMPDIR='new'
 if test -f "$3"; then
     if [ $1 -gt 1 ]
     then
@@ -44,7 +44,6 @@ if test -f "$3"; then
         FILFILE="${SLURM_TMPDIR}/$FIL"
         mv $FILFILE $SPFILES
         #copy the killfile into the folder
-        cp $AFP/killfile.txt $SPFILES
         #run pipeline and prep_fetch prep spegID
         #python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i"
         #don't run sk_mad
@@ -55,11 +54,11 @@ if test -f "$3"; then
         #rm "$SPFILES/"*sk_mad.fil
         #remove the .dat files
         rm "$SPFILES"/*.dat
-	#tarball the infs and singlepulse files
-	tar cf "$SPFILES/${FIL}_singlepulse.tar.gz" "$SPFILES/"*.singlepulse
-	tar cf "$SPFILES/${FIL}_inf.tar.gz" "$SPFILES/"*DM*.inf
-	rm "$SPFILES"/*DM*.inf
-	rm "$SPFILES"/*DM*.singlepulse
+        #tarball the infs and singlepulse files
+        tar cf "$SPFILES/${FIL}_singlepulse.tar.gz" "$SPFILES/"*.singlepulse
+        tar cf "$SPFILES/${FIL}_inf.tar.gz" "$SPFILES/"*DM*.inf
+        rm "$SPFILES"/*DM*.inf
+        rm "$SPFILES"/*DM*.singlepulse
         ((i=i+1))
     done
     #uncomment this code if you want to make a folder and shove everything in there, if you're using process_all_fil.sh, it already makes folder for you.
