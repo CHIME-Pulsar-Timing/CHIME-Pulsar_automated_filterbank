@@ -20,7 +20,9 @@ do
 	fi
 	cp -d $FIL $FN
 	cd $FN
-	sbatch $AFP/automated_filterbank_batch.sh $SPLIT_SIZE $FIL $DM $AFP
+	sbatch $AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
+	#$AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
+
 	cd ..
 	
     fi

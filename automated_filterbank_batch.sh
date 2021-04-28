@@ -16,12 +16,8 @@
 #path to automated filterbank file script locations
 #this is set when you run a batch script by default
 #load the module needed
-#module use /project/6004902/modulefiles
-#module load presto
-#unload scipy-stack because CC has an outdates version of scipy
-#module unload scipy-stack
-#load my own scipy stack
-#source ~/SPEGID/bin/activate
+module use /project/6004902/modulefiles
+module load presto
 AFP=$4
 #check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #SLURM_TMPDIR='new'
@@ -31,7 +27,7 @@ if test -f "$3"; then
         OUT=`python $AFP/split_filterbank.py $1 $3 ${SLURM_TMPDIR}`
     else
         OUT=$3
-        cp $3 ${SLURM_TMPDIR}
+        cp -d $3 ${SLURM_TMPDIR}
     fi
     i=0
     for FIL in $OUT;
