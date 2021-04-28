@@ -20,7 +20,7 @@ module use /project/6004902/modulefiles
 module load presto
 AFP=$4
 #check that the filterbank file exists this prevents accidental deletion of files with the later rm command
-#SLURM_TMPDIR='new'
+SLURM_TMPDIR='new'
 if test -f "$3"; then
     if [ $1 -gt 1 ]
     then
