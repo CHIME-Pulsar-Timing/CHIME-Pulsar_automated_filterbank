@@ -10,7 +10,7 @@ then to create the candidates and grade
 
 `sbatch automated_filterbank_FETCH.batch .`
 
-The split size should be determined by the size of the filterbank file you're using, a general rule of thumb is to try get the split filterbank file to ~800MB for every 40GB of RAM you use. 
+The split size should be determined by the size of the filterbank file you're using, a general rule of thumb is to try get the split filterbank file to ~800MB for every 40GB of RAM you use. If you are not sure about this, just use a split size of 1 and then disable the SK portion of the code in `automated_filterbank_batch.sh` 
 todo: make the split size an automated feature
 i.e. How I've configured it 4GB -> split_size=5
 
