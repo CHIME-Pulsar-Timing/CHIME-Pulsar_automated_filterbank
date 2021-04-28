@@ -10,8 +10,11 @@ The inf file takes the following format
 object_obs,RA,Dec,central_freq_low_chan,total_bandwidth
 a,b,c,d,e
 '''
-def prep_speg(inffile):
-    folder=os.getcwd()
+def prep_speg(inffile,fpath=''):
+    if fpath:
+        folder=fpath
+    else:
+        folder=os.getcwd()
     all_files= np.array(os.listdir(folder))
     sp_files =all_files[list(['.singlepulse' in file for file in all_files])]
     #find the postion of the 'DM' string

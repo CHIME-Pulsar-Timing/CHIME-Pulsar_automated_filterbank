@@ -8,7 +8,7 @@ from presto.filterbank import FilterbankFile
 import pipeline_config
 from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
-
+#original GWG pipeline written by Chiamin
 def run_rfifind(fname):
 
     rfifind_command = 'rfifind -blocks %d -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,pipeline_config.zaplist,fname,fname)
@@ -16,24 +16,32 @@ def run_rfifind(fname):
     run_rfifind_cmd.wait()
 
 def run_sk_mad(fname,fil):
-
+    
     sk_mad_rfi_excision(fname,fil)
     fnamenew = str(fname)+'_sk_mad'
 
     return fnamenew
 
-def run_prepsubband(fname,tsamp,nsamp,dm,coherent_dm,coherent=True):
-
+def run_ddplan(fname,dm):
+    dml=dm-20
+    dmh=dm+20
+    #run the ddplan in my current directory, it's got the rfi masking included
+    import pathlib
+    path=pathlib.Path(__file__).parent.absolute()
+    ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
+    run_ddplan = subprocess.Popen([ddplan_command],shell=True)
+    run_ddplan.wait()
+    prepsubband_command = "python dedisp_%s.py" %(fname)
+    run_ddplan_python = subprocess.Popen([prepsubband_command],shell=True)
+    run_ddplan_python.wait()
+def run_prepsubband(fname,tsamp,dm,ddplan,coherent_dm,slurm='',coherent=True):
+    #should replace this with ddplan
     if coherent:
         dms, ds, sb = pipeline_config.coherent_ddplan(tsamp, dm, coherent_dm)
     else:
         dms, ds, sb = pipeline_config.ddplan(tsamp, dm)
-
-    numout = (((nsamp / (2400*256))+1)*(2400*256))/ds
-    if numout % 7 == 0:
-        numout += (numout/7)
-
-    prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -numout %d -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,numout,ds,sb,fname,fname,fname)
+    
+    prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,ds,sb,fname,fname,fname)
     run_prepsubband_cmd = subprocess.Popen([prepsubband_command],shell=True)
     run_prepsubband_cmd.wait()
 
@@ -166,28 +174,6 @@ def fold_candidates(fname,source_dm,coherent=True):
                         continue
                     else:
                         run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad)
-
-def run_spp_regular(fil):
-    dm=7
-    fil = args.fil
-    fname = fil.rstrip('.fil')
-
-    #get some header details from the filterbank file
-    filfile = FilterbankFile(fil)
-    tsamp = filfile.dt
-    nsamp = filfile.nspec
-    nchan = filfile.nchan
-
-    sk_mad=False
-    coherent=False
-
-    run_rfifind(fname)
-    dm_list = [dm,dm+20,dm+40]
-    for dm in dmlist:
-        #don't need coherent dm value.
-        run_prepsubband(fname,tsamp,nsamp,dm,123,sk_mad,coherent)
-    run_sp(fname)
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -209,24 +195,11 @@ if __name__ == '__main__':
     parser.add_argument('--speg',action='store_true',help='creates the SPEGID files')
     parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
     parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
+    parser.add_argument('--slurm',type=str,help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
+
     args = parser.parse_args()
 
     fil = args.fil
-    fname = fil.rstrip('.fil')
-
-    if os.path.islink(fil):
-        fil = os.readlink(fil)
-        if not os.path.isfile(fil):
-
-            print('File does not exist')
-            sys.exit()
-
-    #get some header details from the filterbank file
-    filfile = FilterbankFile(fil)
-    tsamp = filfile.dt
-    nsamp = filfile.nspec
-    nchan = filfile.nchan
-
     sk_mad = args.sk_mad
     source_dm = args.dm
     coherent = args.coherent
@@ -243,7 +216,29 @@ if __name__ == '__main__':
     fetch =args.fetch 
     dedisp = args.dedisp
     rfifind = args.rfifind
+    slurm=args.slurm
+    if slurm:
+        os.chdir(slurm)
     print('Running RFI mitigation')
+    #get only the file name
+    fname = fil.rstrip('.fil')
+    fname = fname.split('/')
+    fname = fname[-1]
+    
+    if os.path.islink(fil):
+        fil = os.readlink(fil)
+        if not os.path.isfile(fil):
+
+            print('File does not exist')
+            sys.exit()
+
+    #get some header details from the filterbank file
+    filfile = FilterbankFile(fil)
+    tsamp = filfile.dt
+    nsamp = filfile.nspec
+    nchan = filfile.nchan
+
+
     if sk_mad:
         if os.path.exists('{}_sk_mad.fil'.format(fname)):
             print('sk mad cleaned data already exists')
@@ -253,15 +248,18 @@ if __name__ == '__main__':
     if rfifind:
         run_rfifind(fname)
     if dedisp:
+        #deprecating to be run ddplan now
+        run_ddplan(fname,source_dm) 
         #dedispersion
+        '''        
         if coherent:
             dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
             dmlist.append(0)
         else:
-            dmlist = [i for i in pipeline_config.dm_set if i < source_dm+20]
+            dmlist = [i for i in pipeline_config.dm_set if (i < source_dm+20)&(i > source_dm-20)]
         for dm in dmlist:
-            run_prepsubband(fname,tsamp,nsamp,dm,source_dm,coherent)
-
+            run_prepsubband(fname,tsamp,dm,source_dm,coherent)
+        '''
     #run fft
     if fft:
         run_realfft(fname,rednoise,zaplist)

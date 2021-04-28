@@ -11,13 +11,48 @@ def prep_fetch_csv(filfile,rank=1):
     with open('cands.csv','w',newline='') as cands:
         writer=csv.writer(cands,delimiter=',')
         for speg in spegs:
-
             boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
-            fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time)
+            fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM))
             #fetch takes log2 of the downfact
-            writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w])
+            writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w,fn])
 
-def prep_fetch_scale_fil(filfile,burst_time,filterbank_len=5):
+#copied from waterfaller.py
+def maskfile(maskfn, data, start_bin, nbinsextra,extra_mask):    
+    from presto import rfifind
+    rfimask = rfifind.rfifind(maskfn)     
+    mask = get_mask(rfimask, start_bin, nbinsextra)[::-1]    
+    masked_chans = mask.all(axis=1)    
+    # Mask data    
+    if extra_mask:    
+        masked_chans.append(extra_mask)    
+    data = data.masked(mask, maskval='median-mid80')    
+    return data, masked_chans  
+
+def get_mask(rfimask, startsamp, N):
+    """Return an array of boolean values to act as a mask
+        for a Spectra object.
+    
+        Inputs:                                                                    
+            rfimask: An rfifind.rfifind object                         
+            startsamp: Starting sample
+            N: number of samples to read
+
+        Output:
+            mask: 2D numpy array of boolean values. 
+                True represents an element that should be masked.
+    """
+    sampnums = np.arange(startsamp, startsamp+N)
+    blocknums = np.floor(sampnums/rfimask.ptsperint).astype('int')
+    mask = np.zeros((N, rfimask.nchan), dtype='bool')
+    for blocknum in np.unique(blocknums):
+        blockmask = np.zeros_like(mask[blocknums==blocknum])  
+        chans_to_mask = rfimask.mask_zap_chans_per_int[blocknum]
+        if chans_to_mask.any():
+            blockmask[:,chans_to_mask] = True
+        mask[blocknums==blocknum] = blockmask
+    return mask.T
+
+def prep_fetch_scale_fil(filfile,burst_time,dm,filterbank_len=5):
     '''
     filfile: string input to filterbank filename
     filterbank_len: half the time length for filterbank file
@@ -30,7 +65,9 @@ def prep_fetch_scale_fil(filfile,burst_time,filterbank_len=5):
     '''
     from presto.filterbank import FilterbankFile
     from presto import filterbank as fb
-
+    from presto import rfifind
+    #calculate the filterbank length required due to dispersion (plus half a second)
+    filterbank_len=4.15*1000*(4.6875e-6)*dm
     fil = FilterbankFile(filfile,mode='read')
     tsamp = float(fil.header['tsamp'])
     burst_sample = burst_time/tsamp
@@ -47,29 +84,46 @@ def prep_fetch_scale_fil(filfile,burst_time,filterbank_len=5):
     burst_sample=int(np.around(burst_sample))
     nsamp=int(np.around(nsamp))
     my_spec = fil.get_spectra(burst_sample-nsamp,nsamp*2)
+    #mask the file
+    maskfn = filfile.strip('.fil')+'_rfifind.mask'
+    start_bin = burst_sample-nsamp
+    nbinsextra = nsamp*2
+    extra_mask=None
+    data, masked_chans = maskfile(maskfn, my_spec, start_bin, nbinsextra,extra_mask)
+    '''
+    data_masked = np.ma.masked_array(data.data)
+    data_masked[masked_chans] = np.ma.masked
+    data.data = data_masked        
+    '''
+    #subband
+    #data.subband(64,subdm=dm,padval='mean')
+    #downsample
+    #data.downsample(32)
+    #may need to dedisperse
+
+    my_spec = data
+    
     my_spec = my_spec.scaled(False)
     #gotta resolve clipping issue
-    #move all negative numbers to positive and scale if it's going to get clipped
-    my_spec.data = my_spec.data-np.min(my_spec.data)
-    if np.max(my_spec.data)>255:
-        my_spec.data = my_spec.data*(255/np.max(my_spec.data))
-    '''
-    print(np.max(my_spec.data))
-    print(np.min(my_spec.data))
-    import matplotlib.pyplot as plt
-    plt.imshow(my_spec.data)
-    plt.show()
-    plt.plot(np.sum(my_spec.data,1))
-    plt.figure()
-    plt.plot(np.sum(my_spec.data,1))
-    '''
-
+    #move all negative numbers to positive and scale if it's going to get clipped 
+    my_spec.data = my_spec.data-np.min(my_spec.data)+1
+    my_spec.data = my_spec.data*(255/np.max(my_spec.data))
     #modify the start time of the filterbank file
-    fil.header['tstart'] = fil.header['tstart']+(burst_time/(60*60*24))
-    filename=filfile.rstrip('.fil')+'_'+str(int(burst_sample*tsamp))+'.fil' 
+    fil.header['tstart'] = fil.header['tstart']+((burst_time-filterbank_len)/(60*60*24))
+    fil.header['nchans'] = my_spec.numchans
+    fil.header['tsamp'] = my_spec.dt
+    fil.header['frequencies'] = my_spec.freqs
+    fil.frequencies = my_spec.freqs
+    #this is only because we are using int 8  bit, double check this!
+    fil.bytes_per_spectrum = my_spec.numchans
+    fil.nspec = my_spec.numspectra
+    fil.dt = my_spec.dt
+    filename=filfile.rstrip('.fil')+'_'+str(float(burst_sample*tsamp))+'.fil'
+    
     fb.create_filterbank_file(filename,fil.header,spectra=my_spec.data.T,nbits=fil.header['nbits'])    
     return filename,filterbank_len
     
+if __name__=='__main__':
+    prep_fetch_csv(sys.argv[1])
 
-#prep_fetch_csv(sys.argv[1])
  

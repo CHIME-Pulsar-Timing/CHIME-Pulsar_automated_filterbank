@@ -130,9 +130,7 @@ def sk_mad_rfi_excision(fname,fil,apply_sk=True,apply_mad=True,apply_chanthresh=
             #data[j, local_time_slice] = data[j, local_time_slice] - med_intensity
 
     if plot_bandpass:
-
         plot_bandpass_fig(fname+outopts,data)
-
     # rescaling the data
     data = ((data - np.min(data)) / (np.max(data)- np.min(data))) * 256
     data = data.astype(int)
