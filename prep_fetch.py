@@ -11,8 +11,9 @@ def prep_fetch_csv(filfile,rank=1):
     with open('cands.csv','w',newline='') as cands:
         writer=csv.writer(cands,delimiter=',')
         for speg in spegs:
-            boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
-            fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM))
+            #boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
+            boxcar_w=0
+            fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact)
             #fetch takes log2 of the downfact
             writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w,fn])
 
@@ -52,7 +53,7 @@ def get_mask(rfimask, startsamp, N):
         mask[blocknums==blocknum] = blockmask
     return mask.T
 
-def prep_fetch_scale_fil(filfile,burst_time,dm,filterbank_len=5):
+def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32):
     '''
     filfile: string input to filterbank filename
     filterbank_len: half the time length for filterbank file
@@ -96,9 +97,10 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,filterbank_len=5):
     data.data = data_masked        
     '''
     #subband
-    #data.subband(64,subdm=dm,padval='mean')
+    data.subband(64,subdm=dm,padval='mean')
     #downsample
-    #data.downsample(32)
+    #find the highest value of power of 2
+    data.downsample(int(downsamp))
     #may need to dedisperse
 
     my_spec = data
@@ -106,7 +108,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,filterbank_len=5):
     my_spec = my_spec.scaled(False)
     #gotta resolve clipping issue
     #move all negative numbers to positive and scale if it's going to get clipped 
-    my_spec.data = my_spec.data-np.min(my_spec.data)+1
+    my_spec.data = my_spec.data-np.min(my_spec.data)
     my_spec.data = my_spec.data*(255/np.max(my_spec.data))
     #modify the start time of the filterbank file
     fil.header['tstart'] = fil.header['tstart']+((burst_time-filterbank_len)/(60*60*24))
@@ -114,12 +116,15 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,filterbank_len=5):
     fil.header['tsamp'] = my_spec.dt
     fil.header['frequencies'] = my_spec.freqs
     fil.frequencies = my_spec.freqs
+
     #this is only because we are using int 8  bit, double check this!
     fil.bytes_per_spectrum = my_spec.numchans
     fil.nspec = my_spec.numspectra
     fil.dt = my_spec.dt
+    fil.header['fch1'] = my_spec.freqs[0]
+    fil.header['foff'] = np.diff(my_spec.freqs)[0]
+
     filename=filfile.rstrip('.fil')+'_'+str(float(burst_sample*tsamp))+'.fil'
-    
     fb.create_filterbank_file(filename,fil.header,spectra=my_spec.data.T,nbits=fil.header['nbits'])    
     return filename,filterbank_len
     
