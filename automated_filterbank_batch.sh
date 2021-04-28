@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=8:00:00
+#SBATCH --time=2:00:00
 #SBATCH --mem=16GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
