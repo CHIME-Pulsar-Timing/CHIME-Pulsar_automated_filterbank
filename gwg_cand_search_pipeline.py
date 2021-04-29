@@ -23,7 +23,10 @@ def run_sk_mad(fname,fil):
     return fnamenew
 
 def run_ddplan(fname,dm):
-    dml=dm-20
+    if dm>20.1:
+        dml=dm-20
+    else:
+        dml=0
     dmh=dm+20
     #run the ddplan in my current directory, it's got the rfi masking included
     import pathlib

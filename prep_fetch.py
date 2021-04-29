@@ -8,12 +8,18 @@ def prep_fetch_csv(filfile,rank=1):
     spegs = np.load('spegs.npy',allow_pickle=1)
     #get only rank lower than the rank
     spegs = list([speg for speg in spegs if (speg.group_rank<=rank)&(speg.group_rank>0)])
-    with open('cands.csv','w',newline='') as cands:
+    #create the subband 256 files
+    create_cands(spegs,256,filfile)
+    #create the subband 128 files
+    create_cands(spegs,128,filfile)
+
+def create_cands(spegs,downsamp,filfile):
+    with open('cands'+str(int(downsamp))+'.csv','w',newline='') as cands:
         writer=csv.writer(cands,delimiter=',')
         for speg in spegs:
             #boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
             boxcar_w=0
-            fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact)
+            fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,downsamp)
             #fetch takes log2 of the downfact
             writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w,fn])
 
@@ -53,7 +59,7 @@ def get_mask(rfimask, startsamp, N):
         mask[blocknums==blocknum] = blockmask
     return mask.T
 
-def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32):
+def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
     '''
     filfile: string input to filterbank filename
     filterbank_len: half the time length for filterbank file
@@ -97,7 +103,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32):
     data.data = data_masked        
     '''
     #subband
-    data.subband(64,subdm=dm,padval='mean')
+    data.subband(subband,subdm=dm,padval='mean')
     #downsample
     #find the highest value of power of 2
     data.downsample(int(downsamp))
@@ -124,7 +130,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32):
     fil.header['fch1'] = my_spec.freqs[0]
     fil.header['foff'] = np.diff(my_spec.freqs)[0]
 
-    filename=filfile.rstrip('.fil')+'_'+str(float(burst_sample*tsamp))+'.fil'
+    filename=filfile.rstrip('.fil')+'_'+str(float(burst_sample*tsamp))+'_sb_'+str(int(subband))+'.fil'
     fb.create_filterbank_file(filename,fil.header,spectra=my_spec.data.T,nbits=fil.header['nbits'])    
     return filename,filterbank_len
     

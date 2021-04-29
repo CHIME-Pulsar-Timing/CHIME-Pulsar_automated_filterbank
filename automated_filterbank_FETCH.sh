@@ -17,13 +17,20 @@
 #the following is valid for CC
 source ~/afp2/bin/activate
 #work in absolute paths, CC is weird when launching batch script
-AP=$(readlink -f $1)
+while getopts "ai:" flag
+do
+    case "${flag}" in
+        a) ADDITIONAL=true;;
+        i) MY_PATH=$OPTARG;;
+    esac
+done
+AP=$(readlink -f $MY_PATH)
 #lets find all directories where we've run prep_fetch
-PROCESSED=$(find $AP -name 'cands.csv' -printf '%h\n' | sort -u)
-echo $PROCESSED
+PROCESSED=$(find $AP -name 'cands256.csv' -printf '%h\n' | sort -u)
+
 for CAND_PATH in $PROCESSED;
 do
-    FP=cands.csv
+    FP=cands256.csv
     DATA=data/
     cd $CAND_PATH
     if [ ! -d $DATA ]; then
@@ -32,6 +39,15 @@ do
     candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP --plot --fout $DATA
     #don't do predict as we don't have GPU allocation... this can be done in seperate script
     predict.py --data_dir $DATA --model a
+    #if we have the second argument then 
+    if [ "$ADDITIONAL" = true ] ; then
+        PLOT=nsub_128/
+        FP128=cands128.csv
+        if [ ! -d $PLOT ]; then
+            mkdir $PLOT
+        fi
+        candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
+    fi
     cd $AP
     echo $CAND_PATH >> combined_results.csv
     cat "$CAND_PATH/${DATA}"results_*.csv >> combined_results.csv
