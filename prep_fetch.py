@@ -114,7 +114,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
     my_spec = my_spec.scaled(False)
     #gotta resolve clipping issue
     #move all negative numbers to positive and scale if it's going to get clipped 
-    my_spec.data = my_spec.data-np.min(my_spec.data)
+    my_spec.data = my_spec.data-np.min(my_spec.data)+1
     my_spec.data = my_spec.data*(255/np.max(my_spec.data))
     #modify the start time of the filterbank file
     fil.header['tstart'] = fil.header['tstart']+((burst_time-filterbank_len)/(60*60*24))
