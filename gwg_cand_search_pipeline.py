@@ -10,10 +10,16 @@ from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
 #original GWG pipeline written by Chiamin
 def run_rfifind(fname):
-
     rfifind_command = 'rfifind -blocks %d -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,pipeline_config.zaplist,fname,fname)
-    run_rfifind_cmd = subprocess.Popen([rfifind_command], shell=True)
-    run_rfifind_cmd.wait()
+    try:
+        run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
+        #run_rfifind_cmd.wait()
+    except subprocess.CalledProcessError:
+        import traceback
+        traceback.print_exc()
+        [print(f) for f in os.listdir('.')]
+        sys.exit(1)
+
 
 def run_sk_mad(fname,fil):
     
@@ -30,13 +36,21 @@ def run_ddplan(fname,dm):
     dmh=dm+20
     #run the ddplan in my current directory, it's got the rfi masking included
     import pathlib
+    #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
-    run_ddplan = subprocess.Popen([ddplan_command],shell=True)
-    run_ddplan.wait()
-    prepsubband_command = "python dedisp_%s.py" %(fname)
-    run_ddplan_python = subprocess.Popen([prepsubband_command],shell=True)
-    run_ddplan_python.wait()
+    try:
+        run_ddplan = subprocess.check_call([ddplan_command],shell=True)
+        #run_ddplan.wait()
+        prepsubband_command = "python dedisp_%s.py" %(fname)
+        run_ddplan_python = subprocess.check_call([prepsubband_command],shell=True)
+        #run_ddplan_python.wait()
+    except subprocess.CalledProcessError:
+        import traceback
+        traceback.print_exc()
+        [print(f) for f in os.listdir('.')]
+        sys.exit(1)
+
 def run_prepsubband(fname,tsamp,dm,ddplan,coherent_dm,slurm='',coherent=True):
     #should replace this with ddplan
     if coherent:
@@ -113,8 +127,16 @@ def run_ffa(fname):
 
 def run_sp(fname):
     sp_command = 'single_pulse_search.py %s*.dat' %(fname)
-    run_sp_cmd = subprocess.Popen([sp_command],shell=True)
-    run_sp_cmd.wait()
+    failed=True
+    try:
+        run_sp_cmd = subprocess.check_call([sp_command],shell=True)
+        #run_sp_cmd.wait()
+    except subprocess.CalledProcessError:
+        [print(f) for f in os.listdir('.')]
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
 
 def run_accelsift(fname):
 
@@ -227,7 +249,6 @@ if __name__ == '__main__':
     fname = fil.rstrip('.fil')
     fname = fname.split('/')
     fname = fname[-1]
-    
     if os.path.islink(fil):
         fil = os.readlink(fil)
         if not os.path.isfile(fil):
@@ -251,9 +272,9 @@ if __name__ == '__main__':
     if rfifind:
         run_rfifind(fname)
     if dedisp:
-        #deprecating to be run ddplan now
+        #run ddplan
         run_ddplan(fname,source_dm) 
-        #dedispersion
+        #dedispersion // deprecated, run ddplan for efficiency
         '''        
         if coherent:
             dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
