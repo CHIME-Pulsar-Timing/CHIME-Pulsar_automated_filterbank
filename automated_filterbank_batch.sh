@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=2:00:00
+#SBATCH --time=6:00:00
 #SBATCH --mem=16GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -20,7 +20,7 @@ module use /project/6004902/modulefiles
 module load presto
 AFP=$4
 #check that the filterbank file exists this prevents accidental deletion of files with the later rm command
-SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0545+43/new'
+#SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0545+43/new'
 if test -f "$3"; then
     if [ $1 -gt 1 ]
     then
