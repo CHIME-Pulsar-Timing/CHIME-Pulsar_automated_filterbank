@@ -20,7 +20,7 @@ module use /project/6004902/modulefiles
 module load presto
 AFP=$4
 #check that the filterbank file exists this prevents accidental deletion of files with the later rm command
-#SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0545+43/new'
+#SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0012+54/ddplan_tests/new'
 #SLURM_JOB_ID=1
 if test -f "$3"; then
     if [ $1 -gt 1 ]
@@ -53,7 +53,8 @@ if test -f "$3"; then
 		   sleep 15
 		   #if it fails, lets copy all the things to my scratch directory then exit with error code
            PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-           ERRORS="~/scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
+           ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
+           echo "copying error files to ${ERRORS}"
            mkdir -p $ERRORS
 		   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
            exit 1
