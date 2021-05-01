@@ -50,6 +50,8 @@ if test -f "$3"; then
 		   python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
 		   n=$((n+1)) 
 		   sleep 15
+		   #if it fails, lets copy all the things to my scratch directory
+		   cp -r -d ${SLURM_TMPDIR}/* ~/scratch/errors_J2138+69_59251/
 		done
         
         #remove the extra fil files
