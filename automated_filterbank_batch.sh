@@ -21,6 +21,7 @@ module load presto
 AFP=$4
 #check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0545+43/new'
+#SLURM_JOB_ID=1
 if test -f "$3"; then
     if [ $1 -gt 1 ]
     then
@@ -45,13 +46,17 @@ if test -f "$3"; then
         #don't run sk_mad
 		n=0
 		#basically try catch
-		until [ "$n" -ge 5 ]
+		until [ "$n" -ge 1 ]
 		do
 		   python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
 		   n=$((n+1)) 
 		   sleep 15
-		   #if it fails, lets copy all the things to my scratch directory
-		   cp -r -d ${SLURM_TMPDIR}/* ~/scratch/errors_J2138+69_59251/
+		   #if it fails, lets copy all the things to my scratch directory then exit with error code
+           PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+           ERRORS="~/scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
+           mkdir -p $ERRORS
+		   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
+           exit 1
 		done
         
         #remove the extra fil files
