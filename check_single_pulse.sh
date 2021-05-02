@@ -14,7 +14,6 @@ do
             if [ -f $SP ]; then
                 #now finally check if results has been run
                 FP="${SPLIT}data/results_a.csv"
-
                 if [ ! -f $FP ]; then
                     echo $FP
                     echo "$FIL never ran FETCH"
