@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=6:00:00
-#SBATCH --mem=16GB
+#SBATCH --time=10:00:00
+#SBATCH --mem=40GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
@@ -42,12 +42,13 @@ if test -f "$3"; then
         mv $FILFILE $SPFILES
         #copy the killfile into the folder
         #run pipeline and prep_fetch prep spegID
-        #python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i"
-        #don't run sk_mad
+                #don't run sk_mad
 		n=0
 		#basically try catch
 		until [ "$n" -ge 1 ]
 		do
+		   #python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
+
 		   python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
 		   n=$((n+1)) 
 		   sleep 15
@@ -61,8 +62,8 @@ if test -f "$3"; then
 		done
         
         #remove the extra fil files
-        #rm "$SPFILES/$FIL"
-        #rm "$SPFILES/"*sk_mad.fil
+        rm "$SPFILES/$FIL"
+        rm "$SPFILES/"*sk_mad.fil
         #remove the .dat files
         rm "$SPFILES"/*.dat
         #tarball the infs and singlepulse files
