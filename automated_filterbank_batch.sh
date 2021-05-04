@@ -69,8 +69,8 @@ if test -f "$3"; then
         #remove the .dat files
         rm "$SPFILES"/*.dat
         #tarball the infs and singlepulse files
-        tar cf "$SPFILES/${FIL}_singlepulse.tar.gz" "$SPFILES/"*.singlepulse
-        tar cf "$SPFILES/${FIL}_inf.tar.gz" "$SPFILES/"*DM*.inf
+        tar cf "$SPFILES/${FIL}_singlepulse.tar" "$SPFILES/"*.singlepulse
+        tar cf "$SPFILES/${FIL}_inf.tar" "$SPFILES/"*DM*.inf
         rm "$SPFILES"/*DM*.inf
         rm "$SPFILES"/*DM*.singlepulse
         ((i=i+1))
