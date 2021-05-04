@@ -38,7 +38,7 @@ do
     fi
     candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP --plot --fout $DATA
     #don't do predict as we don't have GPU allocation... this can be done in seperate script
-    predict.py --data_dir $DATA --model a
+    #predict.py --data_dir $DATA --model a
     #if we have the second argument then 
     if [ "$ADDITIONAL" = true ] ; then
         PLOT=nsub_128/

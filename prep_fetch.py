@@ -17,11 +17,12 @@ def create_cands(spegs,downsamp,filfile):
     with open('cands'+str(int(downsamp))+'.csv','w',newline='') as cands:
         writer=csv.writer(cands,delimiter=',')
         for speg in spegs:
-            #boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
-            boxcar_w=0
-            fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,downsamp)
-            #fetch takes log2 of the downfact
-            writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w,fn])
+            if speg.peak_SNR>6.5:
+                #boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
+                boxcar_w=0
+                fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,downsamp)
+                #fetch takes log2 of the downfact
+                writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w,fn])
 
 #copied from waterfaller.py
 def maskfile(maskfn, data, start_bin, nbinsextra,extra_mask):    
@@ -73,8 +74,8 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
     from presto.filterbank import FilterbankFile
     from presto import filterbank as fb
     from presto import rfifind
-    #calculate the filterbank length required due to dispersion (plus half a second)
-    filterbank_len=4.15*1000*(4.6875e-6)*dm
+    #calculate the filterbank length required due to dispersion times 4 for plotting purposes
+    filterbank_len=4.15*1000*(4.6875e-6)*dm*4
     fil = FilterbankFile(filfile,mode='read')
     tsamp = float(fil.header['tsamp'])
     burst_sample = burst_time/tsamp

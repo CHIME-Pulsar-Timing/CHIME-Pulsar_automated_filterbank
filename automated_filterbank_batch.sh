@@ -20,7 +20,10 @@ module use /project/6004902/modulefiles
 module load presto
 AFP=$4
 #check that the filterbank file exists this prevents accidental deletion of files with the later rm command
-#SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/J0012+54/ddplan_tests/new'
+PULSAR=$(echo "$3" | cut -f 1 -d '.')
+#SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
+SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
+mkdir -p $SLURM_TMPDIR
 #SLURM_JOB_ID=1
 if test -f "$3"; then
     if [ $1 -gt 1 ]
@@ -48,7 +51,6 @@ if test -f "$3"; then
 		until [ "$n" -ge 1 ]
 		do
 		   #python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
-
 		   python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
 		   n=$((n+1)) 
 		   sleep 15
