@@ -74,8 +74,8 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
     from presto.filterbank import FilterbankFile
     from presto import filterbank as fb
     from presto import rfifind
-    #calculate the filterbank length required due to dispersion times 4 for plotting purposes
-    filterbank_len=4.15*1000*(4.6875e-6)*dm*4
+    #calculate the filterbank length required due to dispersion times 2 for plotting purposes
+    filterbank_len=4.15*1000*(4.6875e-6)*dm*2
     fil = FilterbankFile(filfile,mode='read')
     tsamp = float(fil.header['tsamp'])
     burst_sample = burst_time/tsamp
