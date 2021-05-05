@@ -8,15 +8,14 @@ done
 AP=$(readlink -f $MY_PATH)
 #lets find all directories where we've run prep_fetch
 PROCESSED=$(find $AP -name 'results_a.csv' -printf '%h\n' | sort -u)
-ROOT=$(find $AP -name 'cands128.csv' -printf '%h\n' | sort -u)
 PROCESSED=$(readlink -f $PROCESSED)
-ROOT=$(readlink -f $ROOT)
 rm positive_bursts.csv
 for RESULT_PATH in $PROCESSED;
 do
     RESULT_FILE="$RESULT_PATH/results_a.csv"
     while IFS=, read -r cand filepath probability score
     do
+        ROOT=$(echo "$RESULT_PATH" | sed 's/nsub_128//')
         if [ $score = "1.0" ]; then
             CAND_PATH=$ROOT/$filepath
             CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
