@@ -17,10 +17,8 @@ do
     RESULT_FILE="$RESULT_PATH/results_a.csv"
     while IFS=, read -r cand filepath probability score
     do
-        echo $score
         if [ $score = "1.0" ]; then
             CAND_PATH=$ROOT/$filepath
-            echo $CAND_PATH
             CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
             PATH_PNG=$CAND_PATH.png
             mkdir -p positive_bursts
