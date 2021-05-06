@@ -7,7 +7,6 @@ AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 #AFP="/home/adamdong/scratch/CHIME-Pulsar_automated_filterbank/"
 #AFP="/home/adam/Documents/automated_filterbank/"
 DM=$2
-pwd
 if [ "$#" -le 2 ]; then
     echo "not enough arguments, need 3 at least first is split size, second is DM, rest are filterbank files"
     exit 1
