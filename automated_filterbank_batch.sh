@@ -20,10 +20,11 @@ module use /project/6004902/modulefiles
 module load presto
 AFP=$4
 #check that the filterbank file exists this prevents accidental deletion of files with the later rm command
-#PULSAR=$(echo "$3" | cut -f 1 -d '.')
-#SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
+#********************THIS IS THE LAZY WAY OUT!!!
+PULSAR=$(echo "$3" | cut -f 1 -d '.')
+SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
 #SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
-#mkdir -p $SLURM_TMPDIR
+mkdir -p $SLURM_TMPDIR
 #SLURM_JOB_ID=1
 if test -f "$3"; then
     if [ $1 -gt 1 ]
@@ -45,24 +46,24 @@ if test -f "$3"; then
         mv $FILFILE $SPFILES
         #copy the killfile into the folder
         #run pipeline and prep_fetch prep spegID
-                #don't run sk_mad
-		n=0
+	#don't run sk_mad
+	n=0
 		#basically try catch
 		until [ "$n" -ge 1 ]
 		do
-		   #python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
-		   python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
-		   n=$((n+1)) 
-		   sleep 15
-		   #if it fails, lets copy all the things to my scratch directory then exit with error code
-           PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-           ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
-           echo "copying error files to ${ERRORS}"
-           mkdir -p $ERRORS
-		   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
-           exit 1
-		done
-        
+			#python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
+			python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
+			n=$((n+1)) 
+			sleep 15
+			#if it fails, lets copy all the things to my scratch directory then exit with error code
+			PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+			ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
+			echo "copying error files to ${ERRORS}"
+			df -h
+			mkdir -p $ERRORS
+			   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
+			exit 1
+		done 
         #remove the extra fil files
         rm "$SPFILES/$FIL"
         rm "$SPFILES/"*sk_mad.fil
@@ -83,4 +84,6 @@ if test -f "$3"; then
     #fi
     #cp -r ${SLURM_TMPDIR}/* $FN
     cp -r ${SLURM_TMPDIR}/* .
+    #clean up
+    rm -r ${SLURM_TMPDIR}
 fi
