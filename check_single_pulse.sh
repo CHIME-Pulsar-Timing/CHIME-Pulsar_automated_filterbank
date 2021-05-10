@@ -1,9 +1,10 @@
 #!/bin/bash
 #this file will run to check which filterbank files have been run and which have not
-while getopts "bd:" flag
+while getopts "bfd:" flag
 do
     case "${flag}" in
         b) RBATCH=true;;
+        f) RFETCH=true;;
         d) DM=$OPTARG;;
     esac
 done
@@ -40,11 +41,20 @@ do
     #run the a batch for this pulsar, should probably use the base job script... but it's easier to do it this way
     if [ "$RBATCH" = true ]; then
 	    if [ "$BATCH" = true ]; then
-		echo "submitting batch job for $PULSAR"
-		#find the directory that the script belongs to
-		SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-		$SCRIPT_DIR/process_all_fil.sh 1 $DM $FIL
+            echo "submitting batch job for $PULSAR"
+            #find the directory that the script belongs to
+            SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+            $SCRIPT_DIR/process_all_fil.sh 1 $DM $FIL
 	    fi
     fi
+    if [ "$RFETCH" = true ]; then
+	    if [ "$BFETCH" = true ]; then
+            echo "submitting FETCH job for $PULSAR"
+            #find the directory that the script belongs to
+            SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+            sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -a -i $PULSAR
+	    fi
+    fi
+
     BATCH=false
 done
