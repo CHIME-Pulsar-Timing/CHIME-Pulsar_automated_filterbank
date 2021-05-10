@@ -38,11 +38,13 @@ do
         BATCH=true
     fi
     #run the a batch for this pulsar, should probably use the base job script... but it's easier to do it this way
-    if [ "$BATCH" = true ]; then
-        echo "submitting batch job for $PULSAR"
-        #find the directory that the script belongs to
-        SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-        $SCRIPT_DIR/process_all_fil.sh 1 $DM $FIL
+    if [ "$RBATCH" = true ]; then
+	    if [ "$BATCH" = true ]; then
+		echo "submitting batch job for $PULSAR"
+		#find the directory that the script belongs to
+		SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+		$SCRIPT_DIR/process_all_fil.sh 1 $DM $FIL
+	    fi
     fi
     BATCH=false
 done
