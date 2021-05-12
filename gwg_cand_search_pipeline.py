@@ -13,7 +13,6 @@ def run_rfifind(fname):
     rfifind_command = 'rfifind -blocks %d -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,pipeline_config.zaplist,fname,fname)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
-        #run_rfifind_cmd.wait()
     except subprocess.CalledProcessError:
         import traceback
         traceback.print_exc()
@@ -38,7 +37,8 @@ def run_ddplan(fname,dm):
     import pathlib
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
-    ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
+    ignorechan= pipeline_config.ignorechan
+    ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -i %s -o %s_ddplan -w %s.fil" %(path,dml,dmh,ignorechan,fname,fname)
     try:
         run_ddplan = subprocess.check_call([ddplan_command],shell=True)
         #run_ddplan.wait()
