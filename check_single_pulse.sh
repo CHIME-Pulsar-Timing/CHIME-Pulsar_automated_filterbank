@@ -11,6 +11,7 @@ done
 
 FILFILES=*.fil
 BATCH=false
+FETCH=false
 for FIL in $FILFILES;
 do
     #strip the extension
@@ -48,7 +49,7 @@ do
 	    fi
     fi
     if [ "$RFETCH" = true ]; then
-	    if [ "$BFETCH" = true ]; then
+	    if [ "$FETCH" = true ]; then
             echo "submitting FETCH job for $PULSAR"
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -57,4 +58,5 @@ do
     fi
 
     BATCH=false
+    FETCH=false
 done
