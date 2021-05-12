@@ -431,15 +431,15 @@ for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in zip(dDMs, dsubDMs, dm
             datdownsamp = 2
             if downsamp < 2: subdownsamp = datdownsamp = 1
             # First create the subbands
-            myexecute("prepsubband -sub -subdm %.2f -nsub %d -downsamp %d -mask %s -o %s %s" %
-                      (subDM, nsub, subdownsamp, basename+'_rfifind.mask' , basename, rawfiles))
+            myexecute("prepsubband -sub -subdm %.2f -nsub %d -downsamp %d -mask %s -ignorechan %s -o %s %s" %
+                      (subDM, nsub, subdownsamp, basename+'_rfifind.mask' , ignorechan , basename, rawfiles))
             # And now create the time series
             subnames = basename+"_DM%.2f.sub[0-9]*"%subDM
-            myexecute("prepsubband -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -o %s %s" %
-                      (loDM, dDM, dmspercall, datdownsamp, basename+'_rfifind.mask' , basename, subnames))
+            myexecute("prepsubband -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -ignorechan %s -o %s %s" %
+                      (loDM, dDM, dmspercall, datdownsamp, basename+'_rfifind.mask' , ignorechan , basename, subnames))
         else:
-            myexecute("prepsubband -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -o %s %s" %
-                      (nsub, loDM, dDM, dmspercall, downsamp, basename+'_rfifind.mask' , basename, rawfiles))
+            myexecute("prepsubband -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -ignorechan %s -o %s %s" %
+                      (nsub, loDM, dDM, dmspercall, downsamp, basename+'_rfifind.mask' , ignorechan , basename, rawfiles))
 """
     
 def usage():
@@ -472,10 +472,10 @@ if __name__=='__main__':
     import getopt
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hwo:l:d:f:b:n:k:c:t:s:r:",
+        opts, args = getopt.getopt(sys.argv[1:], "hwo:l:d:f:b:n:k:c:t:s:r:i:",
                                    ["help", "write", "output=", "loDM=", "hiDM=",
                                     "fctr=", "bw=", "numchan=", "blocklen=",
-                                    "cDM=", "dt=", "subbands=", "res="])
+                                    "cDM=", "dt=", "subbands=", "res=","ignorechan="])
 
     except getopt.GetoptError:
         # print help information and exit:
@@ -496,7 +496,7 @@ if __name__=='__main__':
     device = "/xwin"
     write_dedisp = False
     blocklen = 1024
-
+    ignorechan=0
     if len(args):
         fname, ext = os.path.splitext(args[0])
         if ext==".fil":  # Assume it is filterbank
@@ -576,6 +576,8 @@ from '%s'
             numsubbands = int(a)
         if o in ("-r", "--res"):
             ok_smearing = float(a)
+        if o in ("-i", "--ignorechan"):
+            ignorechan = a
 
     # The following is an instance of an "observation" class
     obs = observation(dt, fctr, BW, numchan, cDM)
@@ -604,6 +606,7 @@ from '%s'
         dmspercalls = [m.DMs_per_prepsub for m in methods]
         subcalls = [m.numprepsub for m in methods]
         basename, ext = os.path.splitext(args[0])
+        print(ignorechan)
         with open('dedisp_%s.py'%basename, 'w') as f:
             f.write(dedisp_template1)
             f.write("nsub = %d\n\n"%numsubbands)
@@ -621,8 +624,9 @@ subcalls    = %s\n"""%repr(subcalls))
 startDMs    = %s\n"""%repr(startDMs))
             f.write("""# DMs/call
 dmspercalls = %s\n"""%repr(dmspercalls))
+            f.write("""#ignore chans
+ignorechan  = "%s"\n"""%ignorechan)
             f.write(dedisp_template2)
-
     # The following is an instance of an "observation" class
     # Here's one for a "best" resolution GBT search using the SPIGOT
     # Check out how many DMs you need!  Cool.  ;-)
