@@ -17,7 +17,7 @@ def create_cands(spegs,downsamp,filfile):
     with open('cands'+str(int(downsamp))+'.csv','w',newline='') as cands:
         writer=csv.writer(cands,delimiter=',')
         for speg in spegs:
-            if speg.peak_SNR>6.5:
+            if speg.peak_SNR>5.5:
                 #boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
                 boxcar_w=0
                 fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,downsamp)
