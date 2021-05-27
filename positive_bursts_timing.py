@@ -10,7 +10,6 @@ look something like:
 
 And it should be in the first column of the csv
 """
-
 # Default filename, can be changed
 FNAME = 'positive_bursts.csv'
 
@@ -54,12 +53,15 @@ def extract_pulse_info(burst_ids, sigma=2):
     """
     day_list = []
     dm_list = []
+    
     for i in range(len(burst_ids)):
-        day_list.append(float(burst_ids[i][12:burst_ids[i].find('_tcand_')]))
-        dm_list.append(float(burst_ids[i][burst_ids[i].find('_dm_')+4:\
-                                          burst_ids[i].find('_snr_')]))
-    day_array = np.array(day_list)
-    dm_array = np.array(dm_list)
+        day_list.append(burst_ids[i][12:burst_ids[i].find('_tcand_')])
+        dm_list.append(burst_ids[i][burst_ids[i].find('_dm_')+4:\
+                       burst_ids[i].find('_snr_')])
+    # print(day_list)
+    day_array = np.array(day_list, dtype=np.float128)
+    dm_array = np.array(dm_list, dtype=np.float128)
+    # [print(day) for day in day_array]
 
     # Eliminate everything that has a DM to far away
     dm_mean = np.mean(dm_array)
@@ -93,7 +95,7 @@ def build_multiday(day_array):
             multiday_times.append([])
     
         multiday_times[-1].append(86400*(day_array[i] % 1))
-
+    
     return multiday_times
 
 
@@ -168,4 +170,3 @@ if __name__ == '__main__':
     else:
         rrat_period_multiday(multiday_times)
     print()
-
