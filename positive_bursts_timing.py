@@ -61,7 +61,6 @@ def extract_pulse_info(burst_ids, sigma=2):
     # print(day_list)
     day_array = np.array(day_list, dtype=np.float128)
     dm_array = np.array(dm_list, dtype=np.float128)
-    # [print(day) for day in day_array]
 
     # Eliminate everything that has a DM to far away
     dm_mean = np.mean(dm_array)
