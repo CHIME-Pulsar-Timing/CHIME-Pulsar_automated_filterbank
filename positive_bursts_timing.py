@@ -62,7 +62,7 @@ def extract_pulse_info(burst_ids, sigma=1):
         dm_list.append(burst_ids[i][burst_ids[i].find('_dm_')+4:\
                        burst_ids[i].find('_snr_')])
     
-    ay_array = np.array(day_list, dtype=np.float128)
+    day_array = np.array(day_list, dtype=np.float128)
     dm_array = np.array(dm_list, dtype=np.float128)
 
     # Eliminate everything that has a DM to far away
