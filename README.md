@@ -1,4 +1,17 @@
 # CHIME-Pulsar_automated_filterbank
+the best way to run is in two parts
+`check_single_pulse.sh -b -d $DM` 
+to run the initial prep for fetch
+
+MAKE SURE YOU HAVE NO MODULES LOADED ON CC. THE SCRIPT WILL LOAD THEM FOR YOU.
+`check_single_pulses.sh -f` 
+will run FETCH on any unprocessed `.fil` files in your current directory.
+
+This script will only run the pipeline incrementally on `.fil` files, meaning that it will not rerun the same `.fil` file twice. If you want to do that either use the method below or copy your `.fil` file to an empty directory (symbolic link works).
+
+
+The method outlined below still works but is deprecated.
+
 To run this on a set of filterbank files
 
 On compute canada the command is 
