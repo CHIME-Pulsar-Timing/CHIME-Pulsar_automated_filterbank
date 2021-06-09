@@ -7,7 +7,8 @@ On compute canada the command is
 
 wait for the submitted jobs to finish
 then to create the candidates and grade
-MAKE SURE YOU HAVE NO OTHER MODULES LOADED ON CC. THE SCRIPT WILL LOAD THEM FOR YOU.
+
+MAKE SURE YOU HAVE NO MODULES LOADED ON CC. THE SCRIPT WILL LOAD THEM FOR YOU.
 
 `sbatch automated_filterbank_FETCH.batch .`
 
