@@ -12,6 +12,10 @@ will run FETCH on any unprocessed `.fil` files in your current directory.
 
 This script will only run the pipeline incrementally on `.fil` files, meaning that it will not rerun the same `.fil` file twice. If you want to do that either use the method below or copy your `.fil` file to an empty directory (symbolic link works).
 
+`get_bright_bursts.sh -i .`
+
+will grab all the astrophysical bursts and put them into `positive_bursts/` and create a `positive_burst.csv` file
+
 
 The method outlined below still works but is deprecated.
 
