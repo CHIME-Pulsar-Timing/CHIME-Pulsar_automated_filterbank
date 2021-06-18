@@ -1,4 +1,5 @@
 #!/bin/bash
+#this function makes the folder structures, furthermore it will submit the job
 i=0
 #first argument is split size
 #second argument is DM
