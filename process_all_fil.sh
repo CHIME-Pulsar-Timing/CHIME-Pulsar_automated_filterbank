@@ -21,8 +21,8 @@ do
         fi
         cp -d $FIL $FN
         cd $FN
-        sbatch $AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
-        #$AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
+        #sbatch $AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
+        $AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
         cd ..	
     fi
     i=$((i+1))
