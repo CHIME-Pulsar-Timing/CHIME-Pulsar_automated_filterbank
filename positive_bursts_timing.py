@@ -44,6 +44,38 @@ def get_burst_ids(csvname):
     
     return burst_ids
 
+def get_burst_ids_new(csvname):
+    # Open the positive bursts file
+    positive_bursts_csv = open(csvname)
+    burst_lines = positive_bursts_csv.readlines()
+
+    # Get all of the ids and put them into a dictionary
+    burst_dict = {}
+    for line in burst_lines:
+        burst_str = line.split(',')[0]
+        burst_numbers = [float(num) for num in burst_str.split('_')\
+                         if num.replace('.', '1').isdigit()]
+        burst_info = burst_numbers[-5:]
+        
+        if str(int(burst_info[0])) not in burst_dict:
+            burst_dict[str(int(burst_info[0]))] = [burst_info[1:]]
+        else: burst_dict[str(int(burst_info[0]))].append(burst_info[1:])
+    
+    # Make sure everything is an array
+    master_array = np.zeros((len(burst_lines), 4))
+    i = 0
+    
+    for key in burst_dict.keys():
+        day_array = np.array(burst_dict[key])
+        burst_dict[key] = day_array[np.argsort(day_array[:,0])]
+        master_array[i:i+len(burst_dict[key])] += burst_dict[key]
+        i += len(burst_dict[key])
+
+    burst_dict['mean'] = np.mean(master_array, axis=0)
+    burst_dict['std'] = np.std(master_array, axis=0)
+   
+    return burst_dict
+    
 
 def extract_pulse_info(burst_ids):
     """From a list of burst ids generated from a positive_bursts.csv with
@@ -66,6 +98,31 @@ def extract_pulse_info(burst_ids):
     dm_array = np.array(dm_list, dtype=np.float128)
 
     return day_array, dm_array
+
+
+def print_burst_dict(burst_dict):
+    """Print info about pulses extracted from the dictionary
+    """
+    dm_mean = burst_dict['mean'][2]
+    dm_std = burst_dict['std'][2]
+    print(26*'='+'\n'+'=  Detected Pulse Info:  =\n'+26*'=')
+
+    for key in sorted(burst_dict):
+        if key.isnumeric():
+            print(f'Pulse info for MJD {key}:')
+            day_array, dm_array = burst_dict[key][:,0], burst_dict[key][:,2]
+            last_day = -10
+
+            for day, dm in zip(day_array, dm_array):
+                print_str = 'Time: {:.6f} Pulse DM: {:.2f} '.format(day, dm)
+                if dm_mean-dm_std > dm or dm_mean+dm_std < dm:
+                    print_str += 'Irregular DM! '
+                if day - last_day < 0.5:
+                    print_str += 'Pulses very close!'
+                last_day = day
+                print(print_str)
+            
+            print(f'{len(day_array)} pulses detected'+'\n')
 
 
 def pulse_print(day_array, dm_array):
@@ -155,6 +212,32 @@ def build_multiday(day_array, dm_array, min_day=2, min_time=0, sigma=1):
     return multiday_times
 
 
+def build_multiday_new(burst_dict, min_day=2, min_time=0, sigma=1):
+    multiday_times = []
+    for key in sorted(burst_dict):
+        if key.isnumeric():
+            pulse_times = burst_dict[key][:,0]
+            dm_array = burst_dict[key][:,2]
+            good_times = np.where(np.logical_and(dm_array > dm_mean \
+                                                 -sigma*dm_std,
+                                                 dm_array < dm_mean \
+                                                 +sigma*dm_std))
+            multiday_times.append(list(pulse_times[good_times]))
+    
+    # Remove pulses that are too close together
+    for day in multiday_times:
+        pop_indeces = []
+        for i in range(len(day)):
+            if i >= 1 and day[i] - day[i-1] < min_time:
+                pop_indeces.append(i)
+        [day.pop(i) for i in pop_indeces[::-1]]
+
+    # remove days with too few pulses
+    multiday_times = [dy for dy in multiday_times if len(dy) >= max(2, min_day)]
+
+    return multiday_times
+
+
 def take_good_days(multiday_times, n=2):
     """From a nested TOA list multiday_times, take only the n best days and
     return a nested list of the same form
@@ -195,30 +278,49 @@ if __name__ == '__main__':
     parser.add_argument('--individual', action='store_true',
                         help='Process each valid day individually with '\
                         +'rrat_period instead of rrat_period_multiday')
+    parser.add_argument('--mjd', action='store_true',
+                        help='Run script with the old MJD id strings instead')
 
     args = parser.parse_args()
     if args.filename is not None:
         FNAME = args.filename
     
     try:
-        burst_ids = get_burst_ids(FNAME)
+        if args.mjd:
+            burst_ids = get_burst_ids(FNAME)
+            if len(burst_ids) == 0:
+                print('No Bursts!')
+                exit()
+            day_array, dm_array = extract_pulse_info(burst_ids)
+            dm_mean, dm_std = np.mean(dm_array), np.std(dm_array)
+        else:
+            burst_dict = get_burst_ids_new(FNAME)
+            if len(burst_dict) == 0:
+                print('No Bursts!')
+                exit()
+            dm_mean, dm_std = burst_dict['mean'][2], burst_dict['std'][2]
     except FileNotFoundError:
         print(f'No {FNAME} found')
         exit()
 
-    if len(burst_ids) == 0:
-        print('No Bursts!')
-        exit()
-
-    day_array, dm_array = extract_pulse_info(burst_ids)
-
-    print(f'DM = {round(np.mean(dm_array), 2)}({round(np.std(dm_array), 2)})',
-            '\n')
+    print(f'DM = {round(dm_mean, 2)}({round(dm_std, 2)})'+'\n')
     if args.v:
-        pulse_print(day_array, dm_array)
+        if args.mjd:
+            pulse_print(day_array, dm_array)
+        else:
+            print_burst_dict(burst_dict)
+    
+    if args.mjd:
+        multiday_times = build_multiday(day_array, dm_array,
+                                        min_day=args.min_count,
+                                        min_time=args.min_time, 
+                                         sigma=args.sigma)
+    else:
+        multiday_times = build_multiday_new(burst_dict,
+                                            min_day=args.min_count,
+                                            min_time=args.min_time,
+                                            sigma=args.sigma)
 
-    multiday_times = build_multiday(day_array, dm_array, min_day=args.min_count,
-                                    min_time=args.min_time, sigma=args.sigma)
     
     if args.keep_best is not None:
         multiday_times = take_good_days(multiday_times, n=args.keep_best)
