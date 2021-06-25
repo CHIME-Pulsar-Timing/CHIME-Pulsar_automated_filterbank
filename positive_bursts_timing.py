@@ -6,9 +6,14 @@ from presto.psr_utils import rrat_period_multiday, rrat_period
 Script for extracting rrat TOA's from positive_bursts.csv. The id string should 
 look something like:
 
-[dir to filterbank files]/J2325-0530_59266_pow/0//nsub_128/cand_tstart_59266.889074767183_tcand_0.5816484_dm_14.95000_snr_6.67000
+[dir to filterbank file]/J0740+17_cand_59236_pow/0//nsub_128/J0740+17_cand_59236_pow_153.1887616_sb_128_dm_44.85_snr_5.76
 
 And it should be in the first column of the csv
+
+Using the --mjd flag, the script can also process old id strind which look
+something like this:
+
+[dir to filterbank files]/J2325-0530_59266_pow/0//nsub_128/cand_tstart_59266.889074767183_tcand_0.5816484_dm_14.95000_snr_6.67000
 """
 
 # Default filename, can be changed
@@ -44,7 +49,24 @@ def get_burst_ids(csvname):
     
     return burst_ids
 
-def get_burst_ids_new(csvname):
+def get_burst_dict(csvname):
+    """From a csv of burst information named csv_name, extract burst info and 
+    compile a dictionary of burst data. The first column of the csv should look
+    something like:
+
+    [dir to filterbank file]/J0740+17_cand_59236_pow/0//nsub_128/J0740+17[cont.]
+    _cand_59236_pow_153.1887616_sb_128_dm_44.85_snr_5.76
+    
+    Returns: 
+    Each key of the dictionary will be the string representation of the MJD the
+    pulses were observed on. Each of these entries will be an array with the 
+    rows storing relevant information for each pulse.
+
+    [TOA in s from observation start, subbanding, dm, S/N]
+
+    'mean' and 'std' will also be keys representing the mean and std of each
+    pulse characteristic over all days
+    """
     # Open the positive bursts file
     positive_bursts_csv = open(csvname)
     burst_lines = positive_bursts_csv.readlines()
@@ -154,7 +176,7 @@ def pulse_print(day_array, dm_array):
     print('\n')
 
 
-def build_multiday(day_array, dm_array, min_day=2, min_time=0, sigma=1):
+def build_multiday_array(day_array, dm_array, min_day=2, min_time=0, sigma=1):
     """From an iterable day_array of floating point MJD TOA's for each pulse, 
     construct a nested list multiday_times to be passed into presto's
     rrat_period_multiday
@@ -212,7 +234,22 @@ def build_multiday(day_array, dm_array, min_day=2, min_time=0, sigma=1):
     return multiday_times
 
 
-def build_multiday_new(burst_dict, min_day=2, min_time=0, sigma=1):
+def build_multiday_from_dict(burst_dict, min_day=2, min_time=0, sigma=1):
+    """From a dictionary returned by get_burst_dict, construct a nested list 
+    multiday_times to be passed into presto's rrat_period_multiday.
+
+    Arguments:
+    burst_dict: Dictionary of burst_information returned by get_burst_dict
+    min_day: minimum number of pulses in a day, default 2
+    min_time: minimum time in seconds between pulses, useful for elmiminating
+    double hits
+    sigma: Pulses with dm more than sigma standard deviations away from the mean
+    will not be counted
+
+    Returns:
+    multiday_times: A nested list with each entry containing the TOA of each
+    pulse relative to the start of each observation day
+    """
     multiday_times = []
     for key in sorted(burst_dict):
         if key.isnumeric():
@@ -294,7 +331,7 @@ if __name__ == '__main__':
             day_array, dm_array = extract_pulse_info(burst_ids)
             dm_mean, dm_std = np.mean(dm_array), np.std(dm_array)
         else:
-            burst_dict = get_burst_ids_new(FNAME)
+            burst_dict = get_burst_dict(FNAME)
             if len(burst_dict) == 0:
                 print('No Bursts!')
                 exit()
@@ -311,15 +348,15 @@ if __name__ == '__main__':
             print_burst_dict(burst_dict)
     
     if args.mjd:
-        multiday_times = build_multiday(day_array, dm_array,
-                                        min_day=args.min_count,
-                                        min_time=args.min_time, 
-                                         sigma=args.sigma)
+        multiday_times = build_multiday_array(day_array, dm_array,
+                                              min_day=args.min_count,
+                                              min_time=args.min_time, 
+                                              sigma=args.sigma)
     else:
-        multiday_times = build_multiday_new(burst_dict,
-                                            min_day=args.min_count,
-                                            min_time=args.min_time,
-                                            sigma=args.sigma)
+        multiday_times = build_multiday_from_dict(burst_dict,
+                                                  min_day=args.min_count,
+                                                  min_time=args.min_time,
+                                                  sigma=args.sigma)
 
     
     if args.keep_best is not None:
