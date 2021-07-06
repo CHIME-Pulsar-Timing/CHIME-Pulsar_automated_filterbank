@@ -1,3 +1,7 @@
+# Setting up your folder structure
+Place all the filterbank files in some folder (default to filterbank directory in project space)
+symlink it to your scratch sapce
+`ln -s $FULL_PATH_TO_FILTERBANK $DESTINATION`
 # CHIME-Pulsar_automated_filterbank
 the best way to run is in two parts
 `check_single_pulse.sh -b -d $DM`
