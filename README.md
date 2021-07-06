@@ -5,7 +5,7 @@ symlink it to your scratch sapce
 `ln -s $FULL_PATH_TO_FILTERBANK $DESTINATION`
 
 # CHIME-Pulsar_automated_filterbank
-the best way to run is in two parts
+the best way to run is in two parts; both parts should be run in the folder that you symlinked to in the section above
 `check_single_pulse.sh -b -d $DM`
 
 to run the initial prep for fetch
