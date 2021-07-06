@@ -24,6 +24,19 @@ This script will only run the pipeline incrementally on `.fil` files, meaning th
 will grab all the astrophysical bursts and put them into `positive_bursts/` and create a `positive_burst.csv` file
 
 
+
+
+
+
+***********
+***********
+***********
+
+
+
+
+
+
 The method outlined below still works but is deprecated.
 
 To run this on a set of filterbank files
