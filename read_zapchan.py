@@ -10,7 +10,7 @@ def convert_to_presto(fn):
     #
     with open(fn,'r') as zapfile:
         channels = zapfile.readlines()
-        chans = (int(channel) for channel in channels)
+        chans = list(int(channel) for channel in channels)
         psrchive_chans = np.arange(0, 1024)[::-1]
         psrchive_chans = psrchive_chans[chans]
         chan_str = ",".join(psrchive_chans.astype(str))
