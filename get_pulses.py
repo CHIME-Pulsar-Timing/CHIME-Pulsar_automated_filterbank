@@ -26,7 +26,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                 # writer.writerow([key,burst[0]])
                 # the key is the day, the burst[0] is the timestamp,
                 # first gotta find the file and load up filterbank
-                fb_file = '%s_%d_pow.fil'%(basename,key)
+                fb_file = '%s_%s_pow.fil'%(basename,key)
                 fb_file = FilterbankFile(fb_file)
                 import pdb; pdb.set_trace()
         else:
