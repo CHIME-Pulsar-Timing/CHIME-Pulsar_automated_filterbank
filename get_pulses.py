@@ -26,8 +26,8 @@ with open('extracted_bursts.csv','w') as csv_file:
                 # first gotta find the file and load up filterbank
                 fb_file = '%s_%s_pow.fil'%(basename,key)
                 fb_file = FilterbankFile(fb_file)
-                mjd_pulse = fb_file.tstart+float(burst[0])/60/60/24
                 import pdb; pdb.set_trace()
+                mjd_pulse = fb_file.tstart+float(burst[0])/60/60/24
         else:
             writer.writerow([key,burst_dict[key][0]])
 
