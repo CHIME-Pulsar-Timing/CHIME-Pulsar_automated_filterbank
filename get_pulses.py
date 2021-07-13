@@ -9,8 +9,8 @@ from presto import rfifind
 
 
 
-
 fn = sys.argv[1]
+basename = sys.argv[2]
 burst_dict = pt.get_burst_dict(fn)
 if len(burst_dict) == 0:
     print('No Bursts!')
@@ -26,9 +26,11 @@ with open('extracted_bursts.csv','w') as csv_file:
                 # writer.writerow([key,burst[0]])
                 # the key is the day, the burst[0] is the timestamp,
                 # first gotta find the file and load up filterbank
-                print(key)
-                print(burst)
+                fb_file = '%s_%d_pow.fil'%(basename,key)
+                fb_file = FilterbankFile(fb_file)
+                import pdb; pdb.set_trace()
         else:
             writer.writerow([key,burst_dict[key][0]])
+
 
 #multiday_times = pt.build_multiday_from_dict(burst_dict,min_day=1,min_time=0,sigma=3)
