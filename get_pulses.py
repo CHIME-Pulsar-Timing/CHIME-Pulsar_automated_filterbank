@@ -4,8 +4,6 @@ import csv
 import positive_bursts_timing as pt
 import sys
 from presto.filterbank import FilterbankFile
-from presto import filterbank as fb
-from presto import rfifind
 
 
 
@@ -28,6 +26,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                 # first gotta find the file and load up filterbank
                 fb_file = '%s_%s_pow.fil'%(basename,key)
                 fb_file = FilterbankFile(fb_file)
+                mjd_pulse = fb_file['tstart']+float(burst[0])/60/60/24
                 import pdb; pdb.set_trace()
         else:
             writer.writerow([key,burst_dict[key][0]])
