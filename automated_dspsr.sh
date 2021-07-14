@@ -1,4 +1,5 @@
-#!/usr/bin/bash
+#!/bin/bash
+#
 echo $1
 basename=$1
 DM=$2
@@ -33,6 +34,7 @@ do
     do
         mv "$OUT" PSRSPA_PULSES
     done
+    cd ..
 done < extracted_bursts.csv
 #
 #copy into new directory
