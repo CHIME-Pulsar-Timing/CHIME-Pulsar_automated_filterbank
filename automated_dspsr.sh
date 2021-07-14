@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-
+echo $1
 basename=$1
 DM=$2
 destination="fluence_archives"
