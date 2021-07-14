@@ -28,14 +28,15 @@ with open('extracted_bursts.csv','w') as csv_file:
                 fb_file = FilterbankFile(fb_file)
                 mjd_pulse = fb_file.tstart+float(burst[0])/60/60/24
                 obs_length = fb_file.nspec*fb_file.dt
-                writer.writerow([mjd_pulse,obs_length])
+                #start the pulse 4 seconds early because with dspsr it's better to use a shotgun approach
+                writer.writerow([mjd_pulse,obs_length,float(burst[0])-4])
         else:
             # writer.writerow([key,burst_dict[key][0]])
             fb_file = '%s_%s_pow.fil'%(basename,key)
             fb_file = FilterbankFile(fb_file)
             mjd_pulse = fb_file.tstart+float(burst[key][0])/60/60/24
             obs_length = fb_file.nspec*fb_file.dt
-            writer.writerow([mjd_pulse,obs_length])
+            writer.writerow([mjd_pulse,obs_length,burst[key][0]])
 
 
 
