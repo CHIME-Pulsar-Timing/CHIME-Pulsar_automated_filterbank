@@ -26,13 +26,20 @@ do
     rfifind_stats.py "$filbase"_rfifind.mask
     #run paz to remove rfi
     paz -e zap -z $( python ~/CHIME-Pulsar_automated_filterbank/read_zapchan.py "$basename"_rfifind.zapchans ) *.ar
-
+    #psrspa
+    psrspa -a above:threshold=6 -N 127 *.zap
+    PSRSPA_OUTPUT=($(python ~/CHIME-Pulsar_automated_filterbank/read_psrspa_output.py psrspa_pulses.dat | tr -d '[],'))
+    mkdir -p PSRSPA_PULSES
+    for OUT in "${PSRSPA_OUTPUT[@]}"
+    do
+        mv "$OUT" PSRSPA_PULSES
+    done
 done < extracted_bursts.csv
 #
 #copy into new directory
 #
 #run dspsr
 #this serves as the automated dspsr program
-dspsr -c 0.4 -N J0012+54 -s -S 627.6 -T 0.4 -D 130.4 -k chime J0012+54_59358_pow.fil
+# dspsr -c 0.4 -N J0012+54 -s -S 627.6 -T 0.4 -D 130.4 -k chime J0012+54_59358_pow.fil
 #need to read the zapchan file
-paz -e zap -z $( python ~/CHIME-Pulsar_automated_filterbank/read_zapchan.py J0012+54_59358_pow_rfifind.zapchans ) start_59358.6671434013635.ar
+# paz -e zap -z $( python ~/CHIME-Pulsar_automated_filterbank/read_zapchan.py J0012+54_59358_pow_rfifind.zapchans ) start_59358.6671434013635.ar
