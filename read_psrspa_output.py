@@ -11,4 +11,5 @@ with open(sys.argv[1],'r') as psrspa_file:
     #get unique observations
     obs=set(obs)
     #print them
-    (print(ob) for ob in obs)
+    for ob in obs:
+        print(ob)
