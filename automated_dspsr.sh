@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
+
 basename=$1
 DM=$2
 destination="fluence_archives"
