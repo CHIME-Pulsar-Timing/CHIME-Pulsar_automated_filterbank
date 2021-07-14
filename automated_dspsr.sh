@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
-#read the exracted bursts folder
 basename=$1
 DM=$2
 destination="fluence_archives"
