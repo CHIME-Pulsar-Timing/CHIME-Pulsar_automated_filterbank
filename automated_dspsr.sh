@@ -1,9 +1,9 @@
-#!/bin/bash
-#
-echo $1
+#!/usr/bin/env bash
+set -euo pipefail
+#read the exracted bursts folder
 basename=$1
 DM=$2
-destination=fluence_archives
+destination="fluence_archives"
 mkdir -p $destination
 
 
@@ -36,3 +36,11 @@ do
     done
     cd ..
 done < extracted_bursts.csv
+#
+#copy into new directory
+#
+#run dspsr
+#this serves as the automated dspsr program
+# dspsr -c 0.4 -N J0012+54 -s -S 627.6 -T 0.4 -D 130.4 -k chime J0012+54_59358_pow.fil
+#need to read the zapchan file
+# paz -e zap -z $( python ~/CHIME-Pulsar_automated_filterbank/read_zapchan.py J0012+54_59358_pow_rfifind.zapchans ) start_59358.6671434013635.ar

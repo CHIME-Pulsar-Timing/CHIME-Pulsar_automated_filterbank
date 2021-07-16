@@ -25,19 +25,28 @@ with open('extracted_bursts.csv','w') as csv_file:
                 # the key is the day, the burst[0] is the timestamp,
                 # first gotta find the file and load up filterbank
                 fb_file = '%s_%s_pow.fil'%(basename,key)
-                fb_file = FilterbankFile(fb_file)
-                mjd_pulse = fb_file.tstart+float(burst[0])/60/60/24
-                obs_length = fb_file.nspec*fb_file.dt
-                #start the pulse 4 seconds early because with dspsr it's better to use a shotgun approach
-                writer.writerow([mjd_pulse,obs_length,float(burst[0])-4])
-        else:
-            # writer.writerow([key,burst_dict[key][0]])
-            fb_file = '%s_%s_pow.fil'%(basename,key)
-            fb_file = FilterbankFile(fb_file)
-            mjd_pulse = fb_file.tstart+float(burst[key][0])/60/60/24
-            obs_length = fb_file.nspec*fb_file.dt
-            writer.writerow([mjd_pulse,obs_length,burst[key][0]])
-
+                fb_folder = '%s_%s_pow/0/0'
+                SPEG_file = '%s/0_SPEG.csv'
+                success=False
+                with open(SPEG_file,'r') as speg:
+                    reader = csv.reader(speg,delimiter=',')
+                    for i,row in enumerate(reader):
+                        if i>0:
+                            #first line is a header
+                            #11 is the peak_downfact
+                            #7 is the DM
+                            #8 is peak_time
+                            peak_time = row[8]
+                            if float(peak_time)==float(burst[0]):
+                                success=True
+                                DM = row[7]
+                                peak_downfact = row[11]
+                                break
+                            success=False
+                if success:
+                    writer.writerow([key,burst[0],DM,peak_downfact])
+                else:
+                    print("failed on burst"+str(burst))
 
 
 #multiday_times = pt.build_multiday_from_dict(burst_dict,min_day=1,min_time=0,sigma=3)
