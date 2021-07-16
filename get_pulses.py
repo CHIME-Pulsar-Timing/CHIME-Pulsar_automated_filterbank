@@ -24,8 +24,8 @@ with open('extracted_bursts.csv','w') as csv_file:
                 # the key is the day, the burst[0] is the timestamp,
                 # first gotta find the file and load up filterbank
                 fb_file = '%s_%s_pow.fil'%(basename,key)
-                fb_folder = '%s_%s_pow/0/0'
-                SPEG_file = '%s/0_SPEG.csv'
+                fb_folder = '%s_%s_pow/0'%(basename,key)
+                SPEG_file = '%s/0_SPEG.csv'%(fb_folder)
                 success=False
                 with open(SPEG_file,'r') as speg:
                     reader = csv.reader(speg,delimiter=',')
