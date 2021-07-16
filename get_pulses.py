@@ -32,14 +32,15 @@ with open('extracted_bursts.csv','w') as csv_file:
                     for i,row in enumerate(reader):
                         if i>0:
                             #first line is a header
-                            #11 is the peak_downfact
-                            #7 is the DM
-                            #8 is peak_time
-                            peak_time = row[8]
+                            #16 is the peak_downfact
+                            #12 is the DM
+                            #13 is peak_time
+                            peak_time = row[13]
+
                             if float(peak_time)==float(burst[0]):
                                 success=True
-                                DM = row[7]
-                                peak_downfact = row[11]
+                                DM = row[12]
+                                peak_downfact = row[16]
                                 break
                             success=False
                 if success:
