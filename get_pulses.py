@@ -3,7 +3,6 @@ import numpy as np
 import csv
 import positive_bursts_timing as pt
 import sys
-from presto.filterbank import FilterbankFile
 
 
 
