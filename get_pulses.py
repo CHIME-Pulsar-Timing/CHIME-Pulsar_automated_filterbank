@@ -33,11 +33,13 @@ with open('extracted_bursts.csv','w') as csv_file:
                         if i>0:
                             #first line is a header
                             #16 is the peak_downfact
-                            #12 is the DM
+                            #12 is the peak_DM
                             #13 is peak_time
+                            #14 is peak_SNR
                             peak_time = row[13]
-                            import pdb; pdb.set_trace()
-                            if float(peak_time)==float(burst[0]):
+                            SNR = row[14]
+                            #import pdb; pdb.set_trace()
+                            if (int(peak_time)==int(burst[0])) & (burst[3]==float(SNR)):
                                 success=True
                                 DM = row[12]
                                 peak_downfact = row[16]
