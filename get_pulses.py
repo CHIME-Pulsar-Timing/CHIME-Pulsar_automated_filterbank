@@ -36,7 +36,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                             #12 is the DM
                             #13 is peak_time
                             peak_time = row[13]
-
+                            import pdb; pdb.set_trace()
                             if float(peak_time)==float(burst[0]):
                                 success=True
                                 DM = row[12]
