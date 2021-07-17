@@ -25,7 +25,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                 # first gotta find the file and load up filterbank
                 fb_file = '%s_%s_pow.fil'%(basename,key)
                 fb_folder = '%s_%s_pow/0'%(basename,key)
-                SPEG_file = '%s/0_SPEG.csv'%(fb_folder)
+                SPEG_file = '%s/0_SPEG_all.csv'%(fb_folder)
                 success=False
                 with open(SPEG_file,'r') as speg:
                     reader = csv.reader(speg,delimiter=',')
@@ -48,8 +48,8 @@ with open('extracted_bursts.csv','w') as csv_file:
                 if success:
                     writer.writerow([key,burst[0],DM,peak_downfact])
                 else:
-                    print("day" + str(key))
-                    print("failed on burst"+str(burst))
+                    print("day " + str(key))
+                    print("failed on burst "+str(burst))
 
 
 #multiday_times = pt.build_multiday_from_dict(burst_dict,min_day=1,min_time=0,sigma=3)
