@@ -39,7 +39,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                             peak_time = row[13]
                             SNR = row[14]
                             #import pdb; pdb.set_trace()
-                            if (int(peak_time)==int(burst[0])) & (burst[3]==float(SNR)):
+                            if (int(float(peak_time))==int(burst[0])) & (burst[3]==float(SNR)):
                                 success=True
                                 DM = row[12]
                                 peak_downfact = row[16]
