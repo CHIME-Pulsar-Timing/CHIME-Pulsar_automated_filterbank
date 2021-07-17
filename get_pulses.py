@@ -48,6 +48,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                 if success:
                     writer.writerow([key,burst[0],DM,peak_downfact])
                 else:
+                    print("day" + str(key))
                     print("failed on burst"+str(burst))
 
 
