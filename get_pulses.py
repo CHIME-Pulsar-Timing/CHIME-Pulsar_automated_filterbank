@@ -26,6 +26,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                 fb_file = '%s_%s_pow.fil'%(basename,key)
                 fb_folder = '%s_%s_pow/0'%(basename,key)
                 SPEG_file = '%s/0_SPEG_all.csv'%(fb_folder)
+                mask_file = '%s/%s_%s_pow_rfifind.mask'%(fb_folder,basename,key)
                 success=False
                 with open(SPEG_file,'r') as speg:
                     reader = csv.reader(speg,delimiter=',')
@@ -46,7 +47,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                                 break
                             success=False
                 if success:
-                    writer.writerow([key,burst[0],DM,peak_downfact])
+                    writer.writerow([fb_file,burst[0],peak_downfact,DM,mask_file])
                 else:
                     print("day " + str(key))
                     print("failed on burst "+str(burst))
