@@ -43,7 +43,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                             if (int(float(peak_time))==int(burst[0])) & (burst[3]==float(SNR)):
                                 success=True
                                 DM = row[12]
-                                peak_downfact = int(row[16])
+                                peak_downfact = int(float(row[16]))
                                 break
                             success=False
                 if success:
