@@ -32,7 +32,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                 #grab information needed for Bradley
                 fb = FilterbankFile(fb_file)
                 mjd_pulse = fb.tstart+float(burst[0])/60/60/24
-                obs_length = fb.nspec*fb_file.dt
+                obs_length = fb.nspec*fb.dt
 
                 with open(SPEG_file,'r') as speg:
                     reader = csv.reader(speg,delimiter=',')
