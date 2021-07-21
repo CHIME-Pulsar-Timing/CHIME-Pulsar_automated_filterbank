@@ -3,7 +3,7 @@ import numpy as np
 import csv
 import positive_bursts_timing as pt
 import sys
-
+-from presto.filterbank import FilterbankFile
 
 
 fn = sys.argv[1]
@@ -28,6 +28,12 @@ with open('extracted_bursts.csv','w') as csv_file:
                 SPEG_file = '%s/0_SPEG_all.csv'%(fb_folder)
                 mask_file = '%s/%s_%s_pow_rfifind.mask'%(fb_folder,basename,key)
                 success=False
+
+                #grab information needed for Bradley
+                fb = FilterbankFile(fb_file)
+                mjd_pulse = fb.tstart+float(burst[0])/60/60/24
+                obs_length = fb.nspec*fb_file.dt
+
                 with open(SPEG_file,'r') as speg:
                     reader = csv.reader(speg,delimiter=',')
                     for i,row in enumerate(reader):
@@ -47,7 +53,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                                 break
                             success=False
                 if success:
-                    writer.writerow([fb_file,burst[0],peak_downfact,DM,mask_file])
+                    writer.writerow([fb_file,burst[0],peak_downfact,DM,mask_file,mjd_pulse,obs_length])
                 else:
                     print("day " + str(key))
                     print("failed on burst "+str(burst))
