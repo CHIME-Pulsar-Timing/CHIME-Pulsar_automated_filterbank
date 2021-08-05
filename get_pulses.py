@@ -4,7 +4,7 @@ import csv
 import positive_bursts_timing as pt
 import sys
 from presto.filterbank import FilterbankFile
-
+import glob
 
 fn = sys.argv[1]
 basename = sys.argv[2]
@@ -23,11 +23,27 @@ with open('extracted_bursts.csv','w') as csv_file:
                 # writer.writerow([key,burst[0]])
                 # the key is the day, the burst[0] is the timestamp,
                 # first gotta find the file and load up filterbank
-                fb_file = '%s_%s_pow.fil'%(basename,key)
-                fb_folder = '%s_%s_pow/0'%(basename,key)
-                SPEG_file = '%s/0_SPEG_all.csv'%(fb_folder)
-                mask_file = '%s/%s_%s_pow_rfifind.mask'%(fb_folder,basename,key)
+                fb_file = glob.glob('%s_*%s_pow.fil'%(basename,key))
+                if len(fb_file)>1:
+                    print('error globbing')
+                    sys.exit(1)
+                else:
+                    fb_file=fb_file[0]
+                fb_basename = fb_file.rstrip('.fil')
+
+
+
+                fb_folders = '%s/0'%(fb_basename)
+                SPEG_file = '%s/0_SPEG_all.csv'%(fb_folders)
+                mask_file = glob.glob('%s/*.mask'%(fb_folders))
+
+                if len(mask_file)>1:
+                    print('error globbing mask')
+                    sys.exit(1)
+                else:
+                    mask_file = mask_file[0]
                 success=False
+
 
                 #grab information needed for Bradley
                 fb = FilterbankFile(fb_file)
