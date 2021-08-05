@@ -34,6 +34,7 @@ with open('extracted_bursts.csv','w') as csv_file:
 
 
                 fb_folders = '%s/0'%(fb_basename)
+                print(fb_folders)
                 SPEG_file = '%s/0_SPEG_all.csv'%(fb_folders)
                 mask_file = glob.glob('%s/*.mask'%(fb_folders))
 
