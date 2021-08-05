@@ -41,6 +41,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                     print('error globbing mask')
                     sys.exit(1)
                 else:
+                    print(mask_file)
                     mask_file = mask_file[0]
                 success=False
 
