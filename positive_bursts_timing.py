@@ -136,7 +136,8 @@ def print_burst_dict(burst_dict):
             last_day = -10
 
             for day, dm in zip(day_array, dm_array):
-                print_str = 'Time: {:.6f} Pulse DM: {:.2f} '.format(day, dm)
+                print_str = 'Time: {:10.6f}  Pulse DM: {:5.2f}  '\
+                            .format(day, dm)
                 if dm_mean-dm_std > dm or dm_mean+dm_std < dm:
                     print_str += 'Irregular DM! '
                 if day - last_day < 0.5:
@@ -164,7 +165,7 @@ def pulse_print(day_array, dm_array):
             print(f'{count} pulses detected'+2*'\n'+\
                   f'Pulse info for MJD {MJD}:')
             count = 0
-        print_str = 'Time: {:.6f} Pulse DM: {:.2f} '.format(day, dm)
+        print_str = 'Time: {:10.6f}  Pulse DM: {:5.2f}  '.format(day, dm)
         if dm_mean-dm_std > dm or dm_mean+dm_std < dm:
             print_str += 'Irregular DM! '
         if (day - last_day)*86400 < 0.5:
@@ -382,4 +383,3 @@ if __name__ == '__main__':
         else:                
             rrat_period_multiday(multiday_times)
     print()
-

@@ -1,4 +1,4 @@
-#!/home/adam/anaconda3/bin/python
+#!/cvmfs/soft.computecanada.ca/easybuild/software/2020/avx2/Core/python/3.8.2/bin/python
 from __future__ import print_function
 from __future__ import absolute_import
 from builtins import zip
