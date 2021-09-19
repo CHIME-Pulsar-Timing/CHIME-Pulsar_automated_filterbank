@@ -49,7 +49,7 @@ with open('extracted_bursts.csv','w') as csv_file:
 
                 #grab information needed for Bradley
                 fb = FilterbankFile(fb_file)
-                mjd_pulse = fb.tstart+float(burst[0])/60/60/24
+                mjd_fb_start = fb.tstart#+float(burst[0])/60/60/24
                 obs_length = fb.nspec*fb.dt
 
                 with open(SPEG_file,'r') as speg:
@@ -71,7 +71,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                                 break
                             success=False
                 if success:
-                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_pulse,obs_length])
+                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_fb_start,obs_length])
                 else:
                     print("day " + str(key))
                     print("failed on burst "+str(burst))
