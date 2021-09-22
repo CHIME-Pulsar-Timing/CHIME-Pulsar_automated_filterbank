@@ -52,7 +52,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                 mjd_fb_start = fb.tstart#+float(burst[0])/60/60/24
                 obs_length = fb.nspec*fb.dt
                 pointing_ra = fb.src_raj
-                pointing_dec = fb.src_decj
+                pointing_dec = fb.src_dej
                 rah = int(pointing_ra/10000)
                 ram = int(np.mod(pointing_ra,10000)/100)
                 ras = np.mod(np.mod(pointing_ra,10000),100)
