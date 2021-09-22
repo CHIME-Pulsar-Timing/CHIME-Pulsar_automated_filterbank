@@ -82,7 +82,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                                 break
                             success=False
                 if success:
-                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_pulse,obs_length,pointing_ra_h,pointing_dec_h])
+                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_fb_start,obs_length,pointing_ra_h,pointing_dec_h])
                 else:
                     print("day " + str(key))
                     print("failed on burst "+str(burst))
