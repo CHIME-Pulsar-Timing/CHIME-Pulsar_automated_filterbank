@@ -49,7 +49,7 @@ with open('extracted_bursts.csv','w') as csv_file:
 
                 #grab information needed for Bradley
                 fb = FilterbankFile(fb_file)
-                mjd_pulse = fb.tstart+float(burst[0])/60/60/24
+                mjd_fb_start = fb.tstart#+float(burst[0])/60/60/24
                 obs_length = fb.nspec*fb.dt
                 pointing_ra = fb.src_raj
                 pointing_dec = fb.src_decj
