@@ -51,6 +51,17 @@ with open('extracted_bursts.csv','w') as csv_file:
                 fb = FilterbankFile(fb_file)
                 mjd_pulse = fb.tstart+float(burst[0])/60/60/24
                 obs_length = fb.nspec*fb.dt
+                pointing_ra = fb.src_raj
+                pointing_dec = fb.src_decj
+                rah = int(pointing_ra/10000)
+                ram = int(np.mod(pointing_ra,10000)/100)
+                ras = np.mod(np.mod(pointing_ra,10000),100)
+                pointing_ra_h = '%d:%d:%f'%(rah,ram,ras)
+
+                dech = int(pointing_dec/10000)
+                decm = int(np.mod(pointing_dec,10000)/100)
+                decs = np.mod(np.mod(pointing_dec,10000),100)
+                pointing_dec_h = '%d:%d:%f'%(dech,decm,decs)
 
                 with open(SPEG_file,'r') as speg:
                     reader = csv.reader(speg,delimiter=',')
@@ -71,7 +82,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                                 break
                             success=False
                 if success:
-                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_pulse,obs_length])
+                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_pulse,obs_length,pointing_ra_h,pointing_dec_h])
                 else:
                     print("day " + str(key))
                     print("failed on burst "+str(burst))
