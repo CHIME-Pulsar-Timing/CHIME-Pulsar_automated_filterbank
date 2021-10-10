@@ -52,7 +52,7 @@ if test -f "$3"; then
 		until [ "$n" -ge 1 ]
 		do
 			#python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
-			python $AFP/gwg_cand_search_pipeline.py --dm $2 --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
+			python $AFP/pilot_survey_cand_search_pipeline.py --dm $2 --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
 			n=$((n+1)) 
 			sleep 15
 			#if it fails, lets copy all the things to my scratch directory then exit with error code
