@@ -5,12 +5,16 @@ import argparse
 import re
 
 from presto.filterbank import FilterbankFile
-import pipeline_config
+import pipeline_config_pilot as pipeline_config
 from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
+
 #original GWG pipeline written by Chiamin
 def run_rfifind(fname):
-    rfifind_command = 'rfifind -blocks %d -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,pipeline_config.zaplist,fname,fname)
+    options = ""
+    if pipeline_config.rfizerodm:
+        options += "-zerodm"
+    rfifind_command = 'rfifind -blocks %d -zapchan %s %s -o %s %s.fil' %(pipeline_config.rfiblocks,pipeline_config.zaplist,options,fname,fname)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
     except subprocess.CalledProcessError:
@@ -21,10 +25,8 @@ def run_rfifind(fname):
 
 
 def run_sk_mad(fname,fil):
-    
     sk_mad_rfi_excision(fname,fil)
     fnamenew = str(fname)+'_sk_mad'
-
     return fnamenew
 
 def run_ddplan(fname,dm):
@@ -37,7 +39,6 @@ def run_ddplan(fname,dm):
     import pathlib
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
-    # ignorechan= pipeline_config.ignorechan
     ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
     try:
         run_ddplan = subprocess.check_call([ddplan_command],shell=True)
@@ -57,16 +58,14 @@ def run_prepsubband(fname,tsamp,dm,ddplan,coherent_dm,slurm='',coherent=True):
         dms, ds, sb = pipeline_config.coherent_ddplan(tsamp, dm, coherent_dm)
     else:
         dms, ds, sb = pipeline_config.ddplan(tsamp, dm)
-    
+
     prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,ds,sb,fname,fname,fname)
     run_prepsubband_cmd = subprocess.Popen([prepsubband_command],shell=True)
     run_prepsubband_cmd.wait()
 
 def run_realfft(fname,fil,rednoise=True,zaplist=None):
-
     datfiles = sorted(glob.glob(str(fname)+'*.dat'))
     for dat in datfiles:
-
         realfft_command = 'realfft -disk '+str(dat)
         run_realfft_cmd = subprocess.Popen([realfft_command],shell=True)
         run_realfft_cmd.wait()
@@ -74,53 +73,40 @@ def run_realfft(fname,fil,rednoise=True,zaplist=None):
     fftfiles = sorted(glob.glob(str(fname)+'*.fft'))
 
     if zaplist:
-
         for fft in fftfiles:
-
             baryv = subprocess.check_output(['prepdata -start 0.99 %s -o tmp |grep Average' %fil],shell=True).split()[-1].rstrip('\n')
             zaplist_command = 'zapbirds -zap -zapfile %s -baryv %f'%(zaplist,baryv) 
 
     if rednoise:
-
         for fft in fftfiles:
-
             rednoise_command = 'rednoise '+str(fft)
             run_rednoise_cmd = subprocess.Popen([rednoise_command],shell=True)
             run_rednoise_cmd.wait()
             os.rename(str(fft).rstrip('.fft')+'_red.fft',str(fft))
 
 def run_accelsearch(fname,zmax,wmax,binary=True):
-
     fftfiles= sorted(glob.glob(str(fname)+'*.fft'))
 
     for fft in fftfiles:
-
         if binary == True:
-
             accelsearch_command = 'accelsearch -zmax %d -wmax %d %s' %(zmax,wmax,fft)
             run_accelsearch_cmd = subprocess.Popen([accelsearch_command],shell=True)
             run_accelsearch_cmd.wait()
 
         else:
-
             accelsearch_command = 'accelsearch -zmax 0 -numharm 32 %s' %(fft)
             run_accelsearch_cmd = subprocess.Popen([accelsearch_command],shell=True)
             run_accelsearch_cmd.wait()
 
 def run_ffa(fname):
-
     for dm in pipeline_config.ffa_dm_set:
-
         if dm == 0.0:
-
             datfiles = sorted(glob.glob(fname+'*DM*'+str(dm)+'0.dat'))
 
         else:
-
             datfiles.extend(sorted(glob.glob(fname+'*DM*'+str(dm)+'0.dat')))
 
     for dat in datfiles:
-
         ffa_command = '/psr_scratch/common_utils/ffaGo/ffa.py '+str(dat)
         run_ffa_cmd = subprocess.Popen([ffa_command],shell=True)
         run_ffa_cmd.wait()
@@ -165,15 +151,10 @@ def run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad=False):
     run_prepfold_cmd.wait()
 
 def fold_candidates(fname,source_dm,coherent=True):
-
     if fft:
-
         with open(fname+'_ACCEL_sift_cands.lis','r') as candfile:
-
             for line in candfile:
-
                 if '_ACCEL_' in line:
-
                     accelfile = line.split(':')[0]+'.cand'
                     accelcand = line.split(':')[1].split()[0]
                     candDM = accelfile.split('DM')[1].split('_')[0]
@@ -182,15 +163,11 @@ def fold_candidates(fname,source_dm,coherent=True):
                         continue
                     else:
                         run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad)
-    
-    if ffa:
-    
-        with open(fname+'_cands.ffa','r') as candfile:
-   
-            for line in candfile:
 
+    if ffa:
+        with open(fname+'_cands.ffa','r') as candfile:
+            for line in candfile:
                 if '.dat' in line:
- 
                     candDM = line.split('DM')[1].split('.dat')[0]
                     candperiod = line.split()[2]
                     accelfile = line.split(':')[0].rstrip('.dat')
@@ -199,8 +176,8 @@ def fold_candidates(fname,source_dm,coherent=True):
                         continue
                     else:
                         run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad)
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--fil', type=str, help='Input filterbank file')
