@@ -75,7 +75,7 @@ def run_realfft(fname,fil,rednoise=True,zaplist=None):
     if zaplist:
         for fft in fftfiles:
             baryv = subprocess.check_output(['prepdata -start 0.99 %s -o tmp |grep Average' %fil],shell=True).split()[-1].rstrip('\n')
-            zaplist_command = 'zapbirds -zap -zapfile %s -baryv %f'%(zaplist,baryv) 
+            zaplist_command = 'zapbirds -zap -zapfile %s -baryv %f'%(zaplist,baryv)
 
     if rednoise:
         for fft in fftfiles:
@@ -181,47 +181,33 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--fil', type=str, help='Input filterbank file')
-    parser.add_argument('--dedisp',action='store_true',help='Run prepsubband and dedisperse the data')
-    parser.add_argument('--sk_mad',action='store_true',help='Run sk_mad RFI excision instead of rfifind')
     parser.add_argument('--dm', type=float,help='DM of the candidate. This will determine the max DM to search for pulsar')
-    parser.add_argument('--coherent',action='store_true',help='Use the coherent ddplan for searching')
-    parser.add_argument('--no_fft',action='store_false',help='Do not run fft search (Default is to run)')
-    parser.add_argument('--no_rednoise',action='store_false',help='Do not run rednoise removal on Fourier series (Default is to run)')
-    parser.add_argument('--zaplist',nargs='?',default=None,help='zaplist to remove from the fft files')
-    parser.add_argument('--binary',action='store_true',help='Run binary search (This only works if fft is run)')
-    parser.add_argument('--zmax',nargs='?',default=100,help='zmax value for binary search')
-    parser.add_argument('--wmax',nargs='?',default=0,help='wmax value for binary search')
-    parser.add_argument('--ffa',action='store_true',help='Run Fast Folding Algorithm')
-    parser.add_argument('--sp',action='store_true',help='Run single pulse search')
-    parser.add_argument('--fold',action='store_true',help='Fold the candidates')
-    parser.add_argument('--speg',action='store_true',help='creates the SPEGID files')
-    parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
-    parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
     parser.add_argument('--slurm',type=str,help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
 
     args = parser.parse_args()
 
     fil = args.fil
-    sk_mad = args.sk_mad
     source_dm = args.dm
-    coherent = args.coherent
-    fft = args.no_fft
-    rednoise = args.no_rednoise
-    zaplist = args.zaplist
-    binary = args.binary
-    zmax = args.zmax
-    wmax = args.wmax
-    ffa = args.ffa
-    sp = args.sp
-    fold = args.fold
-    speg = args.speg
-    fetch =args.fetch 
-    dedisp = args.dedisp
-    rfifind = args.rfifind
-    slurm=args.slurm
+    slurm = args.slurm
     if slurm:
         os.chdir(slurm)
-    print('Running RFI mitigation')
+
+    sk_mad = pipeline_config.run_sk_mad
+    coherent = pipeline_config.use_coherent_ddplan
+    fft = pipeline_config.run_fft
+    rednoise = pipeline_config.rednoise
+    zaplist = pipeline_config.fftzaplist
+    binary = pipeline_config.run_binary
+    zmax = pipeline_config.zmax
+    wmax = pipeline_config.wmax
+    ffa = pipeline_config.run_ffa
+    sp = pipeline_config.run_sp
+    fold = pipeline_config.fold_candidates
+    speg = pipeline_config.run_prep_speg
+    fetch = pipeline_config.run_prep_fetch
+    dedisp = pipeline_config.run_dedisp
+    rfifind = pipeline_config.run_rfifind
+
     #get only the file name
     fname = fil.rstrip('.fil')
     fname = fname.split('/')
@@ -239,20 +225,22 @@ if __name__ == '__main__':
     nsamp = filfile.nspec
     nchan = filfile.nchan
 
-
     if sk_mad:
         if os.path.exists('{}_sk_mad.fil'.format(fname)):
             print('sk mad cleaned data already exists')
             fname = '{}_sk_mad'.format(fname)
         else:
+            print('Running RFI mitigation - sk_mad')
             fname = run_sk_mad(fname,fil)
     if rfifind:
+        print('Running RFI mitigation - rfifind')
         run_rfifind(fname)
     if dedisp:
         #run ddplan
-        run_ddplan(fname,source_dm) 
+        print('Dedispersing')
+        run_ddplan(fname,source_dm)
         #dedispersion // deprecated, run ddplan for efficiency
-        '''        
+        '''
         if coherent:
             dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
             dmlist.append(0)
@@ -263,26 +251,33 @@ if __name__ == '__main__':
         '''
     #run fft
     if fft:
+        print('Running FFT search')
         run_realfft(fname,rednoise,zaplist)
         run_accelsearch(fname,zmax,wmax,binary)
         run_accelsift(fname)
 
     #run ffa
     if ffa:
+        print('Running FFA search')
         run_ffa(fname)
         run_ffa_sift(fname)
 
     if sp:
+        print('Running single pulse search')
         run_sp(fname)
 
     if fold:
+        print('Folding candidates')
         fold_candidates(fname, source_dm, coherent=coherent)
-    #run SPEGID on candidates
+
     if speg:
+        print('Running SPEGID on single pulse candidates')
         from prep_speg import prep_speg
         #prep_speg
         #run SPEGID
         prep_speg(fname+'_rfifind.inf')
+
     if fetch:
+        print('Running FETCH')
         from prep_fetch import prep_fetch_csv
         prep_fetch_csv(fname+'.fil',rank=2)
