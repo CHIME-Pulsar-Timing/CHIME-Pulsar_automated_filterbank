@@ -2,7 +2,7 @@
 run_sk_mad = False  # run sk_mad RFI excision instead of rfifind (NB don't think this works atm)
 run_rfifind = True  # run rfifind, using configuration found below
 run_ddplan = False  # run DDplan - uses range +-20 of target DM
-run_dedisp = False  # run the dedisp.py script output by DDplan, aka dedisperse the data using prepsubband
+run_dedisp = False  # run a dedisp_<filename>.py script output by DDplan, aka dedisperse the data using prepsubband
 run_fft = False  # run FFT search
 run_ffa = False # run  FFA (fast folding algorithm) search
 fold_candidates = False  # fold FFA and/or FFT candidates
