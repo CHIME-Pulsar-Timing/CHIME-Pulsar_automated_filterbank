@@ -1,7 +1,8 @@
 # options for what to run in the pipeline:
 run_sk_mad = False  # run sk_mad RFI excision instead of rfifind (NB don't think this works atm)
 run_rfifind = True  # run rfifind, using configuration found below
-run_dedisp = False  # run prepsubband and dedisperse the data
+run_ddplan = False  # run DDplan - uses range +-20 of target DM
+run_dedisp = False  # run the dedisp.py script output by DDplan, aka dedisperse the data using prepsubband
 run_fft = False  # run FFT search
 run_ffa = False # run  FFA (fast folding algorithm) search
 fold_candidates = False  # fold FFA and/or FFT candidates
@@ -123,11 +124,11 @@ def ddplan(tsamp, dm):
     elif dm < 300.0:
         dms = 0.20
         ds = 4
-        sb = 32 
+        sb = 32
     elif dm < 540.0:
         dms = 0.40
         ds = 8
-        sb = 32 
+        sb = 32
     elif dm < 780.0:
         dms = 0.40
         ds = 8
@@ -138,7 +139,7 @@ def ddplan(tsamp, dm):
         sb = 64
     if dm >= 260.0:
         sb = sb * tsamp_fac
-    
+
     return dms, ds, sb
 
 coherent_dm_set = [-40,-30,-20,-10,0,10,20,30,40,50,60,70,80,100,120,140,180,220,260,300,380,460,540,620,700,780,860,940]

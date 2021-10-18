@@ -43,9 +43,17 @@ def run_ddplan(fname,dm):
     try:
         run_ddplan = subprocess.check_call([ddplan_command],shell=True)
         #run_ddplan.wait()
+    except subprocess.CalledProcessError:
+        import traceback
+        traceback.print_exc()
+        [print(f) for f in os.listdir('.')]
+        sys.exit(1)
+
+def run_dedisp(fname):
+    """Execute a dedisp_<fname>.py prepsubband script output by DDplan"""
+    try:
         prepsubband_command = "python dedisp_%s.py" %(fname)
         run_ddplan_python = subprocess.check_call([prepsubband_command],shell=True)
-        #run_ddplan_python.wait()
     except subprocess.CalledProcessError:
         import traceback
         traceback.print_exc()
@@ -205,6 +213,7 @@ if __name__ == '__main__':
     fold = pipeline_config.fold_candidates
     speg = pipeline_config.run_prep_speg
     fetch = pipeline_config.run_prep_fetch
+    ddplan = pipeline_config.run_ddplan
     dedisp = pipeline_config.run_dedisp
     rfifind = pipeline_config.run_rfifind
 
@@ -235,20 +244,14 @@ if __name__ == '__main__':
     if rfifind:
         print('Running RFI mitigation - rfifind')
         run_rfifind(fname)
+    if ddplan:
+        # run ddplan
+        print('Running DDplan')
+        run_ddplan(fname,source_dm)
     if dedisp:
         #run ddplan
         print('Dedispersing')
-        run_ddplan(fname,source_dm)
-        #dedispersion // deprecated, run ddplan for efficiency
-        '''
-        if coherent:
-            dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
-            dmlist.append(0)
-        else:
-            dmlist = [i for i in pipeline_config.dm_set if (i < source_dm+20)&(i > source_dm-20)]
-        for dm in dmlist:
-            run_prepsubband(fname,tsamp,dm,source_dm,coherent)
-        '''
+        run_dedisp(fname)
     #run fft
     if fft:
         print('Running FFT search')
