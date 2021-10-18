@@ -29,7 +29,7 @@ def run_sk_mad(fname,fil):
     fnamenew = str(fname)+'_sk_mad'
     return fnamenew
 
-def run_ddplan(fname,dm):
+def run_sp_ddplan(fname,dm):
     if dm>20.1:
         dml=dm-20
     else:
@@ -49,7 +49,7 @@ def run_ddplan(fname,dm):
         [print(f) for f in os.listdir('.')]
         sys.exit(1)
 
-def run_dedisp(fname):
+def run_dedisp_from_ddplan(fname):
     """Execute a dedisp_<fname>.py prepsubband script output by DDplan"""
     try:
         prepsubband_command = "python dedisp_%s.py" %(fname)
@@ -133,16 +133,13 @@ def run_sp(fname):
 
 
 def run_accelsift(fname):
-
     accelsift_command = 'python /usr/local/src/presto/python/ACCEL_sift.py'
     with open(fname+'_ACCEL_sift_cands.lis','w+') as outfile:
         run_accelsift_cmd = subprocess.Popen([accelsift_command],stdout=outfile,shell=True)
         run_accelsift_cmd.wait()
 
 def run_ffa_sift(fname):
-
     if not os.path.isfile(fname+'_rfifind.inf'):
-
         rfifind_empty_command = 'rfifind -blocks '+str(pipeline_config.rfiblocks)+' -ignorechan 0:1024 -o '+str(fname)+' '+str(fname)+'.fil'
         run_rfifind_empty_cmd = subprocess.Popen([rfifind_empty_command],shell=True)
         run_rfifind_empty_cmd.wait()
@@ -152,7 +149,6 @@ def run_ffa_sift(fname):
     run_ffa_sift_cmd.wait()
 
 def run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad=False):
-
     #check period for folding option
     prepfoldcmd = pipeline_config.foldplan(fname,accelfile,accelcand,candDM,candperiod,sk_mad)
     run_prepfold_cmd = subprocess.Popen([prepfoldcmd],shell=True)
@@ -213,8 +209,9 @@ if __name__ == '__main__':
     fold = pipeline_config.fold_candidates
     speg = pipeline_config.run_prep_speg
     fetch = pipeline_config.run_prep_fetch
-    ddplan = pipeline_config.run_ddplan
-    dedisp = pipeline_config.run_dedisp
+    ddplan_sp = pipeline_config.run_sp_ddplan
+    dedisp_from_ddplan = pipeline_config.run_dedisp_from_ddplan
+    prepsub = pipeline_config.run_prepsubband
     rfifind = pipeline_config.run_rfifind
 
     #get only the file name
@@ -241,17 +238,32 @@ if __name__ == '__main__':
         else:
             print('Running RFI mitigation - sk_mad')
             fname = run_sk_mad(fname,fil)
+            
     if rfifind:
         print('Running RFI mitigation - rfifind')
         run_rfifind(fname)
-    if ddplan:
+
+    if ddplan_sp:
         # run ddplan
-        print('Running DDplan')
-        run_ddplan(fname,source_dm)
-    if dedisp:
-        #run ddplan
-        print('Dedispersing')
-        run_dedisp(fname)
+        print('Running DDplan: +-20 around target DM')
+        run_sp_ddplan(fname,source_dm)
+
+    if dedisp_from_ddplan:
+        #run prepsubband plan output by ddplan
+        print('Dedispersing from a dedisp_<filename>.py script')
+        run_dedisp_from_ddplan(fname)
+
+    if prepsub:
+        # run prepsubband based on ddplan/coherent_ddplan defined in config
+        print('Running prepsubband based on ddplan/coherent_ddplan defined in config')
+        if coherent:
+            dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
+            dmlist.append(0)
+        else:
+            dmlist = [i for i in pipeline_config.dm_set if (i < source_dm+20)&(i > source_dm-20)]
+        for dm in dmlist:
+            run_prepsubband(fname,tsamp,dm,source_dm,coherent)
+
     #run fft
     if fft:
         print('Running FFT search')

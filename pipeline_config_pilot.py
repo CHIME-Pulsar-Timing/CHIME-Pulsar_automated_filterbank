@@ -1,8 +1,9 @@
 # options for what to run in the pipeline:
 run_sk_mad = False  # run sk_mad RFI excision instead of rfifind (NB don't think this works atm)
 run_rfifind = True  # run rfifind, using configuration found below
-run_ddplan = False  # run DDplan - uses range +-20 of target DM
-run_dedisp = False  # run a dedisp_<filename>.py script output by DDplan, aka dedisperse the data using prepsubband
+run_sp_ddplan = False  # run DDplan using range +-20 around target DM. Suitable for single pulse searches (SPEGID & FETCH pipeline)
+run_dedisp_from_ddplan = False  # run a dedisp_<filename>.py script output by DDplan, aka dedisperse the data using prepsubband
+run_prepsubband = False  # run prepsubband using the ddplan/coherent_ddplan defined below
 run_fft = False  # run FFT search
 run_ffa = False # run  FFA (fast folding algorithm) search
 fold_candidates = False  # fold FFA and/or FFT candidates
@@ -17,8 +18,8 @@ rfiblocks = 4
 rfizerodm = True  # run rfifind with option -zerodm
 
 # dedispersion configuration:
+# only relevant when run_prepsubband = True
 use_coherent_ddplan = True  # use coherent ddplan defined below
-# . . . from *_cand_search_pipeline looks like this doesn't actually get used
 
 # fft configuration:
 fftzaplist = None  # zaplist to remove from fft files (NB do not understand how this is currently implemented. need birdies in there too)
