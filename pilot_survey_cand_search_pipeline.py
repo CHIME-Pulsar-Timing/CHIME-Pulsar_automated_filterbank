@@ -58,7 +58,7 @@ def run_make_dedisp_from_template_ddplan(filfname, ddplanfname, multiple_cDMs=Fa
         if multiple_cDMs:
             ddp = frankenstein_ddplan.read_from_npz(ddplanfname)
             ddp.write_dedisp_for(filfname, to_file=True, mask=mask)
-        else
+        else:
             ddp = ddplan.read_from_npz(ddplanfname)
             ddp.write_dedisp_py(filfname, to_file=True, mask=mask)
     else:
