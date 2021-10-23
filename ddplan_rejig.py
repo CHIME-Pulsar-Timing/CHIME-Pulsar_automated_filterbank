@@ -21,6 +21,8 @@ import argparse
 # changed classes to use attrs
 # added the option to include scattering
 # added supporting functions to allow ddplan's to be written to file
+# took out all dependence on presto
+# changes pgplot to matplotlib
 
 @attrs
 class observation(object):
