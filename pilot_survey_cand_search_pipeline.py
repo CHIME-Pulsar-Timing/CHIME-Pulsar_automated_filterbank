@@ -9,6 +9,8 @@ import pipeline_config_pilot as pipeline_config
 from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
 
+from ddplan_rejig import (frankenstein_ddplan, ddplan)
+
 #original GWG pipeline written by Chiamin
 def run_rfifind(fname):
     options = ""
@@ -49,6 +51,21 @@ def run_sp_ddplan(fname,dm):
         [print(f) for f in os.listdir('.')]
         sys.exit(1)
 
+def run_make_dedisp_from_template_ddplan(filfname, ddplanfname, multiple_cDMs=False, mask=True):
+    """Make a dedisp.py for filfname based on a pre-computed ddplan stored in a .npz (ddplanfname)
+    If the ddplan is for multiple coherently dedispersed observations set multiple_cDMs=True"""
+    if ddplanfname is not None:
+        if multiple_cDMs:
+            ddp = frankenstein_ddplan.read_from_npz(ddplanfname)
+            ddp.write_dedisp_for(filfname, to_file=True, mask=mask)
+        else
+            ddp = ddplan.read_from_npz(ddplanfname)
+            ddp.write_dedisp_py(filfname, to_file=True, mask=mask)
+    else:
+        print("No template ddplan file given")
+        sys.exit(1)
+
+
 def run_dedisp_from_ddplan(fname):
     """Execute a dedisp_<fname>.py prepsubband script output by DDplan"""
     try:
@@ -59,17 +76,6 @@ def run_dedisp_from_ddplan(fname):
         traceback.print_exc()
         [print(f) for f in os.listdir('.')]
         sys.exit(1)
-
-def run_prepsubband(fname,tsamp,dm,ddplan,coherent_dm,slurm='',coherent=True):
-    #should replace this with ddplan
-    if coherent:
-        dms, ds, sb = pipeline_config.coherent_ddplan(tsamp, dm, coherent_dm)
-    else:
-        dms, ds, sb = pipeline_config.ddplan(tsamp, dm)
-
-    prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,ds,sb,fname,fname,fname)
-    run_prepsubband_cmd = subprocess.Popen([prepsubband_command],shell=True)
-    run_prepsubband_cmd.wait()
 
 def run_realfft(fname,fil,rednoise=True,zaplist=None):
     datfiles = sorted(glob.glob(str(fname)+'*.dat'))
@@ -107,12 +113,14 @@ def run_accelsearch(fname,zmax,wmax,binary=True):
             run_accelsearch_cmd.wait()
 
 def run_ffa(fname):
-    for dm in pipeline_config.ffa_dm_set:
-        if dm == 0.0:
-            datfiles = sorted(glob.glob(fname+'*DM*'+str(dm)+'0.dat'))
-
-        else:
-            datfiles.extend(sorted(glob.glob(fname+'*DM*'+str(dm)+'0.dat')))
+    datfiles = sorted(glob.glob(str(fname)+'*DM*.dat'))
+    # think the below is there because there's a different set of dms for ffa vs fft - do not know why
+#    for dm in pipeline_config.ffa_dm_set:
+#        if dm == 0.0:
+#            datfiles = sorted(glob.glob(fname+'*DM*'+str(dm)+'0.dat'))
+#
+#        else:
+#            datfiles.extend(sorted(glob.glob(fname+'*DM*'+str(dm)+'0.dat')))
 
     for dat in datfiles:
         ffa_command = '/psr_scratch/common_utils/ffaGo/ffa.py '+str(dat)
@@ -213,6 +221,7 @@ if __name__ == '__main__':
     dedisp_from_ddplan = pipeline_config.run_dedisp_from_ddplan
     prepsub = pipeline_config.run_prepsubband
     rfifind = pipeline_config.run_rfifind
+    make_dedisp_from_template = pipeline_config.run_make_dedisp_from_template
 
     #get only the file name
     fname = fil.rstrip('.fil')
@@ -238,7 +247,7 @@ if __name__ == '__main__':
         else:
             print('Running RFI mitigation - sk_mad')
             fname = run_sk_mad(fname,fil)
-            
+
     if rfifind:
         print('Running RFI mitigation - rfifind')
         run_rfifind(fname)
@@ -247,6 +256,14 @@ if __name__ == '__main__':
         # run ddplan
         print('Running DDplan: +-20 around target DM')
         run_sp_ddplan(fname,source_dm)
+
+    if make_dedisp_from_template:
+        print(f'Making dedisp.py for {fname} from {pipeline_config.template_ddplan_fname}')
+        run_make_dedisp_from_template_ddplan(
+            fname,
+            pipeline_config.template_ddplan_fname,
+            multiple_cDMs=pipeline_config.template_ddplan_has_multiple_cdms
+            )
 
     if dedisp_from_ddplan:
         #run prepsubband plan output by ddplan
