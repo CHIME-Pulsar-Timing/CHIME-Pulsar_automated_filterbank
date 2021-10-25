@@ -1,14 +1,13 @@
-import math
+from __future__ import print_function
+from __future__ import absolute_import
+
 from matplotlib import pyplot as plt
 from matplotlib import colorbar
-import copy
 import attr
 from attr import attrs, attrib
 from typing import List
 import os
 
-from __future__ import print_function
-from __future__ import absolute_import
 from builtins import zip
 import numpy as np
 
