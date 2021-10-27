@@ -9,8 +9,6 @@ import pipeline_config_pilot as pipeline_config
 from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
 
-from ddplan_rejig import (frankenstein_ddplan, ddplan)
-
 #original GWG pipeline written by Chiamin
 def run_rfifind(fname):
     options = ""
@@ -49,20 +47,6 @@ def run_sp_ddplan(fname,dm):
         import traceback
         traceback.print_exc()
         [print(f) for f in os.listdir('.')]
-        sys.exit(1)
-
-def run_make_dedisp_from_template_ddplan(filfname, ddplanfname, multiple_cDMs=False, mask=True):
-    """Make a dedisp.py for filfname based on a pre-computed ddplan stored in a .npz (ddplanfname)
-    If the ddplan is for multiple coherently dedispersed observations set multiple_cDMs=True"""
-    if ddplanfname is not None:
-        if multiple_cDMs:
-            ddp = frankenstein_ddplan.read_from_npz(ddplanfname)
-            ddp.write_dedisp_for(filfname, to_file=True, mask=mask)
-        else:
-            ddp = ddplan.read_from_npz(ddplanfname)
-            ddp.write_dedisp_py(filfname, to_file=True, mask=mask)
-    else:
-        print("No template ddplan file given")
         sys.exit(1)
 
 
@@ -221,7 +205,6 @@ if __name__ == '__main__':
     dedisp_from_ddplan = pipeline_config.run_dedisp_from_ddplan
     prepsub = pipeline_config.run_prepsubband
     rfifind = pipeline_config.run_rfifind
-    make_dedisp_from_template = pipeline_config.run_make_dedisp_from_template
 
     #get only the file name
     fname = fil.rstrip('.fil')
@@ -256,14 +239,6 @@ if __name__ == '__main__':
         # run ddplan
         print('Running DDplan: +-20 around target DM')
         run_sp_ddplan(fname,source_dm)
-
-    if make_dedisp_from_template:
-        print(f'Making dedisp.py for {fname} from {pipeline_config.template_ddplan_fname}')
-        run_make_dedisp_from_template_ddplan(
-            fname,
-            pipeline_config.template_ddplan_fname,
-            multiple_cDMs=pipeline_config.template_ddplan_has_multiple_cdms
-            )
 
     if dedisp_from_ddplan:
         #run prepsubband plan output by ddplan
