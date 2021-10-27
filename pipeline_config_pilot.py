@@ -2,7 +2,7 @@
 run_sk_mad = False  # run sk_mad RFI excision instead of rfifind (NB don't think this works atm)
 run_rfifind = False  # run rfifind, using configuration found below
 run_sp_ddplan = False  # run DDplan using range +-20 around target DM. Suitable for single pulse searches (SPEGID & FETCH pipeline)
-run_make_dedisp_from_template = False  # make the dedsip.py for the file based on a ddplan saved as an npz based on configurations below
+#run_make_dedisp_from_template  = False  # make the dedsip.py for the file based on a ddplan saved as an npz based on configurations below
 run_dedisp_from_ddplan = True  # run a dedisp_<filename>.py script output by DDplan, aka dedisperse the data using prepsubband
 run_fft = False  # run FFT search
 run_ffa = False # run  FFA (fast folding algorithm) search
