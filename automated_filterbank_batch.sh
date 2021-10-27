@@ -52,8 +52,8 @@ if test -f "$3"; then
 		until [ "$n" -ge 1 ]
 		do
 			#python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
-			python $AFP/pilot_survey_cand_search_pipeline.py --dm $2 --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
-			n=$((n+1)) 
+			python $AFP/pilot_survey_cand_search_pipeline.py --dm $2 --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
+			n=$((n+1))
 			sleep 15
 			#if it fails, lets copy all the things to my scratch directory then exit with error code
 			PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
@@ -63,17 +63,18 @@ if test -f "$3"; then
 			mkdir -p $ERRORS
 			   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
 			exit 1
-		done 
+		done
         #remove the extra fil files
         rm "$SPFILES/$FIL"
         rm "$SPFILES/"*sk_mad.fil
-        #remove the .dat files
-        rm "$SPFILES"/*.dat
+        #tarball the .dat files
+        tar -czf "$SPFILES/${FIL}_dat.tar" -C "$SPFILES" *.dat
         #tarball the infs and singlepulse files
-        tar cf "$SPFILES/${FIL}_singlepulse.tar" "$SPFILES/"*.singlepulse
-        tar cf "$SPFILES/${FIL}_inf.tar" "$SPFILES/"*DM*.inf
+        tar -czf "$SPFILES/${FIL}_singlepulse.tar" -C "$SPFILES" *.singlepulse
+        tar -cff "$SPFILES/${FIL}_inf.tar" -C "$SPFILES" *DM*.inf
         rm "$SPFILES"/*DM*.inf
         rm "$SPFILES"/*DM*.singlepulse
+        rm "$SPFILES"/*.dat
         ((i=i+1))
     done
     #uncomment this code if you want to make a folder and shove everything in there, if you're using process_all_fil.sh, it already makes folder for you.
