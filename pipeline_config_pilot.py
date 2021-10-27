@@ -1,9 +1,9 @@
 # options for what to run in the pipeline:
 run_sk_mad = False  # run sk_mad RFI excision instead of rfifind (NB don't think this works atm)
-run_rfifind = True  # run rfifind, using configuration found below
+run_rfifind = False  # run rfifind, using configuration found below
 run_sp_ddplan = False  # run DDplan using range +-20 around target DM. Suitable for single pulse searches (SPEGID & FETCH pipeline)
-run_make_dedisp_from_template = True  # make the dedsip.py for the file based on a ddplan saved as an npz based on configurations below
-run_dedisp_from_ddplan = False  # run a dedisp_<filename>.py script output by DDplan, aka dedisperse the data using prepsubband
+run_make_dedisp_from_template = False  # make the dedsip.py for the file based on a ddplan saved as an npz based on configurations below
+run_dedisp_from_ddplan = True  # run a dedisp_<filename>.py script output by DDplan, aka dedisperse the data using prepsubband
 run_fft = False  # run FFT search
 run_ffa = False # run  FFA (fast folding algorithm) search
 fold_candidates = False  # fold FFA and/or FFT candidates
@@ -20,7 +20,7 @@ rfizerodm = True  # run rfifind with option -zerodm
 
 # dedispersion configuration:
 # for make_dedisp_from_template
-template_ddplan_fname = None  # "/home/kcrowter/survey/amalgamated_ddplan_cdms_30_91_152_213_273_334_395_456.npz"
+template_ddplan_fname = "/home/kcrowter/survey/amalgamated_ddplan_cdms_30_91_152_213_273_334_395_456.npz"
 template_ddplan_has_multiple_cdms = True  # set True if template_ddplan is or multiple coherently dedispersed passes
 
 
