@@ -20,8 +20,8 @@ rfizerodm = True  # run rfifind with option -zerodm
 
 # dedispersion configuration:
 # for make_dedisp_from_template
-template_ddplan_fname = None  # "/home/kcrowter/survey/amalgamated_ddplan_cdms_30_91_152_213_273_334_395_456.npz"
-template_ddplan_has_multiple_cdms = True  # set True if template_ddplan is or multiple coherently dedispersed passes
+#template_ddplan_fname = None  # "/home/kcrowter/survey/amalgamated_ddplan_cdms_30_91_152_213_273_334_395_456.npz"
+#template_ddplan_has_multiple_cdms = True  # set True if template_ddplan is or multiple coherently dedispersed passes
 
 
 # fft configuration:

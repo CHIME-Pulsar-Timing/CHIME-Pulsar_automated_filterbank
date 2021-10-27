@@ -173,6 +173,12 @@ def fold_candidates(fname,source_dm,coherent=True):
                     else:
                         run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad)
 
+def set_option(opt, default=False):
+    try:
+        return opt
+    except AttributeError:
+        return default
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
@@ -188,22 +194,22 @@ if __name__ == '__main__':
     if slurm:
         os.chdir(slurm)
 
-    sk_mad = pipeline_config.run_sk_mad
-    fft = pipeline_config.run_fft
-    rednoise = pipeline_config.rednoise
-    zaplist = pipeline_config.fftzaplist
-    binary = pipeline_config.run_binary
-    zmax = pipeline_config.zmax
-    wmax = pipeline_config.wmax
-    ffa = pipeline_config.run_ffa
-    sp = pipeline_config.run_sp
-    fold = pipeline_config.fold_candidates
-    speg = pipeline_config.run_prep_speg
-    fetch = pipeline_config.run_prep_fetch
-    ddplan_sp = pipeline_config.run_sp_ddplan
-    dedisp_from_ddplan = pipeline_config.run_dedisp_from_ddplan
-    prepsub = pipeline_config.run_prepsubband
-    rfifind = pipeline_config.run_rfifind
+    sk_mad = set_option(pipeline_config.run_sk_mad)
+    fft = set_option(pipeline_config.run_fft)
+    if fft:
+        binary = set_option(pipeline_config.run_binary)
+        zmax = set_option(pipeline_config.zmax, default=0)
+        wmax = set_option(pipeline_config.wmax, default=0)
+        rednoise = set_option(pipeline_config.rednoise)
+        zaplist = set_option(pipeline_config.fftzaplist)
+    ffa = set_option(pipeline_config.run_ffa)
+    sp = set_option(pipeline_config.run_sp)
+    fold = set_option(pipeline_config.fold_candidates)
+    speg = set_option(pipeline_config.run_prep_speg)
+    fetch = set_option(pipeline_config.run_prep_fetch)
+    ddplan_sp = set_option(pipeline_config.run_sp_ddplan)
+    dedisp_from_ddplan = set_option(pipeline_config.run_dedisp_from_ddplan)
+    rfifind = set_option(pipeline_config.run_rfifind)
 
     #get only the file name
     fname = fil.rstrip('.fil')
@@ -243,17 +249,6 @@ if __name__ == '__main__':
         #run prepsubband plan output by ddplan
         print('Dedispersing from a dedisp_<filename>.py script')
         run_dedisp_from_ddplan(fname)
-
-    if prepsub:
-        # run prepsubband based on ddplan/coherent_ddplan defined in config
-        print('Running prepsubband based on ddplan/coherent_ddplan defined in config')
-        if coherent:
-            dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
-            dmlist.append(0)
-        else:
-            dmlist = [i for i in pipeline_config.dm_set if (i < source_dm+20)&(i > source_dm-20)]
-        for dm in dmlist:
-            run_prepsubband(fname,tsamp,dm,source_dm,coherent)
 
     #run fft
     if fft:
