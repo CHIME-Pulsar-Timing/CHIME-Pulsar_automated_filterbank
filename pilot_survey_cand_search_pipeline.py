@@ -189,7 +189,6 @@ if __name__ == '__main__':
         os.chdir(slurm)
 
     sk_mad = pipeline_config.run_sk_mad
-    coherent = pipeline_config.use_coherent_ddplan
     fft = pipeline_config.run_fft
     rednoise = pipeline_config.rednoise
     zaplist = pipeline_config.fftzaplist
