@@ -1,12 +1,15 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=03:00:00
-#SBATCH --mem=12GB
+#SBATCH --time=00:10:00
+#SBATCH --mem=256M
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
+#SBATCH --mail-user=kcrowter@phas.ubc.ca
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
 #1 is number of splits
 #2 is DM
 #3 is filterbank file
