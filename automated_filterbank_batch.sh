@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=02:00:00
-#SBATCH --mem=512M
+#SBATCH --time=00:10:00
+#SBATCH --mem=256M
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
@@ -27,6 +27,7 @@ AFP=$4
 #PULSAR=$(echo "$3" | cut -f 1 -d '.')
 # KC will need to figure out the file movement better but for now:
 FN=${3%.fil}
+echo "Setting tmp dir to /home/kcrowter/scratch/survey/$FN"
 SLURM_TMPDIR="/home/kcrowter/scratch/survey/$FN"
 #SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
 #SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
