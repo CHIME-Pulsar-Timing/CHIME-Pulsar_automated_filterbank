@@ -91,7 +91,7 @@ if test -f "$3"; then
 	#mkdir $FN
     #fi
     #cp -r ${SLURM_TMPDIR}/* $FN
-    cp -r ${SLURM_TMPDIR}/* .
+    #cp -r ${SLURM_TMPDIR}/* .  # KC commented out while reset SLURM_TMPDIR
     #clean up
-    rm -r ${SLURM_TMPDIR}
+    #rm -r ${SLURM_TMPDIR}  # KC commented out while reset SLURM_TMPDIR
 fi
