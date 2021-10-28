@@ -26,7 +26,7 @@ AFP=$4
 #********************THIS IS THE LAZY WAY OUT!!!
 #PULSAR=$(echo "$3" | cut -f 1 -d '.')
 # KC will need to figure out the file movement better but for now:
-FN=S{3%.fil}
+FN=${3%.fil}
 SLURM_TMPDIR="/home/kcrowter/scratch/survey/$FN"
 #SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
 #SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
