@@ -27,38 +27,25 @@ AFP=$4
 #PULSAR=$(echo "$3" | cut -f 1 -d '.')
 # KC will need to figure out the file movement better but for now:
 FN=${3%.fil}
-SLURM_TMPDIR="/home/kcrowter/scratch/survey/$FN"
+#SLURM_TMPDIR="/home/kcrowter/scratch/survey/$FN"
 #SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
 #SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
 #mkdir -p $SLURM_TMPDIR
 #SLURM_JOB_ID=1
 if test -f "$3"; then
-    if [ $1 -gt 1 ]
-    then
-        OUT=`python $AFP/split_filterbank.py $1 $3 ${SLURM_TMPDIR}`
-    else
-        OUT=$3
-        cp -d $3 ${SLURM_TMPDIR}
-    fi
-    i=0
-    for FIL in $OUT;
-    do
-        echo $FIL
-        SPFILES="${SLURM_TMPDIR}/$i"
-        if [ ! -d $SPFILES ]; then
-            mkdir $SPFILES
-        fi
-        FILFILE="${SLURM_TMPDIR}/$FIL"
-        mv $FILFILE $SPFILES
-        #copy the killfile into the folder
-        #run pipeline and prep_fetch prep spegID
-	#don't run sk_mad
+  FIL=$3
+  TMP_OUTDIR=${SLURM_TMPDIR}/0
+  mkdir ${TMP_OUTDIR}
+  cp -d ${FIL} ${TMP_OUTDIR}
+  cp ${FN}_rfifind* ${TMP_OUTDIR}
+  cp dedisp_${FN}.py ${TMP_OUTDIR}
+
 	n=0
 		#basically try catch
 		until [ "$n" -ge 1 ]
 		do
 			#python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
-			python $AFP/pilot_survey_cand_search_pipeline.py --dm $2 --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
+			python $AFP/pilot_survey_cand_search_pipeline.py --dm $2 --fil $FIL --slurm ${TMP_OUTDIR} && break
 			n=$((n+1))
 			sleep 15
 			#if it fails, lets copy all the things to my scratch directory then exit with error code
@@ -71,19 +58,19 @@ if test -f "$3"; then
 			exit 1
 		done
         # KC commented out for testing, uncomment later
+        # . . . I'm not sure you need to remove the stuff
         #remove the extra fil files
-        #rm "$SPFILES/$FIL"
-        #rm "$SPFILES/"*sk_mad.fil
+        #rm ${TMP_OUTDIR}/$FIL  #KC . . . don't think you need to remove stuff?
+        #rm ${TMP_OUTDIR}/*sk_mad.fil  #KC . . . don't think you need to remove stuff?
         #tarball the .dat files
-        #tar -czf "$SPFILES/${FIL}_dat.tar" -C "$SPFILES" *.dat
+        tar -czf ${TMP_OUTDIR}/${FIL}_dat.tar -C ${TMP_OUTDIR} *.dat
         #tarball the infs and singlepulse files
         #tar -czf "$SPFILES/${FIL}_singlepulse.tar" -C "$SPFILES" *.singlepulse
-        #tar -cff "$SPFILES/${FIL}_inf.tar" -C "$SPFILES" *DM*.inf
-        #rm "$SPFILES"/*DM*.inf
-        #rm "$SPFILES"/*DM*.singlepulse
-        #rm "$SPFILES"/*.dat
-        ((i=i+1))
-    done
+        tar -cff ${TMP_OUTDIR}/${FIL}_inf.tar -C ${TMP_OUTDIR} *DM*.inf
+        #rm ${TMP_OUTDIR}/*DM*.inf  #KC . . . don't think you need to remove stuff?
+        #rm "$SPFILES"/*DM*.singlepulse  #KC . . . don't think you need to remove stuff?
+        #rm ${TMP_OUTDIR}/*.dat  #KC . . . don't think you need to remove stuff?
+
     #uncomment this code if you want to make a folder and shove everything in there, if you're using process_all_fil.sh, it already makes folder for you.
     #now copy all the files back
     #if [ ! -d $3 ]; then
@@ -91,7 +78,7 @@ if test -f "$3"; then
 	#mkdir $FN
     #fi
     #cp -r ${SLURM_TMPDIR}/* $FN
-    #cp -r ${SLURM_TMPDIR}/* .  # KC commented out while reset SLURM_TMPDIR
+    cp -r ${SLURM_TMPDIR}/* .  # KC commented out while reset SLURM_TMPDIR
     #clean up
     #rm -r ${SLURM_TMPDIR}  # KC commented out while reset SLURM_TMPDIR
 fi
