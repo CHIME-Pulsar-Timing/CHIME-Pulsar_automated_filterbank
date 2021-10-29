@@ -58,18 +58,18 @@ if test -f "$3"; then
 			exit 1
 		done
         # KC commented out for testing, uncomment later
-        # . . . I'm not sure you need to remove the stuff
+        # Need to remove everything you don't want copied back
         #remove the extra fil files
-        #rm ${TMP_OUTDIR}/$FIL  #KC . . . don't think you need to remove stuff?
-        #rm ${TMP_OUTDIR}/*sk_mad.fil  #KC . . . don't think you need to remove stuff?
+        #rm ${TMP_OUTDIR}/$FIL
+        #rm ${TMP_OUTDIR}/*sk_mad.fil
         #tarball the .dat files
         tar -czf ${TMP_OUTDIR}/${FIL}_dat.tar -C ${TMP_OUTDIR} *.dat
+        rm ${TMP_OUTDIR}/*.dat
         #tarball the infs and singlepulse files
         #tar -czf "$SPFILES/${FIL}_singlepulse.tar" -C "$SPFILES" *.singlepulse
         tar -cff ${TMP_OUTDIR}/${FIL}_inf.tar -C ${TMP_OUTDIR} *DM*.inf
-        #rm ${TMP_OUTDIR}/*DM*.inf  #KC . . . don't think you need to remove stuff?
-        #rm "$SPFILES"/*DM*.singlepulse  #KC . . . don't think you need to remove stuff?
-        #rm ${TMP_OUTDIR}/*.dat  #KC . . . don't think you need to remove stuff?
+        rm ${TMP_OUTDIR}/*DM*.inf
+        #rm "$SPFILES"/*DM*.singlepulse
 
     #uncomment this code if you want to make a folder and shove everything in there, if you're using process_all_fil.sh, it already makes folder for you.
     #now copy all the files back
