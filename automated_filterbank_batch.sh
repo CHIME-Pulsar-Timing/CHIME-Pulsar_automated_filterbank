@@ -37,8 +37,8 @@ if test -f "$3"; then
   TMP_OUTDIR=${SLURM_TMPDIR}/0
   mkdir ${TMP_OUTDIR}
   cp -d ${FIL} ${TMP_OUTDIR}
-  cp ${FN}_rfifind* ${TMP_OUTDIR}
-  cp dedisp_${FN}.py ${TMP_OUTDIR}
+  cp 0/${FN}_rfifind* ${TMP_OUTDIR}
+  cp 0/dedisp_${FN}.py ${TMP_OUTDIR}
 
 	n=0
 		#basically try catch
