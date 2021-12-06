@@ -53,7 +53,7 @@ do
             echo "submitting FETCH job for $PULSAR"
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-            sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -a -i $PULSAR
+            $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -a -i $PULSAR
 	    fi
     fi
 

@@ -28,17 +28,19 @@ def run_sk_mad(fname,fil):
     return fnamenew
 
 def run_ddplan(fname,dm):
-    if dm>20.1:
-        dml=dm-20
+    if dm>10.1:
+        dml=dm-10
     else:
         dml=0
-    dmh=dm+20
+    dmh=dm+10
+    dml = 20
+    dmh = 50
     #run the ddplan in my current directory, it's got the rfi masking included
     import pathlib
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
-    ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
+    ddplan_command = "python %s/DDplan.py -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(dm,path,dml,dmh,fname,fname)
     try:
         run_ddplan = subprocess.check_call([ddplan_command],shell=True)
         #run_ddplan.wait()
@@ -126,7 +128,7 @@ def run_ffa(fname):
         run_ffa_cmd.wait()
 
 def run_sp(fname):
-    sp_command = 'single_pulse_search.py %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py -b %s*.dat' %(fname)
     failed=True
     try:
         run_sp_cmd = subprocess.check_call([sp_command],shell=True)

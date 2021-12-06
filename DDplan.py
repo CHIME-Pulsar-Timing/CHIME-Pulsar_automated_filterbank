@@ -431,14 +431,14 @@ for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in zip(dDMs, dsubDMs, dm
             datdownsamp = 2
             if downsamp < 2: subdownsamp = datdownsamp = 1
             # First create the subbands
-            myexecute("prepsubband -sub -subdm %.2f -nsub %d -downsamp %d -mask %s -o %s %s" %
+            myexecute("prepsubband -ncpus 4 -sub -subdm %.2f -nsub %d -downsamp %d -mask %s -o %s %s" %
                       (subDM, nsub, subdownsamp, basename+'_rfifind.mask' , basename, rawfiles))
             # And now create the time series
             subnames = basename+"_DM%.2f.sub[0-9]*"%subDM
-            myexecute("prepsubband -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -o %s %s" %
+            myexecute("prepsubband -ncpus 4 -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -o %s %s" %
                       (loDM, dDM, dmspercall, datdownsamp, basename+'_rfifind.mask' , basename, subnames))
         else:
-            myexecute("prepsubband -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -o %s %s" %
+            myexecute("prepsubband -ncpus 4 -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -o %s %s" %
                       (nsub, loDM, dDM, dmspercall, downsamp, basename+'_rfifind.mask' , basename, rawfiles))
 """
     
