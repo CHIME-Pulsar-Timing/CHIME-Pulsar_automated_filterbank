@@ -33,14 +33,12 @@ def run_ddplan(fname,dm):
     else:
         dml=0
     dmh=dm+10
-    dml = 20
-    dmh = 50
     #run the ddplan in my current directory, it's got the rfi masking included
     import pathlib
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
-    ddplan_command = "python %s/DDplan.py -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(dm,path,dml,dmh,fname,fname)
+    ddplan_command = "python %s/DDplan.py -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dm,dml,dmh,fname,fname)
     try:
         run_ddplan = subprocess.check_call([ddplan_command],shell=True)
         #run_ddplan.wait()
