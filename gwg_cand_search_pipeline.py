@@ -32,6 +32,8 @@ def run_ddplan(fname,dm):
         dml=dm-20
     else:
         dml=0
+    #dml = 5
+    #dmh = dm
     dmh=dm+20
     #run the ddplan in my current directory, it's got the rfi masking included
     import pathlib
