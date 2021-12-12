@@ -29,6 +29,8 @@ do
                     echo $FP
                     echo "$FIL never ran FETCH"
                     FETCH=true
+		else
+		    echo "$FIL finished everything nothing to see here..."
                 fi
             else
                 echo "$FIL never finished running single_pulse_search.py"
@@ -56,7 +58,7 @@ do
             sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -a -i $PULSAR
 	    fi
     fi
-
+    
     BATCH=false
     FETCH=false
 done

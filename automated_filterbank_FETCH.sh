@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=def-istairs
+#SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
 #SBATCH --time=16:00:00
 #SBATCH --mem=8GB
