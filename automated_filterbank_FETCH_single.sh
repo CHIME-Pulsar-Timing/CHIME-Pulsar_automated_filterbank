@@ -2,7 +2,7 @@
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
 #SBATCH --time=2:00:00
-#SBATCH --mem=8GB
+#SBATCH --mem=4GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=fetch
 #SBATCH --output=%x-%j.out
@@ -26,7 +26,7 @@ do
 done
 AP=$(readlink -f $MY_PATH)
 #lets find all directories where we've run prep_fetch
-PROCESSED=$(find $AP -name 'cands256.csv' -printf '%h\n' | sort -u)
+PROCESSED=$(find $AP -name 'cands128.csv' -printf '%h\n' | sort -u)
 
 for CAND_PATH in $PROCESSED;
 do

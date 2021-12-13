@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=16:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mem=4GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -57,12 +57,12 @@ if test -f "$3"; then
 			sleep 15
 			#if it fails, lets copy all the things to my scratch directory then exit with error code
 			PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-			ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
-			echo "copying error files to ${ERRORS}"
-			df -h
-			mkdir -p $ERRORS
-			   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
-			exit 1
+			#ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
+			#echo "copying error files to ${ERRORS}"
+			#df -h
+			#mkdir -p $ERRORS
+			#   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
+			#exit 1
 		done 
         #remove the extra fil files
         rm "$SPFILES/$FIL"
@@ -87,3 +87,4 @@ if test -f "$3"; then
     #clean up
     rm -r ${SLURM_TMPDIR}
 fi
+exit 0
