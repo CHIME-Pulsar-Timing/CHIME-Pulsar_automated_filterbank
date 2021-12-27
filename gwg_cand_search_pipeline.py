@@ -126,7 +126,8 @@ def run_ffa(fname):
         run_ffa_cmd.wait()
 
 def run_sp(fname):
-    sp_command = 'single_pulse_search.py -b %s*.dat' %(fname)
+    #I set -m to 300, but I don't think I need 300 because it's in bins
+    sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
     failed=True
     try:
         run_sp_cmd = subprocess.check_call([sp_command],shell=True)

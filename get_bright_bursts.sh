@@ -25,4 +25,7 @@ do
             echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
         fi
     done < $RESULT_FILE
+    #once it has finished everything, tar all the files up
+    tar -zcvf $RESULT_PATH/../filfiles.tar.gz $RESULT_PATH/../*.fil
+    rm $RESULT_PATH/../*.fil
 done
