@@ -75,7 +75,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
     from presto import filterbank as fb
     from presto import rfifind
     #calculate the filterbank length required due to dispersion times 2 for plotting purposes
-    filterbank_len=4.15*1000*(4.6875e-6)*dm*2
+    filterbank_len=(4.15/1000)*dm*2
     fil = FilterbankFile(filfile,mode='read')
     tsamp = float(fil.header['tsamp'])
     burst_sample = burst_time/tsamp
@@ -104,7 +104,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
     data.data = data_masked        
     '''
     #subband
-    data.subband(subband,subdm=dm,padval='mean')
+    data.subband(subband,subdm=dm,padval='median')
     #downsample
     #find the highest value of power of 2
     data.downsample(int(downsamp))
