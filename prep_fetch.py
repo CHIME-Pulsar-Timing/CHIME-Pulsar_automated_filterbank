@@ -9,7 +9,7 @@ def prep_fetch_csv(filfile,rank=1):
     #get only rank lower than the rank
     spegs = list([speg for speg in spegs if (speg.group_rank<=rank)&(speg.group_rank>0)])
     #create the subband 256 files
-    create_cands(spegs,256,filfile)
+    #create_cands(spegs,256,filfile)
     #create the subband 128 files
     create_cands(spegs,128,filfile)
 

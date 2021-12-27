@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=2:00:00
-#SBATCH --mem=8GB
+#SBATCH --time=4:00:00
+#SBATCH --mem=4GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=fetch
 #SBATCH --output=%x-%j.out
@@ -26,16 +26,12 @@ do
 done
 AP=$(readlink -f $MY_PATH)
 #lets find all directories where we've run prep_fetch
-PROCESSED=$(find $AP -name 'cands256.csv' -printf '%h\n' | sort -u)
+PROCESSED=$(find $AP -name 'cands128.csv' -printf '%h\n' | sort -u)
 
 for CAND_PATH in $PROCESSED;
 do
     FP=cands256.csv
-    DATA=data/
     cd $CAND_PATH
-    if [ ! -d $DATA ]; then
-        mkdir $DATA
-    fi
     #candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP --plot --fout $DATA
     #don't do predict as we don't have GPU allocation... this can be done in seperate script
     #predict.py --data_dir $DATA --model a
@@ -49,7 +45,12 @@ do
         candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a
     fi
+    #once it has finished everything, tar all the files up
+    tar -zcvf filfiles.tar.gz *.fil
+    rm *.fil
+    #combine the results if we have split things
     cd $AP
     echo $CAND_PATH >> combined_results.csv
     cat "$CAND_PATH/${PLOT}"results_*.csv >> combined_results.csv
+
 done
