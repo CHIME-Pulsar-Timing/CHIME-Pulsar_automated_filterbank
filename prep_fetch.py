@@ -20,9 +20,9 @@ def create_cands(spegs,downsamp,filfile):
             if speg.peak_SNR>5.5:
                 #boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
                 boxcar_w=0
-                fn,peak_time=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,downsamp)
+                fn,width,start=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,downsamp)
                 #fetch takes log2 of the downfact
-                writer.writerow([fn,speg.peak_SNR,peak_time,speg.peak_DM,boxcar_w,fn])
+                writer.writerow([fn,speg.peak_SNR,start,speg.peak_DM,np.log2(width),fn])
 
 #copied from waterfaller.py
 def maskfile(maskfn, data, start_bin, nbinsextra,extra_mask):    
@@ -60,7 +60,7 @@ def get_mask(rfimask, startsamp, N):
         mask[blocknums==blocknum] = blockmask
     return mask.T
 
-def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
+def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=8):
     '''
     filfile: string input to filterbank filename
     filterbank_len: half the time length for filterbank file
@@ -75,12 +75,15 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
     from presto import filterbank as fb
     from presto import rfifind
     #calculate the filterbank length required due to dispersion times 2 for plotting purposes
-    filterbank_len=(4.15/1000)*dm*2
+    filterbank_len=((4.15/1000)*dm*10)
+    #start it a bit later to prevent errors
+    # start_time = (4.15/1000)*(dm+50)*2
     fil = FilterbankFile(filfile,mode='read')
     tsamp = float(fil.header['tsamp'])
     burst_sample = burst_time/tsamp
     total_samples = fil.nspec
-    nsamp = filterbank_len/tsamp
+    #the downsamp is the amount of boxcar widths
+    nsamp = (filterbank_len/tsamp)+boxcar
     if burst_sample<nsamp:
         #then there hasn't been enough time elapsed for this filterbank length
         nsamp=burst_sample
@@ -98,20 +101,20 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
     nbinsextra = nsamp*2
     extra_mask=None
     data, masked_chans = maskfile(maskfn, my_spec, start_bin, nbinsextra,extra_mask)
-    '''
-    data_masked = np.ma.masked_array(data.data)
-    data_masked[masked_chans] = np.ma.masked
-    data.data = data_masked        
-    '''
     #subband
     data.subband(subband,subdm=dm,padval='median')
+    #add padding at start
+    # my_spec_data = data.data
+    # medians = np.median(my_spec_data,axis=1)
+    # pad_samps = int(start_time/tsamp)+1
+    # pad_data = np.tile(medians,(pad_samps,1)).T
+    # new_data = np.concatenate((pad_data,my_spec_data),axis=1)
+    # data.data = new_data
+    # data.numspectra = new_data.shape[1]
     #downsample
-    #find the highest value of power of 2
     data.downsample(int(downsamp))
     #may need to dedisperse
-
     my_spec = data
-    
     my_spec = my_spec.scaled(False)
     #gotta resolve clipping issue
     #move all negative numbers to positive and scale if it's going to get clipped 
@@ -133,7 +136,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,downsamp=32,subband=256):
 
     filename=filfile.rstrip('.fil')+'_'+str(float(burst_sample*tsamp))+'_sb_'+str(int(subband))+'.fil'
     fb.create_filterbank_file(filename,fil.header,spectra=my_spec.data.T,nbits=fil.header['nbits'])    
-    return filename,filterbank_len
+    return filename,nsamp/downsamp,filterbank_len
     
 if __name__=='__main__':
     prep_fetch_csv(sys.argv[1])
