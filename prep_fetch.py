@@ -21,7 +21,7 @@ def create_cands(spegs,subband,filfile,fb_len=0):
         for speg in spegs:
             if speg.peak_SNR>5.5:
                 #boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
-                boxcar_w=0
+                # boxcar_w=0
                 fn,width,start=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,subband,downsamp=1,fb_len=fb_len)
                 #fetch takes log2 of the downfact
                 writer.writerow([fn,speg.peak_SNR,start,speg.peak_DM,np.log2(width),fn])
@@ -85,7 +85,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=1,
     if fb_len!=0:
         filterbank_len=((4.15/1000)*dm)+fb_len
     else:
-        filterbank_len=((4.15/1000)*dm)*tsamp*100*boxcar
+        filterbank_len=((4.15/1000)*dm)+tsamp*10*boxcar
     burst_sample = burst_time/tsamp
     total_samples = fil.nspec
     #the downsamp is the amount of boxcar widths

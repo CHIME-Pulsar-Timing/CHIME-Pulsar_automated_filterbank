@@ -42,7 +42,7 @@ do
             mkdir $PLOT
         fi
         candmaker.py --frequency_size 128 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
-        predict.py --data_dir $PLOT --model a
+        # predict.py --data_dir $PLOT --model a
         #do the 1.5 second one for long timescales
         PLOT=nsub_128_1.5/
         FP128=cands128_1.5.csv
@@ -50,15 +50,14 @@ do
             mkdir $PLOT
         fi
         candmaker.py --frequency_size 128 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
-        predict.py --data_dir $PLOT --model a
+        # predict.py --data_dir $PLOT --model a
 
     fi
     #once it has finished everything, tar all the files up
-    tar -zcvf filfiles.tar.gz *.fil
-    rm *.fil
+    # tar -zcvf filfiles.tar.gz *.fil
+    # rm *.fil
     #combine the results if we have split things
-    cd $AP
-    echo $CAND_PATH >> combined_results.csv
-    cat "$CAND_PATH/${PLOT}"results_*.csv >> combined_results.csv
-
+    # cd $AP
+    # echo $CAND_PATH >> combined_results.csv
+    # cat "$CAND_PATH/${PLOT}"results_*.csv >> combined_results.csv
 done
