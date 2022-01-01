@@ -11,16 +11,18 @@ def prep_fetch_csv(filfile,rank=1):
     #create the subband 256 files
     #create_cands(spegs,256,filfile)
     #create the subband 128 files
-    create_cands(spegs,128,filfile)
-
-def create_cands(spegs,downsamp,filfile):
-    with open('cands'+str(int(downsamp))+'.csv','w',newline='') as cands:
+    create_cands(spegs,128,filfile,1.5)
+    create_cands(spegs,128,filfile,0)
+    # create_cands(spegs,128,filfile,0.5)
+    # create_cands(spegs,128,filfile,0.2)
+def create_cands(spegs,subband,filfile,fb_len=0):
+    with open('cands'+str(int(subband))+'_'+str(fb_len)+'.csv','w',newline='') as cands:
         writer=csv.writer(cands,delimiter=',')
         for speg in spegs:
             if speg.peak_SNR>5.5:
                 #boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
                 boxcar_w=0
-                fn,width,start=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,downsamp)
+                fn,width,start=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,subband,downsamp=1,fb_len=fb_len)
                 #fetch takes log2 of the downfact
                 writer.writerow([fn,speg.peak_SNR,start,speg.peak_DM,np.log2(width),fn])
 
@@ -60,7 +62,7 @@ def get_mask(rfimask, startsamp, N):
         mask[blocknums==blocknum] = blockmask
     return mask.T
 
-def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=8):
+def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=1,fb_len=1):
     '''
     filfile: string input to filterbank filename
     filterbank_len: half the time length for filterbank file
@@ -75,15 +77,19 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=8)
     from presto import filterbank as fb
     from presto import rfifind
     #calculate the filterbank length required due to dispersion times 2 for plotting purposes
-    filterbank_len=((4.15/1000)*dm*10)
     #start it a bit later to prevent errors
     # start_time = (4.15/1000)*(dm+50)*2
+
     fil = FilterbankFile(filfile,mode='read')
     tsamp = float(fil.header['tsamp'])
+    if fb_len!=0:
+        filterbank_len=((4.15/1000)*dm)+fb_len
+    else:
+        filterbank_len=((4.15/1000)*dm)*tsamp*100*boxcar
     burst_sample = burst_time/tsamp
     total_samples = fil.nspec
     #the downsamp is the amount of boxcar widths
-    nsamp = (filterbank_len/tsamp)+boxcar
+    nsamp = (filterbank_len/tsamp)
     if burst_sample<nsamp:
         #then there hasn't been enough time elapsed for this filterbank length
         nsamp=burst_sample
@@ -100,7 +106,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=8)
     start_bin = burst_sample-nsamp
     nbinsextra = nsamp*2
     extra_mask=None
-    data, masked_chans = maskfile(maskfn, my_spec, start_bin, nbinsextra,extra_mask)
+    data, masked_chans = maskfile(maskfn, my_spec, start_bin, nbinsextra, extra_mask)
     #subband
     data.subband(subband,subdm=dm,padval='median')
     #add padding at start
@@ -133,10 +139,10 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=8)
     fil.dt = my_spec.dt
     fil.header['fch1'] = my_spec.freqs[0]
     fil.header['foff'] = np.diff(my_spec.freqs)[0]
-
-    filename=filfile.rstrip('.fil')+'_'+str(float(burst_sample*tsamp))+'_sb_'+str(int(subband))+'.fil'
+    filename=filfile.rstrip('.fil')+'_'+str(float(burst_sample*tsamp))+'_sb_'+str(int(subband))+'_'+str(fb_len)+'.fil'
     fb.create_filterbank_file(filename,fil.header,spectra=my_spec.data.T,nbits=fil.header['nbits'])    
-    return filename,nsamp/downsamp,filterbank_len
+    # import pdb; pdb.set_trace()
+    return filename,nsamp/downsamp/128,filterbank_len
     
 if __name__=='__main__':
     prep_fetch_csv(sys.argv[1])

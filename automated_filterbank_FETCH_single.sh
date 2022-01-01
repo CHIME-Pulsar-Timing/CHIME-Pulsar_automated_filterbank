@@ -26,24 +26,32 @@ do
 done
 AP=$(readlink -f $MY_PATH)
 #lets find all directories where we've run prep_fetch
-PROCESSED=$(find $AP -name 'cands128.csv' -printf '%h\n' | sort -u)
+PROCESSED=$(find $AP -name 'cands128_0.csv' -printf '%h\n' | sort -u)
 
 for CAND_PATH in $PROCESSED;
 do
-    FP=cands256.csv
     cd $CAND_PATH
     #candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP --plot --fout $DATA
     #don't do predict as we don't have GPU allocation... this can be done in seperate script
     #predict.py --data_dir $DATA --model a
     #if we have the second argument then 
     if [ "$ADDITIONAL" = true ] ; then
-        PLOT=nsub_128/
-        FP128=cands128.csv
+        PLOT=nsub_128_0/
+        FP128=cands128_0.csv
         if [ ! -d $PLOT ]; then
             mkdir $PLOT
         fi
-        candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
+        candmaker.py --frequency_size 128 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a
+        #do the 1.5 second one for long timescales
+        PLOT=nsub_128_1.5/
+        FP128=cands128_1.5.csv
+        if [ ! -d $PLOT ]; then
+            mkdir $PLOT
+        fi
+        candmaker.py --frequency_size 128 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
+        predict.py --data_dir $PLOT --model a
+
     fi
     #once it has finished everything, tar all the files up
     tar -zcvf filfiles.tar.gz *.fil
