@@ -15,7 +15,7 @@
 # source ~/anaconda3/etc/profile.d/conda.sh
 #conda activate fetch
 #the following is valid for CC
-# source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
+source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
 #work in absolute paths, CC is weird when launching batch script
 while getopts "ai:" flag
 do
@@ -31,6 +31,7 @@ PROCESSED=$(find $AP -name 'cands128_0.csv' -printf '%h\n' | sort -u)
 for CAND_PATH in $PROCESSED;
 do
     cd $CAND_PATH
+    tar -xzf filfiles.tar.gz
     #candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP --plot --fout $DATA
     #don't do predict as we don't have GPU allocation... this can be done in seperate script
     #predict.py --data_dir $DATA --model a
