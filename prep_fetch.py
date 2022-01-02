@@ -85,7 +85,7 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=1,
     if fb_len!=0:
         filterbank_len=((4.15/1000)*dm)+fb_len
     else:
-        filterbank_len=((4.15/1000)*dm)+tsamp*10*boxcar
+        filterbank_len=((4.15/1000)*dm)+tsamp*20*boxcar
     burst_sample = burst_time/tsamp
     total_samples = fil.nspec
     #the downsamp is the amount of boxcar widths
