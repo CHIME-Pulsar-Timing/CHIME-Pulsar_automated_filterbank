@@ -18,7 +18,7 @@ do
     do
         ROOT=$(dirname $RESULT_PATH)
         echo $ROOT
-        if [ $score = "1.0" ]; then
+        if [[ "$probability" != *"e"* ]]; then
             CAND_PATH=$ROOT/$filepath
             CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
             PATH_PNG=$CAND_PATH.png
@@ -26,7 +26,4 @@ do
             echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
         fi
     done < $RESULT_FILE
-    #once it has finished everything, tar all the files up
-    # tar -zcvf $RESULT_PATH/../filfiles.tar.gz $RESULT_PATH/../*.fil
-    # rm $RESULT_PATH/../*.fil
 done
