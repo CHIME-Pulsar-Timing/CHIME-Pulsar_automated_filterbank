@@ -19,7 +19,7 @@ do
         if [[ $probability != "candidate" ]]; then
             ROOT=$(dirname $RESULT_PATH)
             echo $ROOT
-            min=0.1
+            min=0.01
             if [[ "$probability" != *"e"* ]]; then
                 if [ 1 -eq "$(echo "${probability} < ${min}" | bc)" ]; then
                     CAND_PATH=$ROOT/$filepath
