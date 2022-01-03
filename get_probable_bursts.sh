@@ -9,8 +9,8 @@ AP=$(readlink -f $MY_PATH)
 #lets find all directories where we've run prep_fetch
 PROCESSED=$(find $AP -name 'results_a.csv' -printf '%h\n' | sort -u)
 PROCESSED=$(readlink -f $PROCESSED)
-rm positive_bursts.csv
-mkdir -p positive_bursts
+rm probable_bursts.csv
+mkdir -p probable_bursts
 for RESULT_PATH in $PROCESSED;
 do
     RESULT_FILE="$RESULT_PATH/results_a.csv"
@@ -22,8 +22,8 @@ do
             CAND_PATH=$ROOT/$filepath
             CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
             PATH_PNG=$CAND_PATH.png
-            cp $PATH_PNG positive_bursts
-            echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
+            cp $PATH_PNG probable_bursts
+            echo "$CAND_PATH,$probability,$score" >> probable_bursts.csv
         fi
     done < $RESULT_FILE
 done
