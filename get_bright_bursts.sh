@@ -15,7 +15,8 @@ do
     RESULT_FILE="$RESULT_PATH/results_a.csv"
     while IFS=, read -r cand filepath probability score
     do
-        ROOT=$(echo "$RESULT_PATH" | sed 's/nsub_128//')
+        ROOT=$(dirname $RESULT_PATH)
+        echo $ROOT
         if [ $score = "1.0" ]; then
             CAND_PATH=$ROOT/$filepath
             CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
@@ -26,6 +27,6 @@ do
         fi
     done < $RESULT_FILE
     #once it has finished everything, tar all the files up
-    tar -zcvf $RESULT_PATH/../filfiles.tar.gz $RESULT_PATH/../*.fil
-    rm $RESULT_PATH/../*.fil
+    # tar -zcvf $RESULT_PATH/../filfiles.tar.gz $RESULT_PATH/../*.fil
+    # rm $RESULT_PATH/../*.fil
 done
