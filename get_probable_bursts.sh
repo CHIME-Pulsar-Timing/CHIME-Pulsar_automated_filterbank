@@ -16,14 +16,16 @@ do
     RESULT_FILE="$RESULT_PATH/results_a.csv"
     while IFS=, read -r cand filepath probability score
     do
-        ROOT=$(dirname $RESULT_PATH)
-        echo $ROOT
-        if [[ "$probability" != *"e"* ]]; then
-            CAND_PATH=$ROOT/$filepath
-            CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
-            PATH_PNG=$CAND_PATH.png
-            cp $PATH_PNG probable_bursts
-            echo "$CAND_PATH,$probability,$score" >> probable_bursts.csv
+        if [[ $probability != "candidate" ]]; then
+            ROOT=$(dirname $RESULT_PATH)
+            echo $ROOT
+            if [[ "$probability" != *"e"* ]]; then
+                CAND_PATH=$ROOT/$filepath
+                CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
+                PATH_PNG=$CAND_PATH.png
+                cp $PATH_PNG probable_bursts
+                echo "$CAND_PATH,$probability,$score" >> probable_bursts.csv
+            fi
         fi
     done < $RESULT_FILE
 done
