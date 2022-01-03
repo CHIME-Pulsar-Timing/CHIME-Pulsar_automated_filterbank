@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import os
 import csv
-def prep_fetch_csv(filfile,rank=1):
+def prep_fetch_csv(filfile,rank=2):
     #get spegid_python3 speg
     from SPEGID_Python3 import SinglePulseEventGroup
     spegs = np.load('spegs.npy',allow_pickle=1)
@@ -142,7 +142,13 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=1,
     filename=filfile.rstrip('.fil')+'_'+str(float(burst_sample*tsamp))+'_sb_'+str(int(subband))+'_'+str(fb_len)+'.fil'
     fb.create_filterbank_file(filename,fil.header,spectra=my_spec.data.T,nbits=fil.header['nbits'])    
     # import pdb; pdb.set_trace()
-    return filename,nsamp/downsamp/128,filterbank_len
+    #the chunks are min size of 128 samples, this means that if we are less than 128, just round up to 128
+    if (nsamp/downsamp) < 256:
+        width = 2
+    else:
+        width = nsamp/downsamp/128
+    #otherwise do nothing
+    return filename,width,filterbank_len
     
 if __name__=='__main__':
     prep_fetch_csv(sys.argv[1])

@@ -19,12 +19,15 @@ do
         if [[ $probability != "candidate" ]]; then
             ROOT=$(dirname $RESULT_PATH)
             echo $ROOT
+            min=0.1
             if [[ "$probability" != *"e"* ]]; then
-                CAND_PATH=$ROOT/$filepath
-                CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
-                PATH_PNG=$CAND_PATH.png
-                cp $PATH_PNG probable_bursts
-                echo "$CAND_PATH,$probability,$score" >> probable_bursts.csv
+                if [ 1 -eq "$(echo "${probability} < ${min}" | bc)" ]; then
+                    CAND_PATH=$ROOT/$filepath
+                    CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
+                    PATH_PNG=$CAND_PATH.png
+                    cp $PATH_PNG probable_bursts
+                    echo "$CAND_PATH,$probability,$score" >> probable_bursts.csv
+                fi
             fi
         fi
     done < $RESULT_FILE
