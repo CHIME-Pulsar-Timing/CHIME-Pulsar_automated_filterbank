@@ -24,13 +24,20 @@ do
             SP="$SPLIT${PULSAR}"*"singlepulse.ps"
             if [ -f $SP ]; then
                 #now finally check if results has been run
-                FP="${SPLIT}nsub_128/results_a.csv"
-                if [ ! -f $FP ]; then
-                    echo $FP
+                FP="${SPLIT}nsub_128_0/results_a.csv"
+                if [ -f $FP ]; then
+                    FP="${SPLIT}nsub_128_1.5/results_a.csv"
+                    if [ ! -f $FP ]; then
+               	    	echo $FP
+                    	echo "$FIL never ran FETCH"
+                    	FETCH=true
+		    else
+		        echo "$FIL finished everything nothing to see here..."
+		    fi
+		else
+		    echo $FP
                     echo "$FIL never ran FETCH"
                     FETCH=true
-		else
-		    echo "$FIL finished everything nothing to see here..."
                 fi
             else
                 echo "$FIL never finished running single_pulse_search.py"

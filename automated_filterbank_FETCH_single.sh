@@ -12,10 +12,10 @@
 #run FETCH
 
 #the following code is only valid for Adam's personal computer comment out if on CC
-source ~/anaconda3/etc/profile.d/conda.sh
-conda activate fetch
+#source ~/anaconda3/etc/profile.d/conda.sh
+#conda activate fetch
 #the following is valid for CC
-# source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
+source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
 #work in absolute paths, CC is weird when launching batch script
 while getopts "ai:" flag
 do
