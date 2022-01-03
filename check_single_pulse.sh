@@ -29,6 +29,7 @@ do
                     FP="${SPLIT}nsub_128_1.5/results_a.csv"
                     if [ ! -f $FP ]; then
                	    	echo $FP
+			ls -lHd $FIL
                     	echo "$FIL never ran FETCH"
                     	FETCH=true
 		    else
@@ -37,10 +38,12 @@ do
 		else
 		    echo $FP
                     echo "$FIL never ran FETCH"
+		    ls -lHd $FIL
                     FETCH=true
                 fi
             else
                 echo "$FIL never finished running single_pulse_search.py"
+		ls -lHd $FIL
                 BATCH=true
             fi
         done

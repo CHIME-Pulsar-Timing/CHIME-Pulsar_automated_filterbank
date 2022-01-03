@@ -18,15 +18,18 @@ do
     do
         if [[ "$probability" != "probability" ]]; then
             ROOT=$(dirname $RESULT_PATH)
+            min=0.01
             if [[ "$probability" != *"e"* ]]; then
-                CAND_PATH=$ROOT/$filepath
-                CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
-                PATH_PNG=$CAND_PATH.png
-                cp $PATH_PNG probable_bursts
-		echo "copying path:"
-		echo $PATH_PNG
-		echo $probability
-                echo "$CAND_PATH,$probability,$score" >> probable_bursts.csv
+                if [ 1 -eq "$(echo "${probability} > ${min}" | bc)" ]; then
+                    CAND_PATH=$ROOT/$filepath
+                    CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
+                    PATH_PNG=$CAND_PATH.png
+                    cp $PATH_PNG probable_bursts
+		    echo "copying path:"
+	   	    echo $PATH_PNG
+	            echo $probability
+                    echo "$CAND_PATH,$probability,$score" >> probable_bursts.csv
+                fi
             fi
         fi
     done < $RESULT_FILE
