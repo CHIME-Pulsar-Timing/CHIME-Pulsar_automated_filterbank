@@ -12,8 +12,8 @@
 #run FETCH
 
 #the following code is only valid for Adam's personal computer comment out if on CC
-#source ~/anaconda3/etc/profile.d/conda.sh
-#conda activate fetch
+# source ~/anaconda3/etc/profile.d/conda.sh
+# conda activate fetch
 #the following is valid for CC
 source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
 #work in absolute paths, CC is weird when launching batch script
@@ -37,6 +37,7 @@ do
     #predict.py --data_dir $DATA --model a
     #if we have the second argument then 
     if [ "$ADDITIONAL" = true ] ; then
+        #make plots and do a predict for general pulses
         PLOT=nsub_128_0/
         FP128=cands128_0.csv
         if [ ! -d $PLOT ]; then
@@ -44,7 +45,7 @@ do
         fi
         candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a
-        #do the 1.5 second one for long timescales
+        #do the 1 second one for long timescales pulses
         PLOT=nsub_128_1/
         FP128=cands128_1.csv
         if [ ! -d $PLOT ]; then
@@ -52,7 +53,14 @@ do
         fi
         candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a
-
+        #do the small dm_range one for very short timescales pulses
+        PLOT=nsub_128_0_short/
+        FP128=cands128_0.csv
+        if [ ! -d $PLOT ]; then
+            mkdir $PLOT
+        fi
+        candmaker.py --frequency_size 256 --time_size 256 --dm_range 5 --cand_param_file $FP128 --plot --fout $PLOT
+        predict.py --data_dir $PLOT --model a
     fi
     #once it has finished everything, tar all the files up
     tar -zcvf filfiles.tar.gz *.fil
