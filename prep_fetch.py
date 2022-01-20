@@ -11,7 +11,7 @@ def prep_fetch_csv(filfile,rank=2):
     #create the subband 256 files
     #create_cands(spegs,256,filfile)
     #create the subband 128 files
-    create_cands(spegs,128,filfile,1.5)
+    create_cands(spegs,128,filfile,1)
     create_cands(spegs,128,filfile,0)
     # create_cands(spegs,128,filfile,0.5)
     # create_cands(spegs,128,filfile,0.2)
@@ -22,7 +22,7 @@ def create_cands(spegs,subband,filfile,fb_len=0):
             if speg.peak_SNR>5.5:
                 #boxcar_w = np.around(np.log10(speg.peak_downfact)/np.log10(2))
                 # boxcar_w=0
-                fn,width,start=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,subband,downsamp=1,fb_len=fb_len)
+                fn,width,start=prep_fetch_scale_fil(filfile,speg.peak_time,float(speg.peak_DM),speg.peak_downfact,subband=subband,downsamp=1,fb_len=fb_len)
                 #fetch takes log2 of the downfact
                 writer.writerow([fn,speg.peak_SNR,start,speg.peak_DM,np.log2(width),fn])
 
@@ -62,7 +62,7 @@ def get_mask(rfimask, startsamp, N):
         mask[blocknums==blocknum] = blockmask
     return mask.T
 
-def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=1,fb_len=1):
+def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=1,fb_len=0):
     '''
     filfile: string input to filterbank filename
     filterbank_len: half the time length for filterbank file
@@ -83,9 +83,9 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=1,
     fil = FilterbankFile(filfile,mode='read')
     tsamp = float(fil.header['tsamp'])
     if fb_len!=0:
-        filterbank_len=((4.15/1000)*dm)+fb_len
+        filterbank_len=(8.3*1000*dm*400)/(600**3)+5
     else:
-        filterbank_len=((4.15/1000)*dm)+tsamp*20*boxcar
+        filterbank_len=(8.3*1000*dm*400)/(600**3)+tsamp*1000*boxcar
     burst_sample = burst_time/tsamp
     total_samples = fil.nspec
     #the downsamp is the amount of boxcar widths
@@ -143,10 +143,15 @@ def prep_fetch_scale_fil(filfile,burst_time,dm,boxcar=32,subband=256,downsamp=1,
     fb.create_filterbank_file(filename,fil.header,spectra=my_spec.data.T,nbits=fil.header['nbits'])    
     # import pdb; pdb.set_trace()
     #the chunks are min size of 128 samples, this means that if we are less than 128, just round up to 128
-    if (nsamp/downsamp) < 256:
+    if fb_len==0:
+        width_box = boxcar*5
+    else:
+        #for 1 seconds of width, this gets the really long bursts
+        width_box = fb_len/tsamp
+    if (width_box/downsamp) < 256:
         width = 2
     else:
-        width = nsamp/downsamp/128
+        width = width_box/downsamp/128
     #otherwise do nothing
     return filename,width,filterbank_len
     

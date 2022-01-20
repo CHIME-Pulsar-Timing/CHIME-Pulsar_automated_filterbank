@@ -45,8 +45,8 @@ do
         candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a
         #do the 1.5 second one for long timescales
-        PLOT=nsub_128_1.5/
-        FP128=cands128_1.5.csv
+        PLOT=nsub_128_1/
+        FP128=cands128_1.csv
         if [ ! -d $PLOT ]; then
             mkdir $PLOT
         fi
