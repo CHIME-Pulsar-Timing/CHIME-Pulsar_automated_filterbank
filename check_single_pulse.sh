@@ -26,7 +26,7 @@ do
                 #now finally check if results has been run
                 FP="${SPLIT}nsub_128_0/results_a.csv"
                 if [ -f $FP ]; then
-                    FP="${SPLIT}nsub_128_1.5/results_a.csv"
+                    FP="${SPLIT}nsub_128_1/results_a.csv"
                     if [ ! -f $FP ]; then
                	    	echo $FP
 			ls -lHd $FIL

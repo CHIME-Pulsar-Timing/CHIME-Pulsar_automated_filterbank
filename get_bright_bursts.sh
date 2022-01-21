@@ -14,10 +14,10 @@ mkdir -p positive_bursts
 for RESULT_PATH in $PROCESSED;
 do
     RESULT_FILE="$RESULT_PATH/results_a.csv"
+    echo $RESULT_PATH
     while IFS=, read -r cand filepath probability score
     do
         ROOT=$(dirname $RESULT_PATH)
-        echo $ROOT
         if [ $score = "1.0" ]; then
             CAND_PATH=$ROOT/$filepath
             CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')

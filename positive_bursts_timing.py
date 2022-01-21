@@ -77,8 +77,8 @@ def get_burst_dict(csvname):
         burst_str = line.split(',')[0]
         burst_numbers = [float(num) for num in burst_str.split('_')\
                          if num.replace('.', '1').isdigit()]
-        burst_info = burst_numbers[-5:]
-        
+        burst_info = burst_numbers[-6:]
+        print(burst_info)
         if str(int(burst_info[0])) not in burst_dict:
             burst_dict[str(int(burst_info[0]))] = [burst_info[1:]]
         else: burst_dict[str(int(burst_info[0]))].append(burst_info[1:])

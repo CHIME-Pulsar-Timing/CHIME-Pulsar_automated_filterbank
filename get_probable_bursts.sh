@@ -1,8 +1,9 @@
 #!/bin/bash
-while getopts "i:" flag
+while getopts "i:m:" flag
 do
     case "${flag}" in
         i) MY_PATH=$OPTARG;;
+	m) MIN=$OPTARG;;
     esac
 done
 AP=$(readlink -f $MY_PATH)
@@ -18,9 +19,8 @@ do
     do
         if [[ "$probability" != "probability" ]]; then
             ROOT=$(dirname $RESULT_PATH)
-            min=0.01
             if [[ "$probability" != *"e"* ]]; then
-                if [ 1 -eq "$(echo "${probability} > ${min}" | bc)" ]; then
+                if [ 1 -eq "$(echo "${probability} > ${MIN}" | bc)" ]; then
                     CAND_PATH=$ROOT/$filepath
                     CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
                     PATH_PNG=$CAND_PATH.png

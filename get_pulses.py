@@ -19,11 +19,14 @@ with open('extracted_bursts.csv','w') as csv_file:
         if (key=='mean')| (key=='std'):
             continue
         if isinstance(burst_dict[key][0],np.ndarray):
+            print(burst_dict)
             for burst in burst_dict[key]:
                 # writer.writerow([key,burst[0]])
                 # the key is the day, the burst[0] is the timestamp,
                 # first gotta find the file and load up filterbank
                 fb_file = glob.glob('%s_*%s_pow.fil'%(basename,key))
+                print(key)
+                print(basename)
                 if len(fb_file)>1:
                     print('error globbing')
                     sys.exit(1)
