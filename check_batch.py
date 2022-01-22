@@ -28,9 +28,9 @@ with open(SPEG_file,'r') as speg:
                             #we're good, has both fil 0 and 1
                             pass
                         else:
-                            sys.exit(1)
                             success = False
                             print(fil)
+                            sys.exit(1)
                     #repeat the excercise for the 1.fil files
                     if "1.fil" in fil:
                         fil.strip('1.fil')
@@ -40,6 +40,6 @@ with open(SPEG_file,'r') as speg:
                             #we're good, has both fil 0 and 1
                             pass
                         else:
-                            sys.exit(1)
                             success = False
                             print(fil)
+                            sys.exit(1)
