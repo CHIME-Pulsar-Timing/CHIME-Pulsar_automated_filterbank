@@ -11,6 +11,8 @@ PROCESSED=$(find $AP -name 'results_a.csv' -printf '%h\n' | sort -u)
 PROCESSED=$(readlink -f $PROCESSED)
 rm positive_bursts.csv
 mkdir -p positive_bursts
+mkdir -p positive_bursts_short
+
 for RESULT_PATH in $PROCESSED;
 do
     RESULT_FILE="$RESULT_PATH/results_a.csv"
@@ -22,7 +24,16 @@ do
             CAND_PATH=$ROOT/$filepath
             CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
             PATH_PNG=$CAND_PATH.png
-            cp $PATH_PNG positive_bursts
+
+            if [[ $PATH_PNG == *"short"* ]];
+            then
+                # code if found
+                cp $PATH_PNG positive_bursts_short
+            else
+                # code if not found
+                cp $PATH_PNG positive_bursts
+            fi
+
             echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
         fi
     done < $RESULT_FILE

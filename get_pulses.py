@@ -19,14 +19,11 @@ with open('extracted_bursts.csv','w') as csv_file:
         if (key=='mean')| (key=='std'):
             continue
         if isinstance(burst_dict[key][0],np.ndarray):
-            print(burst_dict)
             for burst in burst_dict[key]:
                 # writer.writerow([key,burst[0]])
                 # the key is the day, the burst[0] is the timestamp,
                 # first gotta find the file and load up filterbank
                 fb_file = glob.glob('%s_*%s_pow.fil'%(basename,key))
-                print(key)
-                print(basename)
                 if len(fb_file)>1:
                     print('error globbing')
                     sys.exit(1)
@@ -37,10 +34,8 @@ with open('extracted_bursts.csv','w') as csv_file:
 
 
                 fb_folders = '%s/0'%(fb_basename)
-                print(fb_folders)
                 SPEG_file = '%s/0_SPEG_all.csv'%(fb_folders)
                 mask_file = glob.glob('%s/*.mask'%(fb_folders))
-
                 if len(mask_file)>1:
                     print('error globbing mask')
                     sys.exit(1)
@@ -78,7 +73,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                             peak_time = row[13]
                             SNR = row[14]
                             #import pdb; pdb.set_trace()
-                            if (int(float(peak_time))==int(burst[0])) & (burst[3]==float(SNR)):
+                            if (int(float(peak_time))==int(burst[0])) & (burst[4]==float(SNR)):
                                 success=True
                                 DM = row[12]
                                 peak_downfact = int(float(row[16]))*2
