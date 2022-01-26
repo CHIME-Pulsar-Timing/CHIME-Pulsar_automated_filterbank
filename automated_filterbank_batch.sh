@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=24:00:00
+#SBATCH --time=50:00:00
 #SBATCH --mem=8GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -46,24 +46,24 @@ if test -f "$3"; then
         mv $FILFILE $SPFILES
         #copy the killfile into the folder
         #run pipeline and prep_fetch prep spegID
-	#don't run sk_mad
-	n=0
-		#basically try catch
-		until [ "$n" -ge 1 ]
-		do
-			#python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
-			python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break  
-			n=$((n+1)) 
-			sleep 15
-			#if it fails, lets copy all the things to my scratch directory then exit with error code
-			PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-			#ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
-			#echo "copying error files to ${ERRORS}"
-			#df -h
-			#mkdir -p $ERRORS
-			#   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
-			#exit 1
-		done 
+    #don't run sk_mad
+    n=0
+        #basically try catch
+        until [ "$n" -ge 1 ]
+        do
+            #python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
+            python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
+            n=$((n+1))
+            sleep 15
+            #if it fails, lets copy all the things to my scratch directory then exit with error code
+            PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+            #ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
+            #echo "copying error files to ${ERRORS}"
+            #df -h
+            #mkdir -p $ERRORS
+            #   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
+            #exit 1
+        done
         #remove the extra fil files
         rm "$SPFILES/$FIL"
         rm "$SPFILES/"*sk_mad.fil
@@ -79,8 +79,8 @@ if test -f "$3"; then
     #uncomment this code if you want to make a folder and shove everything in there, if you're using process_all_fil.sh, it already makes folder for you.
     #now copy all the files back
     #if [ ! -d $3 ]; then
-    	#FN=$(echo "$3" | cut -f 1 -d '.')
-	#mkdir $FN
+        #FN=$(echo "$3" | cut -f 1 -d '.')
+    #mkdir $FN
     #fi
     #cp -r ${SLURM_TMPDIR}/* $FN
     cp -r ${SLURM_TMPDIR}/* .
