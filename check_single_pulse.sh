@@ -28,22 +28,22 @@ do
                 if [ -f $FP ]; then
                     FP="${SPLIT}nsub_128_1/results_a.csv"
                     if [ ! -f $FP ]; then
-               	    	echo $FP
-			ls -lHd $FIL
-                    	echo "$FIL never ran FETCH"
-                    	FETCH=true
-		    else
-		        echo "$FIL finished everything nothing to see here..."
-		    fi
-		else
-		    echo $FP
+                        echo $FP
+                        ls -lHd $FIL
+                        echo "$FIL never ran FETCH"
+                        FETCH=true
+                    else
+                        echo "$FIL finished everything nothing to see here..."
+                    fi
+                else
+                    echo $FP
                     echo "$FIL never ran FETCH"
-		    ls -lHd $FIL
+                    ls -lHd $FIL
                     FETCH=true
                 fi
             else
                 echo "$FIL never finished running single_pulse_search.py"
-		ls -lHd $FIL
+                ls -lHd $FIL
                 BATCH=true
             fi
         done
@@ -53,20 +53,20 @@ do
     fi
     #run the a batch for this pulsar, should probably use the base job script... but it's easier to do it this way
     if [ "$RBATCH" = true ]; then
-	    if [ "$BATCH" = true ]; then
+        if [ "$BATCH" = true ]; then
             echo "submitting batch job for $PULSAR"
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
             $SCRIPT_DIR/process_all_fil.sh 1 $DM $FIL
-	    fi
+        fi
     fi
     if [ "$RFETCH" = true ]; then
-	    if [ "$FETCH" = true ]; then
+        if [ "$FETCH" = true ]; then
             echo "submitting FETCH job for $PULSAR"
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
             sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -a -i $PULSAR
-	    fi
+        fi
     fi
     
     BATCH=false
