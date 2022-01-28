@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=4:00:00
+#SBATCH --time=7:00:00
 #SBATCH --mem=4GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=fetch
@@ -45,14 +45,7 @@ do
         fi
         candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a
-        #do the 1 second one for long timescales pulses
-        PLOT=nsub_128_1/
-        FP128=cands128_1.csv
-        if [ ! -d $PLOT ]; then
-            mkdir $PLOT
-        fi
-        candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
-        predict.py --data_dir $PLOT --model a
+
         #do the small dm_range one for very short timescales pulses
         PLOT=nsub_128_0_short/
         FP128=cands128_0.csv
@@ -60,6 +53,15 @@ do
             mkdir $PLOT
         fi
         candmaker.py --frequency_size 256 --time_size 256 --dm_range 5 --cand_param_file $FP128 --plot --fout $PLOT
+        predict.py --data_dir $PLOT --model a
+
+        #do the 1 second one for long timescales pulses
+        PLOT=nsub_128_1/
+        FP128=cands128_1.csv
+        if [ ! -d $PLOT ]; then
+            mkdir $PLOT
+        fi
+        candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a
     fi
     #once it has finished everything, tar all the files up

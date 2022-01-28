@@ -29,10 +29,10 @@ def run_sk_mad(fname,fil):
 
 def run_ddplan(fname,dm):
     if dm>10.1:
-        dml=dm-10
+        dml=dm-20
     else:
         dml=0
-    dmh=dm+10
+    dmh=dm+20
     #run the ddplan in my current directory, it's got the rfi masking included
     import pathlib
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
