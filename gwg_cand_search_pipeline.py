@@ -38,7 +38,10 @@ def run_ddplan(fname,dm):
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
-    ddplan_command = "python %s/DDplan.py -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dm,dml,dmh,fname,fname)
+    ddplan_command = "python %s/DDplan.py -r 1.2 -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dm,dml,dmh,fname,fname)
+    print(ddplan_command)
+    # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
+
     try:
         run_ddplan = subprocess.check_call([ddplan_command],shell=True)
         #run_ddplan.wait()
@@ -128,6 +131,8 @@ def run_ffa(fname):
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
     sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
+    # sp_command = 'single_pulse_search.py -b %s*.dat' %(fname)
+
     failed=True
     try:
         run_sp_cmd = subprocess.check_call([sp_command],shell=True)

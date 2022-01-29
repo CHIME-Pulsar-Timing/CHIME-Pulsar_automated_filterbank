@@ -44,7 +44,7 @@ do
             mkdir $PLOT
         fi
         candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
-        predict.py --data_dir $PLOT --model a
+        predict.py --data_dir $PLOT --model a --probability 0.1
 
         #do the small dm_range one for very short timescales pulses
         PLOT=nsub_128_0_short/
@@ -53,7 +53,7 @@ do
             mkdir $PLOT
         fi
         candmaker.py --frequency_size 256 --time_size 256 --dm_range 5 --cand_param_file $FP128 --plot --fout $PLOT
-        predict.py --data_dir $PLOT --model a
+        predict.py --data_dir $PLOT --model a --probability 0.1
 
         #do the 1 second one for long timescales pulses
         PLOT=nsub_128_1/
@@ -62,7 +62,8 @@ do
             mkdir $PLOT
         fi
         candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
-        predict.py --data_dir $PLOT --model a
+        predict.py --data_dir $PLOT --model a --probability 0.1
+
     fi
     #once it has finished everything, tar all the files up
     tar -zcvf filfiles.tar.gz *.fil
