@@ -23,7 +23,7 @@ do
         cd $FN
         sbatch $AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
         #$AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
-        cd ..	
+        cd ..
     fi
     i=$((i+1))
 done
