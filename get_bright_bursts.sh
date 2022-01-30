@@ -12,7 +12,7 @@ PROCESSED=$(readlink -f $PROCESSED)
 rm positive_bursts.csv
 mkdir -p positive_bursts
 mkdir -p positive_bursts_short
-
+mkdir -p positive_bursts_1
 for RESULT_PATH in $PROCESSED;
 do
     RESULT_FILE="$RESULT_PATH/results_a.csv"
@@ -29,6 +29,9 @@ do
             then
                 # code if found
                 cp $PATH_PNG positive_bursts_short
+	    elif [[ $PATH_PNG == *"nsub_128_1"* ]];
+	    then
+	        cp $PATH_PNG positive_bursts_1
             else
                 # code if not found
                 cp $PATH_PNG positive_bursts

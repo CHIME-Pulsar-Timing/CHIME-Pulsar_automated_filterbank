@@ -3,7 +3,7 @@ import sys
 import os
 import csv
 
-def prep_fetch_csv(filfile,rank=2):
+def prep_fetch_csv(filfile,rank=5):
     #get spegid_python3 speg
     from SPEGID_Python3 import SinglePulseEventGroup
     spegs = np.load('spegs.npy',allow_pickle=1)
