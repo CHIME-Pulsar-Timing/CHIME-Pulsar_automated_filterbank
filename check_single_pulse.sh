@@ -28,7 +28,7 @@ do
                 FP="${SPLIT}nsub_128_0/results_a.csv"
                 if [ ! -f $FP ]; then
                     echo $FP
-                    echo "$FIL never ran FETCH"
+                    echo "$FIL never ran FETCH missing 0"
                     ls -lHd $FIL
                     FETCH=true
                 fi
@@ -37,7 +37,7 @@ do
                 FP="${SPLIT}nsub_128_1/results_a.csv"
                 if [ ! -f $FP ]; then
                     echo $FP
-                    echo "$FIL never ran FETCH"
+                    echo "$FIL never ran FETCH missing 1"
                     ls -lHd $FIL
                     FETCH=true
                 fi
@@ -47,7 +47,7 @@ do
                 if [ ! -f $FP ]; then
                     echo $FP
                     ls -lHd $FIL
-                    echo "$FIL never ran FETCH"
+                    echo "$FIL never ran FETCH missing short"
                     FETCH=true
                 fi
 
