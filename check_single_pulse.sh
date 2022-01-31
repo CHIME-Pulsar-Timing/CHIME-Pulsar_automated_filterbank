@@ -52,7 +52,7 @@ do
                 fi
 
                 if [ "$FETCH" = false ]; then
-                    echo "$FIL finished everything nothing to see here..."
+                    echo "$FIL finished everything nothing to see here..." >> completed.csv
                 fi
 
             else
