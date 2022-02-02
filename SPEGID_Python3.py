@@ -1479,9 +1479,10 @@ for i in range(n_bright_SPEGs):
 print("after merging:")
 print(SPEG_rank - 1)
 
-
-np.save('spegs',all_SPEGs)
-
+all_speg = []
+all_speg.extend(dim_SPEGs)
+all_speg.extend(bright_SPEGs)
+np.save('spegs',all_speg)
 """
 open output files to write the SPEGs/clusters, and write header to both files
 """
