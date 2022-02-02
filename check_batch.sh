@@ -14,7 +14,7 @@ do
         for SPLIT in $SPLITS;
         do
             #just make the file for now
-            touch "$SPLIT${PULSAR}_singlepulse.ps"
+            # touch "$SPLIT${PULSAR}_singlepulse.ps"
             SP="$SPLIT${PULSAR}"*"singlepulse.ps"
             if [ -f $SP ]; then
                 #check that the SPEG file has more than 1 line
