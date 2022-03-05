@@ -18,7 +18,15 @@ fi
 cp -d $FIL $FN
 cd $FN
 jbid_batch=$(sbatch $AFP/automated_filterbank_batch.sh -d $DM -p $FIL -a $AFP)
+#jbid_batch="Submitted batch job 28251101"
+
+#batch job submit string
+jbid_batch=${jbid_batch#*job }
 # $AFP/automated_filterbank_batch.sh -d $DM -a $AFP -p $FIL
 # echo $?
 cd ..
-jbid_fetch=$(sbatch --dependency=afterok$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -a -i $FN)
+sleep 1
+echo "sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -a -i $FN"
+jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -a -i $FN)
+jbid_fetch=${jbid_fetch#*job }
+
