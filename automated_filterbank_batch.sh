@@ -47,9 +47,9 @@ if test -f "$p"; then
     #basically try catch
     until [ "$n" -ge 1 ]
     do
-        # python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #FETCH and SPEGID are slow so lets like ignore that for now
-        python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #for rapid tests, only do rfifind
         # python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --fil $FIL --slurm "${SLURM_TMPDIR}" && break
 
@@ -64,18 +64,20 @@ if test -f "$p"; then
         #   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
         #exit 1
         #remove the extra fil files
-        rm "$SPFILES/$FIL"
-        #remove the .dat files
-        rm "$SPFILES"/*.dat
-        #tarball the infs and singlepulse files
-        tar cf "$SPFILES/${FIL}_singlepulse.tar" "$SPFILES/"*.singlepulse
-        tar cf "$SPFILES/${FIL}_inf.tar" "$SPFILES/"*DM*.inf
-        rm "$SPFILES"/*DM*.inf
-        rm "$SPFILES"/*DM*.singlepulse
-        ((i=i+1))
-        cp -r ${SLURM_TMPDIR}/* .
-        #clean up - not needed on compute canada, but nice to run clean up when on my own computer
-        rm -r ${SLURM_TMPDIR}
-        exit 0
     done
+    rm "$SPFILES/$FIL"
+    #remove the .dat files
+    rm "$SPFILES"/*.dat
+    #tarball the infs and singlepulse files
+    tar cf "$SPFILES/${FIL}_singlepulse.tar" "$SPFILES/"*.singlepulse
+    tar cf "$SPFILES/${FIL}_inf.tar" "$SPFILES/"*DM*.inf
+    rm "$SPFILES"/*DM*.inf
+    rm "$SPFILES"/*DM*.singlepulse
+    cp -r ${SLURM_TMPDIR}/* .
+    #clean up - not needed on compute canada, but nice to run clean up when on my own computer
+    rm -r ${SLURM_TMPDIR}
+    exit 0
 fi
+#didn't find file, throw error
+echo "filterbank file not found"
+exit 1
