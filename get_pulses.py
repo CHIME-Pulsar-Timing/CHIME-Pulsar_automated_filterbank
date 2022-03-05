@@ -8,6 +8,10 @@ import glob
 
 fn = sys.argv[1]
 basename = sys.argv[2]
+if len(sys.argv)>4:
+    nom_DM = float(sys.argv[3])
+else:
+    nom_DM = -1
 burst_dict = pt.get_burst_dict(fn)
 if len(burst_dict) == 0:
     print('No Bursts!')
@@ -75,7 +79,10 @@ with open('extracted_bursts.csv','w') as csv_file:
                             #import pdb; pdb.set_trace()
                             if (int(float(peak_time))==int(burst[0])) & (burst[4]==float(SNR)):
                                 success=True
-                                DM = row[12]
+                                if nom_DM >0:
+                                    DM = nom_DM
+                                else:
+                                    DM = row[12]
                                 peak_downfact = int(float(row[16]))*2
                                 break
                             success=False

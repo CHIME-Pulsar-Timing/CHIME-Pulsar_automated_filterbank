@@ -17,50 +17,45 @@ do
     #strip the extension
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     if [ -d $PULSAR ]; then
-        #lists all the splits in the pulsar's directory
-        SPLITS=$PULSAR/*/
-        for SPLIT in $SPLITS;
-        do
-            SP="$SPLIT${PULSAR}"*"singlepulse.ps"
-            if [ -f $SP ]; then
-                #now finally check if results has been run
-                #Check FETCH 1 has been run
-                FP="${SPLIT}nsub_128_0/results_a.csv"
-                if [ ! -f $FP ]; then
-                    echo $FP
-                    echo "$FIL never ran FETCH missing 0"
-                    ls -lHd $FIL
-                    FETCH=true
-                fi
-
-                #check FETCH 2 has been run
-                FP="${SPLIT}nsub_128_1/results_a.csv"
-                if [ ! -f $FP ]; then
-                    echo $FP
-                    echo "$FIL never ran FETCH missing 1"
-                    ls -lHd $FIL
-                    FETCH=true
-                fi
-
-                #check FETCH 3 has been run
-                FP="${SPLIT}nsub_128_0_short/results_a.csv"
-                if [ ! -f $FP ]; then
-                    echo $FP
-                    ls -lHd $FIL
-                    echo "$FIL never ran FETCH missing short"
-                    FETCH=true
-                fi
-
-                if [ "$FETCH" = false ]; then
-                    echo "$FIL finished everything nothing to see here..." >> completed.csv
-                fi
-
-            else
-                echo "$FIL never finished running single_pulse_search.py"
+        SP="${PULSAR}/"*"singlepulse.ps"
+        if [ -f $SP ]; then
+            #now finally check if results has been run
+            #Check FETCH 1 has been run
+            FP="${PULSAR}/nsub_128_0/results_a.csv"
+            if [ ! -f $FP ]; then
+                echo $FP
+                echo "$FIL never ran FETCH missing 0"
                 ls -lHd $FIL
-                BATCH=true
+                FETCH=true
             fi
-        done
+
+            #check FETCH 2 has been run
+            FP="${PULSAR}/nsub_128_1/results_a.csv"
+            if [ ! -f $FP ]; then
+                echo $FP
+                echo "$FIL never ran FETCH missing 1"
+                ls -lHd $FIL
+                FETCH=true
+            fi
+
+            #check FETCH 3 has been run
+            FP="${PULSAR}/nsub_128_0_short/results_a.csv"
+            if [ ! -f $FP ]; then
+                echo $FP
+                ls -lHd $FIL
+                echo "$FIL never ran FETCH missing short"
+                FETCH=true
+            fi
+
+            if [ "$FETCH" = false ]; then
+                echo "$FIL finished everything nothing to see here..." >> completed.csv
+            fi
+
+        else
+            echo "$FIL never finished running single_pulse_search.py"
+            ls -lHd $FIL
+            BATCH=true
+        fi
     else
         echo "$FIL has no directory"
         BATCH=true
@@ -71,7 +66,8 @@ do
             echo "submitting batch job for $PULSAR"
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-            $SCRIPT_DIR/process_all_fil.sh 1 $DM $FIL
+            #this will send the batch job and after it's done sent the fetch job
+            $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL
         fi
     fi
     if [ "$RFETCH" = true ]; then
