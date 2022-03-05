@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=24:00:00
+#SBATCH --time=8:00:00
 #SBATCH --mem=8GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -35,14 +35,13 @@ module load presto
 # SLURM_JOB_ID=1
 #make sure that $p is a file
 if test -f "$p"; then
+    #rename it FIL
     FIL=$p
-    cp -d $p ${SLURM_TMPDIR}
+    cp -d $FIL ${SLURM_TMPDIR}
     echo $FIL
     if [ ! -d ${SLURM_TMPDIR} ]; then
         mkdir ${SLURM_TMPDIR}
     fi
-    FILFILE="${SLURM_TMPDIR}/$FIL"
-    #copy the killfile into the folder
     n=0
     #basically try catch
     until [ "$n" -ge 1 ]
@@ -66,17 +65,18 @@ if test -f "$p"; then
         #exit 1
         #remove the extra fil files
     done
-    rm "$SPFILES/$FIL"
+    PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+    rm "${SLURM_TMPDIR}"/$FIL
     #remove the .dat files
-    rm "$SPFILES"/*.dat
+    rm "${SLURM_TMPDIR}"/*.dat
     #tarball the infs and singlepulse files
-    tar cf "$SPFILES/${FIL}_singlepulse.tar" "$SPFILES/"*.singlepulse
-    tar cf "$SPFILES/${FIL}_inf.tar" "$SPFILES/"*DM*.inf
-    rm "$SPFILES"/*DM*.inf
-    rm "$SPFILES"/*DM*.singlepulse
+    tar cf "${SLURM_TMPDIR}/${PULSAR}_singlepulse.tar" "${SLURM_TMPDIR}/"*.singlepulse
+    tar cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
+    rm "${SLURM_TMPDIR}"/*DM*.inf
+    rm "${SLURM_TMPDIR}"/*DM*.singlepulse
     cp -r ${SLURM_TMPDIR}/* .
     #clean up - not needed on compute canada, but nice to run clean up when on my own computer
-    rm -r ${SLURM_TMPDIR}
+    # rm -r ${SLURM_TMPDIR}
     exit 0
 fi
 #didn't find file, throw error
