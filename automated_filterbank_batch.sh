@@ -24,15 +24,15 @@ done
 #path to automated filterbank file script locations
 #this is set when you run a batch script by default
 #load the module needed
-# module use /project/6004902/modulefiles
-# module load presto
-#check that the filterbank file exists this prevents accidental deletion of files with the later rm command
+module use /project/6004902/modulefiles
+module load presto
+# check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
-PULSAR=$(echo "$p" | cut -f 1 -d '.')
-SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
-SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
-mkdir -p $SLURM_TMPDIR
-SLURM_JOB_ID=1
+# PULSAR=$(echo "$p" | cut -f 1 -d '.')
+# SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
+# SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
+# mkdir -p $SLURM_TMPDIR
+# SLURM_JOB_ID=1
 #make sure that $p is a file
 if test -f "$p"; then
     FIL=$p
@@ -49,8 +49,9 @@ if test -f "$p"; then
     do
         # python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #FETCH and SPEGID are slow so lets like ignore that for now
-        # python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
-        python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        #for rapid tests, only do rfifind
+        # python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --fil $FIL --slurm "${SLURM_TMPDIR}" && break
 
         n=$((n+1))
         # sleep 15
