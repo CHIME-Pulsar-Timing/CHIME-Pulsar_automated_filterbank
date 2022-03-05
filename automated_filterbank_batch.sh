@@ -52,7 +52,8 @@ if test -f "$p"; then
         #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #for rapid tests, only do rfifind
         # python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --fil $FIL --slurm "${SLURM_TMPDIR}" && break
-
+        # Should never get here. if it does exit with an error
+        exit 1
         n=$((n+1))
         # sleep 15
         #if it fails, lets copy all the things to my scratch directory then exit with error code
