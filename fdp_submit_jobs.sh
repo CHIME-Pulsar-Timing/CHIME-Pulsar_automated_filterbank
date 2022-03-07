@@ -7,5 +7,11 @@ AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 SCRATCH_DIR=$(pwd)
 for FIL in $@
 do
-    sbatch $AFP/fdp.sh $FIL
+    #strip the fil at the end
+    PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+    FDP_fn="${PULSAR}"_fdp.fil
+    if [ ! -f $FDP_fn ]; then
+        echo "submitting job for "${PULSAR}
+        sbatch $AFP/fdp.sh $FIL
+    fi
 done
