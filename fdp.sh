@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=24:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=8GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=fix_dropped
@@ -16,16 +16,14 @@ AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 #comment out on cc
 # SLURM_TMPDIR="/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir"
 SCRATCH_DIR=$(pwd)
-for FIL in $@
-do
-    cp $FIL ${SLURM_TMPDIR}
-    #go to compute node
-    cd ${SLURM_TMPDIR}
-    python $AFP/fdp.py $FIL
-    #come back from compute node
-    cd $SCRATCH_DIR
-    PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-    cp ${SLURM_TMPDIR}/"$PULSAR"_fdp.fil $SCRATCH_DIR
-    #clear tmpdir
-    rm ${SLURM_TMPDIR}/*
-done
+FIL=$1
+cp $FIL ${SLURM_TMPDIR}
+#go to compute node
+cd ${SLURM_TMPDIR}
+python $AFP/fdp.py $FIL
+#come back from compute node
+cd $SCRATCH_DIR
+PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+cp ${SLURM_TMPDIR}/"$PULSAR"_fdp.fil $SCRATCH_DIR
+#clear tmpdir
+rm ${SLURM_TMPDIR}/*
