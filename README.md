@@ -1,7 +1,10 @@
 # Preparing the data
 As of March 2022 we found that there are sometimes dropped packets in filterbank data (see https://bao.chimenet.ca/doc/documents/1624)
 Therefore I have developed a script to correct the dropped packets. _This is reccommended for all observations untill it is fixed up stream_
+
 `fdp_submit_jobs.sh *.fil` will submit a job for each filterbank file. The script expects you to give it all the filterbank files you're interesting in. For example I will do the following to correct observations of J0012+54
+
+
 `fdp_submit_jobs.sh J0012+54*.fil` 
 
 # Setting up your folder structure
@@ -18,6 +21,7 @@ the best way to run is to run the following command, it will submit two jobs per
 
 If for some reason FETCH failed you can run it again with the following command (`check_single_pulse.sh` will check if FETCH ran)
 MAKE SURE YOU HAVE NO MODULES LOADED ON CC. THE SCRIPT WILL LOAD THEM FOR YOU.
+
 
 `check_single_pulses.sh -f` 
 
