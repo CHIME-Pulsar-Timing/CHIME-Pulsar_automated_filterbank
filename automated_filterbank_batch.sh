@@ -26,6 +26,7 @@ done
 #load the module needed
 module use /project/6004902/modulefiles
 module load presto
+module load chime-psr
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 # PULSAR=$(echo "$p" | cut -f 1 -d '.')
@@ -46,7 +47,8 @@ if test -f "$p"; then
     #basically try catch
     until [ "$n" -ge 1 ]
     do
-        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
+        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #FETCH and SPEGID are slow so lets like ignore that for now
         #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #for rapid tests, only do rfifind
