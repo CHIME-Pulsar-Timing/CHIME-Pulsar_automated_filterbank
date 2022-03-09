@@ -9,8 +9,32 @@ import pipeline_config
 from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
 #original GWG pipeline written by Chiamin
-def run_rfifind(fname):
-    rfifind_command = 'rfifind -blocks %d -intfrac 0.4 -clip 4 -ignorechan %s -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,pipeline_config.ignorelist,pipeline_config.ignorelist,fname,fname)
+def run_rfifind(fname,dead_gpus=''):
+    dead_gpu_mask = dead_gpus.split(',')
+    pipeline_config_mask = pipeline_config.ignorelist.split(',')
+    #combine the two masks
+    final_mask = []
+    pipeline_config_mask = list(int(pgm) for pgm in pipeline_config_mask)
+    dead_gpu_mask = list(int(dgm) for dgm in dead_gpu_mask)
+    for dgm in dead_gpu_mask:
+        if dgm in pipeline_config_mask:
+            #do nothing
+            pass
+        else:
+            #if something in the dead gpu mask isn't in the pipe config mask
+            pipeline_config_mask.append(dgm)
+            print('ignoring ',dgm)
+
+    #conver pipeline config mask back into string
+    ignore_chan_string = ''
+    for i,chan in enumerate(pipeline_config_mask):
+        if i==0:
+            ignore_chan_string = str(chan)
+        else:
+            ignore_chan_string = ignore_chan_string+','+str(chan)
+    print('ignoring these channels', ignore_chan_string)
+    rfifind_command = 'rfifind -blocks %d -intfrac 0.4 -clip 4 -ignorechan %s -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,ignore_chan_string,ignore_chan_string,fname,fname)
+
     print(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
@@ -74,6 +98,7 @@ if __name__ == '__main__':
     parser.add_argument('--speg',action='store_true',help='creates the SPEGID files')
     parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
     parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
+    parser.add_argument('--dead_gpu',type=str,help='use this option if you want to input a mask for dead GPUs')
     parser.add_argument('--slurm',type=str,help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
 
     args = parser.parse_args()
@@ -85,6 +110,8 @@ if __name__ == '__main__':
     fetch =args.fetch 
     dedisp = args.dedisp
     rfifind = args.rfifind
+    dead_gpu=args.dead_gpu
+
     slurm=args.slurm
     if slurm:
         os.chdir(slurm)
@@ -107,7 +134,7 @@ if __name__ == '__main__':
 
 
     if rfifind:
-        run_rfifind(fname)
+        run_rfifind(fname,dead_gpu)
     if dedisp:
         #run ddplan
         run_ddplan(fname,source_dm) 
