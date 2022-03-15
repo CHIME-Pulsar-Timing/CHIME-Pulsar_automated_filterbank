@@ -20,23 +20,23 @@ def prep_speg(inffile,fpath=''):
     #find the postion of the 'DM' string
     dtype =[('fn','U200'),('dm',float)]
     unsorted=[]
-    for file in sp_files:
+    for fn in sp_files:
         #parse the fn
-        index=file.find('DM')
-        DM = file[index+2:]
+        index=fn.find('DM')
+        DM = fn[index+2:]
         DM = DM.split('.')
         DM = float(DM[0]+'.'+DM[1])
-        unsorted.append((file,DM))
+        unsorted.append((fn,DM))
     
     #writes the csv file
-    sorted = np.sort(np.array(unsorted,dtype=dtype),order='dm')
+    sorted_arr = np.sort(np.array(unsorted,dtype=dtype),order='dm')
     last_folder=folder.split('/')
     last_folder=last_folder[-1]
     with open(last_folder+'singlepulses.csv','w',newline='') as spegscsv:
         writer=csv.writer(spegscsv,delimiter=',')
         writer.writerow(['DM','SNR','time','sample','downfact'])
-        for file,DM in sorted:
-            with open(file) as csvfile:
+        for fn,DM in sorted_arr:
+            with open(fn) as csvfile:
                 reader=csv.reader(csvfile,delimiter=' ')
                 for i,row in enumerate(reader):
                     row = list(filter(None,row))
