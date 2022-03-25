@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#THE FIRST ARGUMENT SETS THE PERMISSIONS OF THE TARBALL
 set -euo pipefail
 FILFILES=*.fil
 for FIL in $FILFILES;
@@ -14,6 +15,7 @@ do
             tar -cf "${PULSAR}/nsub_128_0.tar" $nsub
             if [ $? -eq 0 ]; then
                 rm -r $nsub
+                chown -R $1 "${PULSAR}/nsub_128_0.tar"
             else
                 echo "tar failed for ${PULSAR}"
             fi
@@ -22,6 +24,7 @@ do
             tar -cf "${PULSAR}/nsub_128_1.tar" $nsub_1
             if [ $? -eq 0 ]; then
                 rm -r $nsub_1
+                chown -R $1 "${PULSAR}/nsub_128_1.tar"
             else
                 echo "tar failed for ${PULSAR}"
             fi
@@ -30,6 +33,7 @@ do
             tar -cf "${PULSAR}/nsub_128_short.tar" $nsub_short
             if [ $? -eq 0 ]; then
                 rm -r $nsub_short
+                chown -R $1 "${PULSAR}/nsub_128_short.tar"
             else
                 echo "tar failed for ${PULSAR}"
             fi
