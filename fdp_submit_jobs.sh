@@ -10,6 +10,7 @@ do
     #strip the fil at the end
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     FDP_fn="${PULSAR}"_fdp.fil
+
     if [ ! -f $FDP_fn ]; then
         echo "submitting job for "${PULSAR}
         sbatch $AFP/fdp.sh $FIL
