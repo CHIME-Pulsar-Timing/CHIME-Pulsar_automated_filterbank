@@ -24,16 +24,16 @@ done
 #path to automated filterbank file script locations
 #this is set when you run a batch script by default
 #load the module needed
-module use /project/6004902/modulefiles
-module load presto
-module load chime-psr
+# module use /project/6004902/modulefiles
+# module load presto
+# module load chime-psr
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
-# PULSAR=$(echo "$p" | cut -f 1 -d '.')
-# SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
-# SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
-# mkdir -p $SLURM_TMPDIR
-# SLURM_JOB_ID=1
+PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
+SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
+SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
+mkdir -p $SLURM_TMPDIR
+SLURM_JOB_ID=1
 #make sure that $p is a file
 if test -f "$p"; then
     #rename it FIL
@@ -47,8 +47,8 @@ if test -f "$p"; then
     #basically try catch
     until [ "$n" -ge 1 ]
     do
-        DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
-        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        # DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
+        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #FETCH and SPEGID are slow so lets like ignore that for now
         #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #for rapid tests, only do rfifind
@@ -78,7 +78,7 @@ if test -f "$p"; then
     rm "${SLURM_TMPDIR}"/*DM*.singlepulse
     cp -r ${SLURM_TMPDIR}/* .
     #clean up - not needed on compute canada, but nice to run clean up when on my own computer
-    # rm -r ${SLURM_TMPDIR}
+    rm -r ${SLURM_TMPDIR}
     exit 0
 fi
 #didn't find file, throw error

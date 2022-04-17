@@ -126,7 +126,7 @@ if "zerodm" in cur_dir:
     t_off = 7
 else:
     print(cur_dir + " no zerodm!")
-    t_off = 2
+    t_off = 0
 
 obs_length = max(spe_DF_full['time']) - t_off
 # print max(pulses0.time)

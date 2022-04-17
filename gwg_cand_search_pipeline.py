@@ -10,20 +10,21 @@ from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
 #original GWG pipeline written by Chiamin
 def run_rfifind(fname,dead_gpus=''):
-    dead_gpu_mask = dead_gpus.split(',')
     pipeline_config_mask = pipeline_config.ignorelist.split(',')
-    #combine the two masks
-    final_mask = []
-    pipeline_config_mask = list(int(pgm) for pgm in pipeline_config_mask)
-    dead_gpu_mask = list(int(dgm) for dgm in dead_gpu_mask)
-    for dgm in dead_gpu_mask:
-        if dgm in pipeline_config_mask:
-            #do nothing
-            pass
-        else:
-            #if something in the dead gpu mask isn't in the pipe config mask
-            pipeline_config_mask.append(dgm)
-            print('ignoring ',dgm)
+    if dead_gpus!='':
+        dead_gpu_mask = dead_gpus.split(',')
+        #combine the two masks
+        final_mask = []
+        pipeline_config_mask = list(int(pgm) for pgm in pipeline_config_mask)
+        dead_gpu_mask = list(int(dgm) for dgm in dead_gpu_mask)
+        for dgm in dead_gpu_mask:
+            if dgm in pipeline_config_mask:
+                #do nothing
+                pass
+            else:
+                #if something in the dead gpu mask isn't in the pipe config mask
+                pipeline_config_mask.append(dgm)
+                print('ignoring ',dgm)
 
     #conver pipeline config mask back into string
     ignore_chan_string = ''
@@ -75,7 +76,7 @@ def run_ddplan(fname,dm):
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
     # sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
-    sp_command = 'single_pulse_search.py %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py -b %s*.dat' %(fname)
     print(sp_command)
     failed=True
     try:
@@ -98,7 +99,7 @@ if __name__ == '__main__':
     parser.add_argument('--speg',action='store_true',help='creates the SPEGID files')
     parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
     parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
-    parser.add_argument('--dead_gpu',type=str,help='use this option if you want to input a mask for dead GPUs')
+    parser.add_argument('--dead_gpu',type=str,default='',help='use this option if you want to input a mask for dead GPUs')
     parser.add_argument('--slurm',type=str,help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
 
     args = parser.parse_args()

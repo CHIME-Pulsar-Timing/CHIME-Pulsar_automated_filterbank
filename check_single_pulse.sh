@@ -15,13 +15,14 @@ FETCH=false
 for FIL in $FILFILES;
 do
     #strip the extension
-    PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+    PULSAR=$(echo "$FIL" | rev | cut -f2- -d '.' | rev)
     if [ -d $PULSAR ]; then
         SP="${PULSAR}/"*"singlepulse.ps"
         if [ -f $SP ]; then
             #now finally check if results has been run
             #Check FETCH 1 has been run
             FP="${PULSAR}/nsub_128_0/results_a.csv"
+            echo $PULSAR
             if [ ! -f $FP ]; then
                 #echo $FP
                 #echo "$FIL never ran FETCH missing 0"
@@ -49,20 +50,20 @@ do
 
             if [ "$FETCH" = false ]; then
                 echo "$FIL finished everything nothing to see here..." >> completed.csv
-	    else
-		#check if cands is empty
-		if [ -s ${PULSAR}/cands128_0.csv ]
-		then
-		    FETCH=true
+        else
+        #check if cands is empty
+        if [ -s ${PULSAR}/cands128_0.csv ]
+        then
+            FETCH=true
                     echo "**** printing cands *****"
-        	    cat "${PULSAR}"/*cands*.csv
-		    echo "****end cands*****"
+                # cat "${PULSAR}"/*cands*.csv
+            echo "****end cands*****"
                     echo "$FIL never ran FETCH"
                     ls -lHd $FIL
-		else
-		    FETCH=false
-		    echo "${PULSAR} - cands file empty"
-		fi
+        else
+            FETCH=false
+            echo "${PULSAR} - cands file empty"
+        fi
             fi
 
         else
@@ -89,7 +90,7 @@ do
             echo "submitting FETCH job for $PULSAR"
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-            sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -a -i $PULSAR
+            $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -a -i $PULSAR
         fi
     fi
     
