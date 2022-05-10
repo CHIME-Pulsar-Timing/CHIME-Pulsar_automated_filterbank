@@ -9,7 +9,7 @@ do
 done
 
 AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-FN=$(echo "$FIL" | cut -f 1 -d '.')
+FN=$(echo "$FIL" | rev | cut -f2- -d '.' | rev)
 #make a new folder and set up to run main pipeline
 if [ ! -d $FN ]; then
     mkdir $FN

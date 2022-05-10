@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=40:00:00
+#SBATCH --time=1:30:00
 #SBATCH --mem=4GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=fetch
@@ -31,6 +31,8 @@ PROCESSED=$(find $AP -name 'cands128_0.csv' -printf '%h\n' | sort -u)
 for CAND_PATH in $PROCESSED;
 do
     cd $CAND_PATH
+    cp -a ./* $SLURM_TMPDIR
+    cd $SLURM_TMPDIR
     if test -f filfiles.tar.gz; then
         tar -xzf filfiles.tar.gz
     fi
@@ -46,7 +48,7 @@ do
         fi
         candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a --probability 0.1
-
+        echo "finished_1"
         #do the small dm_range one for very short timescales pulses
         PLOT=nsub_128_0_short/
         FP128=cands128_0.csv
@@ -55,7 +57,7 @@ do
         fi
         candmaker.py --frequency_size 256 --time_size 256 --dm_range 5 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a --probability 0.1
-
+        echo "finished 2"
         #do the 1 second one for long timescales pulses
         PLOT=nsub_128_1/
         FP128=cands128_1.csv
@@ -64,13 +66,17 @@ do
         fi
         candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
         predict.py --data_dir $PLOT --model a --probability 0.1
-
+        echo "finished 3"
     fi
     #once it has finished everything, tar all the files up
     tar -zcvf filfiles.tar.gz *.fil
     rm *.fil
+    cp -a $SLURM_TMPDIR/* $CAND_PATH/
+    #remove all the fil files
+    rm $CAND_PATH/*.fil
+
     #combine the results if we have split things
-    cd $AP
-    echo $CAND_PATH >> combined_results.csv
-    cat "$CAND_PATH/${PLOT}"results_*.csv >> combined_results.csv
+    # cd $AP
+    # echo $CAND_PATH >> combined_results.csv
+    # cat "$CAND_PATH/${PLOT}"results_*.csv >> combined_results.csv
 done

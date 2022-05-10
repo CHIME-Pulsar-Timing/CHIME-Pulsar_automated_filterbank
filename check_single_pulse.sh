@@ -15,7 +15,7 @@ FETCH=false
 for FIL in $FILFILES;
 do
     #strip the extension
-    PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+    PULSAR=$(echo "$FIL" | rev | cut -f2- -d '.' | rev)
     if [ -d $PULSAR ]; then
         SP="${PULSAR}/"*"singlepulse.ps"
         if [ -f $SP ]; then
