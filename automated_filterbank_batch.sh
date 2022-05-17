@@ -30,8 +30,9 @@ done
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
-SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
-SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
+SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+# SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
+echo $SLURM_TMPDIR
 mkdir -p $SLURM_TMPDIR
 SLURM_JOB_ID=1
 #make sure that $p is a file
