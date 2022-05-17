@@ -9,8 +9,33 @@ import pipeline_config
 from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
 #original GWG pipeline written by Chiamin
-def run_rfifind(fname):
-    rfifind_command = 'rfifind -blocks %d -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,pipeline_config.zaplist,fname,fname)
+def run_rfifind(fname,dead_gpus=''):
+    dead_gpu_mask = dead_gpus.split(',')
+    pipeline_config_mask = pipeline_config.ignorelist.split(',')
+    #combine the two masks
+    final_mask = []
+    pipeline_config_mask = list(int(pgm) for pgm in pipeline_config_mask)
+    dead_gpu_mask = list(int(dgm) for dgm in dead_gpu_mask)
+    for dgm in dead_gpu_mask:
+        if dgm in pipeline_config_mask:
+            #do nothing
+            pass
+        else:
+            #if something in the dead gpu mask isn't in the pipe config mask
+            pipeline_config_mask.append(dgm)
+            print('ignoring ',dgm)
+
+    #conver pipeline config mask back into string
+    ignore_chan_string = ''
+    for i,chan in enumerate(pipeline_config_mask):
+        if i==0:
+            ignore_chan_string = str(chan)
+        else:
+            ignore_chan_string = ignore_chan_string+','+str(chan)
+    print('ignoring these channels', ignore_chan_string)
+    rfifind_command = 'rfifind -blocks %d -intfrac 0.4 -clip 4 -ignorechan %s -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,ignore_chan_string,ignore_chan_string,fname,fname)
+
+    print(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
     except subprocess.CalledProcessError:
@@ -19,13 +44,6 @@ def run_rfifind(fname):
         [print(f) for f in os.listdir('.')]
         sys.exit(1)
 
-
-def run_sk_mad(fname,fil):
-    
-    sk_mad_rfi_excision(fname,fil)
-    fnamenew = str(fname)+'_sk_mad'
-
-    return fnamenew
 
 def run_ddplan(fname,dm):
     #this branch of the pipeline searches from dm = 0 - dm
@@ -38,6 +56,8 @@ def run_ddplan(fname,dm):
     # ignorechan= pipeline_config.ignorechan
     # removed the -c flag
     ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
+    print(ddplan_command)
+    # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
     try:
         run_ddplan = subprocess.check_call([ddplan_command],shell=True)
         #run_ddplan.wait()
@@ -50,83 +70,12 @@ def run_ddplan(fname,dm):
         [print(f) for f in os.listdir('.')]
         sys.exit(1)
 
-def run_prepsubband(fname,tsamp,dm,ddplan,coherent_dm,slurm='',coherent=True):
-    #should replace this with ddplan
-    if coherent:
-        dms, ds, sb = pipeline_config.coherent_ddplan(tsamp, dm, coherent_dm)
-    else:
-        dms, ds, sb = pipeline_config.ddplan(tsamp, dm)
-    
-    prepsubband_command = 'prepsubband -lodm %.2f -dmstep %.2f -numdms 100 -downsamp %d -nsub %d -mask %s_rfifind.mask -o %s %s.fil' %(dm,dms,ds,sb,fname,fname,fname)
-    run_prepsubband_cmd = subprocess.Popen([prepsubband_command],shell=True)
-    run_prepsubband_cmd.wait()
-
-def run_realfft(fname,fil,rednoise=True,zaplist=None):
-
-    datfiles = sorted(glob.glob(str(fname)+'*.dat'))
-    for dat in datfiles:
-
-        realfft_command = 'realfft -disk '+str(dat)
-        run_realfft_cmd = subprocess.Popen([realfft_command],shell=True)
-        run_realfft_cmd.wait()
-
-    fftfiles = sorted(glob.glob(str(fname)+'*.fft'))
-
-    if zaplist:
-
-        for fft in fftfiles:
-
-            baryv = subprocess.check_output(['prepdata -start 0.99 %s -o tmp |grep Average' %fil],shell=True).split()[-1].rstrip('\n')
-            zaplist_command = 'zapbirds -zap -zapfile %s -baryv %f'%(zaplist,baryv) 
-
-    if rednoise:
-
-        for fft in fftfiles:
-
-            rednoise_command = 'rednoise '+str(fft)
-            run_rednoise_cmd = subprocess.Popen([rednoise_command],shell=True)
-            run_rednoise_cmd.wait()
-            os.rename(str(fft).rstrip('.fft')+'_red.fft',str(fft))
-
-def run_accelsearch(fname,zmax,wmax,binary=True):
-
-    fftfiles= sorted(glob.glob(str(fname)+'*.fft'))
-
-    for fft in fftfiles:
-
-        if binary == True:
-
-            accelsearch_command = 'accelsearch -zmax %d -wmax %d %s' %(zmax,wmax,fft)
-            run_accelsearch_cmd = subprocess.Popen([accelsearch_command],shell=True)
-            run_accelsearch_cmd.wait()
-
-        else:
-
-            accelsearch_command = 'accelsearch -zmax 0 -numharm 32 %s' %(fft)
-            run_accelsearch_cmd = subprocess.Popen([accelsearch_command],shell=True)
-            run_accelsearch_cmd.wait()
-
-def run_ffa(fname):
-
-    for dm in pipeline_config.ffa_dm_set:
-
-        if dm == 0.0:
-
-            datfiles = sorted(glob.glob(fname+'*DM*'+str(dm)+'0.dat'))
-
-        else:
-
-            datfiles.extend(sorted(glob.glob(fname+'*DM*'+str(dm)+'0.dat')))
-
-    for dat in datfiles:
-
-        ffa_command = '/psr_scratch/common_utils/ffaGo/ffa.py '+str(dat)
-        run_ffa_cmd = subprocess.Popen([ffa_command],shell=True)
-        run_ffa_cmd.wait()
 
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
     sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
+    # sp_command = 'single_pulse_search.py %s*.dat' %(fname)
+    print(sp_command)
     failed=True
     try:
         run_sp_cmd = subprocess.check_call([sp_command],shell=True)
@@ -137,110 +86,31 @@ def run_sp(fname):
         traceback.print_exc()
         sys.exit(1)
 
-
-def run_accelsift(fname):
-
-    accelsift_command = 'python /usr/local/src/presto/python/ACCEL_sift.py'
-    with open(fname+'_ACCEL_sift_cands.lis','w+') as outfile:
-        run_accelsift_cmd = subprocess.Popen([accelsift_command],stdout=outfile,shell=True)
-        run_accelsift_cmd.wait()
-
-def run_ffa_sift(fname):
-
-    if not os.path.isfile(fname+'_rfifind.inf'):
-
-        rfifind_empty_command = 'rfifind -blocks '+str(pipeline_config.rfiblocks)+' -ignorechan 0:1024 -o '+str(fname)+' '+str(fname)+'.fil'
-        run_rfifind_empty_cmd = subprocess.Popen([rfifind_empty_command],shell=True)
-        run_rfifind_empty_cmd.wait()
-
-    ffa_sift_command = 'python /psr_scratch/common_utils/ffaGo/ffa_final.py '+str(fname)+'_rfifind.inf'
-    run_ffa_sift_cmd = subprocess.Popen([ffa_sift_command],shell=True)
-    run_ffa_sift_cmd.wait()
-
-def run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad=False):
-
-    #check period for folding option
-    prepfoldcmd = pipeline_config.foldplan(fname,accelfile,accelcand,candDM,candperiod,sk_mad)
-    run_prepfold_cmd = subprocess.Popen([prepfoldcmd],shell=True)
-    run_prepfold_cmd.wait()
-
-def fold_candidates(fname,source_dm,coherent=True):
-
-    if fft:
-
-        with open(fname+'_ACCEL_sift_cands.lis','r') as candfile:
-
-            for line in candfile:
-
-                if '_ACCEL_' in line:
-
-                    accelfile = line.split(':')[0]+'.cand'
-                    accelcand = line.split(':')[1].split()[0]
-                    candDM = accelfile.split('DM')[1].split('_')[0]
-                    candperiod = float(line.split()[7]) / 1000.0
-                    if coherent and np.abs(float(candDM)-float(source_dm)) > 20.0:
-                        continue
-                    else:
-                        run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad)
-    
-    if ffa:
-    
-        with open(fname+'_cands.ffa','r') as candfile:
-   
-            for line in candfile:
-
-                if '.dat' in line:
- 
-                    candDM = line.split('DM')[1].split('.dat')[0]
-                    candperiod = line.split()[2]
-                    accelfile = line.split(':')[0].rstrip('.dat')
-                    accelcand = None
-                    if coherent and np.abs(float(candDM)-float(source_dm)) > 20.0:
-                        continue
-                    else:
-                        run_prepfold(fname,accelfile,accelcand,candDM,candperiod,sk_mad)
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--fil', type=str, help='Input filterbank file')
     parser.add_argument('--dedisp',action='store_true',help='Run prepsubband and dedisperse the data')
-    parser.add_argument('--sk_mad',action='store_true',help='Run sk_mad RFI excision instead of rfifind')
     parser.add_argument('--dm', type=float,help='DM of the candidate. This will determine the max DM to search for pulsar')
-    parser.add_argument('--coherent',action='store_true',help='Use the coherent ddplan for searching')
-    parser.add_argument('--no_fft',action='store_false',help='Do not run fft search (Default is to run)')
-    parser.add_argument('--no_rednoise',action='store_false',help='Do not run rednoise removal on Fourier series (Default is to run)')
-    parser.add_argument('--zaplist',nargs='?',default=None,help='zaplist to remove from the fft files')
-    parser.add_argument('--binary',action='store_true',help='Run binary search (This only works if fft is run)')
-    parser.add_argument('--zmax',nargs='?',default=100,help='zmax value for binary search')
-    parser.add_argument('--wmax',nargs='?',default=0,help='wmax value for binary search')
-    parser.add_argument('--ffa',action='store_true',help='Run Fast Folding Algorithm')
     parser.add_argument('--sp',action='store_true',help='Run single pulse search')
-    parser.add_argument('--fold',action='store_true',help='Fold the candidates')
     parser.add_argument('--speg',action='store_true',help='creates the SPEGID files')
     parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
     parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
+    parser.add_argument('--dead_gpu',type=str,help='use this option if you want to input a mask for dead GPUs')
     parser.add_argument('--slurm',type=str,help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
 
     args = parser.parse_args()
 
     fil = args.fil
-    sk_mad = args.sk_mad
     source_dm = args.dm
-    coherent = args.coherent
-    fft = args.no_fft
-    rednoise = args.no_rednoise
-    zaplist = args.zaplist
-    binary = args.binary
-    zmax = args.zmax
-    wmax = args.wmax
-    ffa = args.ffa
     sp = args.sp
-    fold = args.fold
     speg = args.speg
     fetch =args.fetch 
     dedisp = args.dedisp
     rfifind = args.rfifind
+    dead_gpu=args.dead_gpu
+
     slurm=args.slurm
     if slurm:
         os.chdir(slurm)
@@ -252,7 +122,6 @@ if __name__ == '__main__':
     if os.path.islink(fil):
         fil = os.readlink(fil)
         if not os.path.isfile(fil):
-
             print('File does not exist')
             sys.exit()
 
@@ -263,49 +132,20 @@ if __name__ == '__main__':
     nchan = filfile.nchan
 
 
-    if sk_mad:
-        if os.path.exists('{}_sk_mad.fil'.format(fname)):
-            print('sk mad cleaned data already exists')
-            fname = '{}_sk_mad'.format(fname)
-        else:
-            fname = run_sk_mad(fname,fil)
     if rfifind:
-        run_rfifind(fname)
+        run_rfifind(fname,dead_gpu)
     if dedisp:
         #run ddplan
         run_ddplan(fname,source_dm) 
-        #dedispersion // deprecated, run ddplan for efficiency
-        '''        
-        if coherent:
-            dmlist = [source_dm-i for i in pipeline_config.coherent_dm_set if source_dm-i > 0]
-            dmlist.append(0)
-        else:
-            dmlist = [i for i in pipeline_config.dm_set if (i < source_dm+20)&(i > source_dm-20)]
-        for dm in dmlist:
-            run_prepsubband(fname,tsamp,dm,source_dm,coherent)
-        '''
-    #run fft
-    if fft:
-        run_realfft(fname,rednoise,zaplist)
-        run_accelsearch(fname,zmax,wmax,binary)
-        run_accelsift(fname)
-
-    #run ffa
-    if ffa:
-        run_ffa(fname)
-        run_ffa_sift(fname)
-
     if sp:
         run_sp(fname)
-
-    if fold:
-        fold_candidates(fname, source_dm, coherent=coherent)
     #run SPEGID on candidates
     if speg:
         from prep_speg import prep_speg
-        #prep_speg
+        # prep_speg
         #run SPEGID
         prep_speg(fname+'_rfifind.inf')
+    #prep the file needed for fetch
     if fetch:
         from prep_fetch import prep_fetch_csv
-        prep_fetch_csv(fname+'.fil',rank=2)
+        prep_fetch_csv(fname+'.fil',rank=5)

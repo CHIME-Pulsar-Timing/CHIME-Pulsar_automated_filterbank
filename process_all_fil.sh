@@ -1,29 +1,32 @@
 #!/bin/bash
 #this function makes the folder structures, furthermore it will submit the job
-i=0
-#first argument is split size
-#second argument is DM
-SPLIT_SIZE=$1
-AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-#AFP="/home/adamdong/scratch/CHIME-Pulsar_automated_filterbank/"
-#AFP="/home/adam/Documents/automated_filterbank/"
-DM=$2
-if [ "$#" -le 2 ]; then
-    echo "not enough arguments, need 3 at least first is split size, second is DM, rest are filterbank files"
-    exit 1
-fi
-for FIL in $@;
+while getopts d:f: flag
 do
-    if [ $i -gt 1 ]; then
-        FN=$(echo "$FIL" | cut -f 1 -d '.')
-        if [ ! -d $FN ]; then
-            mkdir $FN
-        fi
-        cp -d $FIL $FN
-        cd $FN
-        sbatch $AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
-        #$AFP/automated_filterbank_batch.sh $SPLIT_SIZE $DM $FIL $AFP
-        cd ..	
-    fi
-    i=$((i+1))
+    case "${flag}" in
+        d) DM=${OPTARG};;
+        f) FIL=${OPTARG};;
+    esac
 done
+
+AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+FN=$(echo "$FIL" | rev | cut -f2- -d '.' | rev)
+#make a new folder and set up to run main pipeline
+if [ ! -d $FN ]; then
+    mkdir $FN
+fi
+#copy the symbolic link into the folder we made
+cp -d $FIL $FN
+cd $FN
+jbid_batch=$(sbatch $AFP/automated_filterbank_batch.sh -d $DM -p $FIL -a $AFP)
+#jbid_batch="Submitted batch job 28251101"
+
+#batch job submit string
+jbid_batch=${jbid_batch#*job }
+# $AFP/automated_filterbank_batch.sh -d $DM -a $AFP -p $FIL
+# echo $?
+cd ..
+sleep 1
+echo "sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -a -i $FN"
+jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -a -i $FN)
+jbid_fetch=${jbid_fetch#*job }
+

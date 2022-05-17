@@ -5,8 +5,22 @@ import numpy as np
 #first argument is speg file
 SPEG_file = sys.argv[1]
 #argv are all the fil files
-filfiles = sys.argv[2:]
+filfiles = sys.argv[3:]
+rank = float(sys.argv[2])
 success = True
+#create filfiles list
+times = []
+for fil in filfiles:
+    try:
+        splits = np.array(fil.split('_'))
+        sb_ind = np.where(splits=='sb')
+        time_ind = int(sb_ind[0][0]-1)
+        t = np.around(float(splits[time_ind]),2)
+        times.append(t)
+    except:
+        #for some reason can't read fil file
+        print(fil)
+
 with open(SPEG_file,'r') as speg:
     reader = csv.reader(speg,delimiter=',')
     for i,row in enumerate(reader):
@@ -17,41 +31,21 @@ with open(SPEG_file,'r') as speg:
             #12 is the peak_DM
             #13 is peak_time
             #14 is peak_SNR
+            #19 is min_time
+            #20 is max_time
+
             group_rank = float(row[4])
-            peak_time = str(int(float(row[13])*1000)/1000.0)
-            if (group_rank<=2) & (group_rank>0):
-                match = False
-                for fil in filfiles:
-                    if peak_time in fil:
-                        #check if it has the 0
-                        if "0.fil" in fil:
-                            match = True
-                            fil = fil.strip('0.fil')
-                            #check if it has the 1
-                            fil_1 = fil+'1.fil'
-                            if fil_1 in filfiles:
-                                #we're good, has both fil 0 and 1
-                                pass
-                            else:
-                                success = False
-                                # print(fil)
-                                # sys.exit(1)
-                        #repeat the excercise for the 1.fil files
-                        if "1.fil" in fil:
-                            match = True
-                            fil = fil.strip('1.fil')
-                            #check if it has the 1
-                            fil_0 = fil+'0.fil'
-                            if fil_0 in filfiles:
-                                #we're good, has both fil 0 and 1
-                                pass
-                            else:
-                                success = False
-                                # print(fil)
-                                # sys.exit(1)
-                if not match:
+            #we shouldn't be searching for peak time
+            min_time = float(row[19])
+            max_time = float(row[20])
+            av_time = np.mean([min_time,max_time])
+            av_time = np.around(av_time,2)
+            if (group_rank<=rank) & (group_rank>0):
+                if av_time in times:
+                    pass
+                else:
                     success = False
-                    # print(peak_time)
-                    # print(group_rank)
+                    print(av_time)
+                    print(group_rank)
 if not success:
     sys.exit(1)

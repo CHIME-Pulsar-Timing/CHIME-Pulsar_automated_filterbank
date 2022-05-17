@@ -13,6 +13,8 @@ do
         SPLITS=$PULSAR/*/
         for SPLIT in $SPLITS;
         do
+            #just make the file for now
+            # touch "$SPLIT${PULSAR}_singlepulse.ps"
             SP="$SPLIT${PULSAR}"*"singlepulse.ps"
             if [ -f $SP ]; then
                 #check that the SPEG file has more than 1 line
@@ -20,11 +22,11 @@ do
                 if (( SPEGL > 1 )); then
                     #untar all the filterbank files
                     tar -xf $SPLIT/filfiles.tar.gz --directory $SPLIT
-                    python $SCRIPT_DIR/check_batch.py $SPLIT/0_SPEG.csv $SPLIT/*.fil
+                    python $SCRIPT_DIR/check_batch.py $SPLIT/0_SPEG.csv $1 $SPLIT/*.fil
                     prev=$?
                     if (( $prev > 0 )); then
                         echo $SPLIT
-                        rm $SP
+                        #rm $SP
                     fi
                     rm $SPLIT/*.fil
                     #now need to do matching between the files

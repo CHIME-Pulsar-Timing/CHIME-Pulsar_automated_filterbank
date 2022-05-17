@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=50:00:00
+#SBATCH --time=20:00:00
 #SBATCH --mem=8GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -12,79 +12,76 @@
 #3 is filterbank file
 #4 is the location of the scripts
 #if we are not splitting then just set out as the fil file
+while getopts d:a:p: flag
+do
+    case "${flag}" in
+        d) DM=${OPTARG};;
+        a) AFP=${OPTARG};;
+        p) p=${OPTARG};;
+    esac
+done
 
 #path to automated filterbank file script locations
 #this is set when you run a batch script by default
 #load the module needed
 module use /project/6004902/modulefiles
 module load presto
-AFP=$4
-#check that the filterbank file exists this prevents accidental deletion of files with the later rm command
+module load chime-psr
+# check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
-#PULSAR=$(echo "$3" | cut -f 1 -d '.')
-#SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
-#SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
-#mkdir -p $SLURM_TMPDIR
-#SLURM_JOB_ID=1
-if test -f "$3"; then
-    if [ $1 -gt 1 ]
-    then
-        OUT=`python $AFP/split_filterbank.py $1 $3 ${SLURM_TMPDIR}`
-    else
-        OUT=$3
-        cp -d $3 ${SLURM_TMPDIR}
+# PULSAR=$(echo "$p" | cut -f 1 -d '.')
+# SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
+# SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
+# mkdir -p $SLURM_TMPDIR
+# SLURM_JOB_ID=1
+#make sure that $p is a file
+if test -f "$p"; then
+    #rename it FIL
+    FIL=$p
+    cp -d $FIL ${SLURM_TMPDIR}
+    echo $FIL
+    if [ ! -d ${SLURM_TMPDIR} ]; then
+        mkdir ${SLURM_TMPDIR}
     fi
-    i=0
-    for FIL in $OUT;
-    do
-        echo $FIL
-        SPFILES="${SLURM_TMPDIR}/$i"
-        if [ ! -d $SPFILES ]; then
-            mkdir $SPFILES
-        fi
-        FILFILE="${SLURM_TMPDIR}/$FIL"
-        mv $FILFILE $SPFILES
-        #copy the killfile into the folder
-        #run pipeline and prep_fetch prep spegID
-    #don't run sk_mad
     n=0
-        #basically try catch
-        until [ "$n" -ge 1 ]
-        do
-            #python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
-            python $AFP/gwg_cand_search_pipeline.py --dm $2 --speg --fetch --no_fft --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}/$i" && break
-            n=$((n+1))
-            sleep 15
-            #if it fails, lets copy all the things to my scratch directory then exit with error code
-            PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-            #ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
-            #echo "copying error files to ${ERRORS}"
-            #df -h
-            #mkdir -p $ERRORS
-            #   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
-            #exit 1
-        done
+    #basically try catch
+    until [ "$n" -ge 1 ]
+    do
+
+        DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
+        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        #FETCH and SPEGID are slow so lets like ignore that for now
+        #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        #for rapid tests, only do rfifind
+        # python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        # Should never get here. if it does exit with an error
+        exit 1
+        n=$((n+1))
+        # sleep 15
+        #if it fails, lets copy all the things to my scratch directory then exit with error code
+        # PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+        #ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
+        #echo "copying error files to ${ERRORS}"
+        #df -h
+        #mkdir -p $ERRORS
+        #   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
+        #exit 1
         #remove the extra fil files
-        rm "$SPFILES/$FIL"
-        rm "$SPFILES/"*sk_mad.fil
-        #remove the .dat files
-        rm "$SPFILES"/*.dat
-        #tarball the infs and singlepulse files
-        tar cf "$SPFILES/${FIL}_singlepulse.tar" "$SPFILES/"*.singlepulse
-        tar cf "$SPFILES/${FIL}_inf.tar" "$SPFILES/"*DM*.inf
-        rm "$SPFILES"/*DM*.inf
-        rm "$SPFILES"/*DM*.singlepulse
-        ((i=i+1))
     done
-    #uncomment this code if you want to make a folder and shove everything in there, if you're using process_all_fil.sh, it already makes folder for you.
-    #now copy all the files back
-    #if [ ! -d $3 ]; then
-        #FN=$(echo "$3" | cut -f 1 -d '.')
-    #mkdir $FN
-    #fi
-    #cp -r ${SLURM_TMPDIR}/* $FN
+    PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+    rm "${SLURM_TMPDIR}"/$FIL
+    #remove the .dat files
+    rm "${SLURM_TMPDIR}"/*.dat
+    #tarball the infs and singlepulse files
+    tar cf "${SLURM_TMPDIR}/${PULSAR}_singlepulse.tar" "${SLURM_TMPDIR}/"*.singlepulse
+    tar cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
+    rm "${SLURM_TMPDIR}"/*DM*.inf
+    rm "${SLURM_TMPDIR}"/*DM*.singlepulse
     cp -r ${SLURM_TMPDIR}/* .
-    #clean up
-    rm -r ${SLURM_TMPDIR}
+    #clean up - not needed on compute canada, but nice to run clean up when on my own computer
+    # rm -r ${SLURM_TMPDIR}
+    exit 0
 fi
-exit 0
+#didn't find file, throw error
+echo "filterbank file not found"
+exit 1

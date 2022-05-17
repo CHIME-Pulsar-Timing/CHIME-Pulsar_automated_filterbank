@@ -77,24 +77,20 @@ def get_burst_dict(csvname):
         burst_str = line.split(',')[0]
         burst_numbers = [float(num) for num in burst_str.split('_')\
                          if num.replace('.', '1').isdigit()]
-        burst_info = burst_numbers[-6:]
+        burst_info = burst_numbers[-5:]
         if str(int(burst_info[0])) not in burst_dict:
             burst_dict[str(int(burst_info[0]))] = [burst_info[1:]]
         else: burst_dict[str(int(burst_info[0]))].append(burst_info[1:])
     
     # Make sure everything is an array
-    master_array = np.zeros((len(burst_lines), 5))
     i = 0
     
     for key in burst_dict.keys():
         day_array = np.array(burst_dict[key])
         burst_dict[key] = day_array[np.argsort(day_array[:,0])]
-        master_array[i:i+len(burst_dict[key])] += burst_dict[key]
         i += len(burst_dict[key])
 
-    burst_dict['mean'] = np.mean(master_array, axis=0)
-    burst_dict['std'] = np.std(master_array, axis=0)
-   
+
     return burst_dict
     
 

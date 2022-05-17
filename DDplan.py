@@ -6,7 +6,8 @@ import numpy as np
 from presto.Pgplot import *
 import presto.filterbank as fil
 import presto.psrfits as pfits
-
+import pipeline_config
+ignorelist = pipeline_config.ignorelist
 class observation(object):
     def __init__(self, dt, f_ctr, BW, numchan, cDM):
         # dt in sec, f_ctr and in MHz
@@ -431,17 +432,16 @@ for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in zip(dDMs, dsubDMs, dm
             datdownsamp = 2
             if downsamp < 2: subdownsamp = datdownsamp = 1
             # First create the subbands
-            myexecute("prepsubband -sub -subdm %.2f -nsub %d -downsamp %d -mask %s -o %s %s" %
-                      (subDM, nsub, subdownsamp, basename+'_rfifind.mask' , basename, rawfiles))
+            myexecute("prepsubband -mask %s -ignorechan %s -sub -subdm %.2f -nsub %d -downsamp %d -o %s %s" %
+                      (basename+'_rfifind.mask',ignorelist, subDM, nsub, subdownsamp , basename, rawfiles))
             # And now create the time series
             subnames = basename+"_DM%.2f.sub[0-9]*"%subDM
-            myexecute("prepsubband -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -o %s %s" %
-                      (loDM, dDM, dmspercall, datdownsamp, basename+'_rfifind.mask' , basename, subnames))
+            myexecute("prepsubband -mask %s -ignorechan %s -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s" %
+                      (basename+'_rfifind.mask',ignorelist, loDM, dDM, dmspercall, datdownsamp, basename, subnames))
         else:
-            myexecute("prepsubband -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -mask %s -o %s %s" %
-                      (nsub, loDM, dDM, dmspercall, downsamp, basename+'_rfifind.mask' , basename, rawfiles))
+            myexecute("prepsubband -mask %s -ignorechan %s -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %s -o %s %s" %
+                      (basename+'_rfifind.mask',ignorelist, nsub, loDM, dDM, dmspercall, downsamp, basename, rawfiles))
 """
-    
 def usage():
     print("""
     usage:  DDplan.py [options] [raw PSRFITS or filterbank file]
@@ -622,7 +622,9 @@ subcalls    = %s\n"""%repr(subcalls))
 startDMs    = %s\n"""%repr(startDMs))
             f.write("""# DMs/call
 dmspercalls = %s\n"""%repr(dmspercalls))
-#            f.write("""#ignore chans
+            f.write("""# bad GPU list (0 channels)
+ignorelist = %s\n"""%repr(ignorelist))
+ #            f.write("""#ignore chans
 #ignorechan  = "%s"\n"""%ignorechan)
             f.write(dedisp_template2)
     # The following is an instance of an "observation" class
