@@ -1,4 +1,4 @@
-#heretofore known as CHIPSPIPE
+# heretofore known as CHIme/Pulsar Single-pulse PIPEline (CHIPSPIPE)
 # Preparing the data
 As of March 2022 we found that there are sometimes dropped packets in filterbank data (see https://bao.chimenet.ca/doc/documents/1624)
 Therefore I have developed a script to correct the dropped packets. _This is reccommended for all observations untill it is fixed up stream_
