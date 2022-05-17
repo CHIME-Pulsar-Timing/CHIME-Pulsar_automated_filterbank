@@ -1,10 +1,11 @@
 #!/bin/bash
 #this function makes the folder structures, furthermore it will submit the job
-while getopts d:f: flag
+while getopts d:f:t: flag
 do
     case "${flag}" in
         d) DM=${OPTARG};;
         f) FIL=${OPTARG};;
+        t) prep_ts=${OPTARG};;
     esac
 done
 
@@ -17,7 +18,7 @@ fi
 #copy the symbolic link into the folder we made
 cp -d $FIL $FN
 cd $FN
-jbid_batch=$(sbatch $AFP/automated_filterbank_batch.sh -d $DM -p $FIL -a $AFP)
+jbid_batch=$(sbatch $AFP/automated_filterbank_batch.sh -d $DM -p $FIL -a $AFP -t $prep_ts)
 #jbid_batch="Submitted batch job 28251101"
 
 #batch job submit string

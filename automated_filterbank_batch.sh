@@ -12,12 +12,13 @@
 #3 is filterbank file
 #4 is the location of the scripts
 #if we are not splitting then just set out as the fil file
-while getopts d:a:p: flag
+while getopts d:a:p:t: flag
 do
     case "${flag}" in
         d) DM=${OPTARG};;
         a) AFP=${OPTARG};;
         p) p=${OPTARG};;
+        t) prep_ts=${OPTARG};;
     esac
 done
 
@@ -76,7 +77,7 @@ if test -f "$p"; then
     until [ "$n" -ge 1 ]
     do
         DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
-        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --prep_ts 2 --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --prep_ts $prep_ts --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #FETCH and SPEGID are slow so lets like ignore that for now
         #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #for rapid tests, only do rfifind

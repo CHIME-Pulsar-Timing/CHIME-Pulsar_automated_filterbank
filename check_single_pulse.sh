@@ -1,11 +1,14 @@
 #!/bin/bash
 #this file will run to check which filterbank files have been run and which have not
-while getopts "bfd:" flag
+#set default value for prep_ts
+prep_ts=0
+while getopts "bfd:t:" flag
 do
     case "${flag}" in
         b) RBATCH=true;;
         f) RFETCH=true;;
         d) DM=$OPTARG;;
+        t) prep_ts=$OPTARG;;
     esac
 done
 
@@ -49,20 +52,20 @@ do
 
             if [ "$FETCH" = false ]; then
                 echo "$FIL finished everything nothing to see here..." >> completed.csv
-	    else
-		#check if cands is empty
-		if [ -s ${PULSAR}/cands128_0.csv ]
-		then
-		    FETCH=true
+        else
+        #check if cands is empty
+        if [ -s ${PULSAR}/cands128_0.csv ]
+        then
+            FETCH=true
                     echo "**** printing cands *****"
-        	    cat "${PULSAR}"/*cands*.csv
-		    echo "****end cands*****"
+                cat "${PULSAR}"/*cands*.csv
+            echo "****end cands*****"
                     echo "$FIL never ran FETCH"
                     ls -lHd $FIL
-		else
-		    FETCH=false
-		    echo "${PULSAR} - cands file empty"
-		fi
+        else
+            FETCH=false
+            echo "${PULSAR} - cands file empty"
+        fi
             fi
 
         else
@@ -81,7 +84,7 @@ do
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
             #this will send the batch job and after it's done sent the fetch job
-            $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL
+            $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL -t $prep_ts
         fi
     fi
     if [ "$RFETCH" = true ]; then
