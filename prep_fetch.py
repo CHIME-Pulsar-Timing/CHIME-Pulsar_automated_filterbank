@@ -3,20 +3,20 @@ import sys
 import os
 import csv
 
-def prep_fetch_csv(filfile,rank=5):
+def prep_fetch_csv(filfile,rank=5,fil_length=0):
     #get spegid_python3 speg
     from SPEGID_Python3 import SinglePulseEventGroup
     spegs = np.load('spegs.npy',allow_pickle=1)
     #get only rank lower than the rank
     spegs = list([speg for speg in spegs if (speg.group_rank<=rank)&(speg.group_rank>0)])
     # abc = list(speg for speg in spegs if (speg.peak_time < 645) & (speg.peak_time > 630))
-    create_cands(spegs,128,filfile)
+    create_cands(spegs,128,filfile,fil_length=fil_length)
 
-def create_cands(spegs,subband,filfile):
+def create_cands(spegs,subband,filfile,fil_length=0):
     fetch_len_1 = 1
-    fetch_len_0 = 0
+    fetch_len_0 = fil_length
     with open('cands'+str(int(subband))+'_'+str(fetch_len_1)+'.csv','w',newline='') as cands_1:
-        with open('cands'+str(int(subband))+'_'+str(fetch_len_0)+'.csv','w',newline='') as cands:
+        with open('cands'+str(int(subband))+'_0.csv','w',newline='') as cands:
             writer_0=csv.writer(cands,delimiter=',')
             writer_1=csv.writer(cands_1,delimiter=',')
 
@@ -30,7 +30,10 @@ def create_cands(spegs,subband,filfile):
 
                     deltasamps = (maxt-mint)/tsamp
                     #try to create a width befitting of the width
-                    width_box_0 = deltasamps*5
+                    if fetch_len_0==0:
+                        width_box_0 = deltasamps*5
+                    else:
+                        width_box_0 = fetch_len_0/tsamp
                     #for 1 seconds of width, this gets the really long bursts
                     width_box_1 = fetch_len_1/tsamp
                     def get_width(width_box):

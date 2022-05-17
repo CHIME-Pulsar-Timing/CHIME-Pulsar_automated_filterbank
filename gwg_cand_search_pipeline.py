@@ -44,7 +44,6 @@ def run_rfifind(fname,dead_gpus=''):
         [print(f) for f in os.listdir('.')]
         sys.exit(1)
 
-
 def run_ddplan(fname,dm):
     if dm>20.1:
         dml=dm-20
@@ -96,6 +95,7 @@ if __name__ == '__main__':
     parser.add_argument('--dm', type=float,help='DM of the candidate. This will determine the max DM to search for pulsar')
     parser.add_argument('--sp',action='store_true',help='Run single pulse search')
     parser.add_argument('--speg',action='store_true',help='creates the SPEGID files')
+    parser.add_argument('--prep_ts', type=float,default=0,help='prep_ts - this is the length of output you want at the end of the pipeline. i.e a prep-ts of 1s will give you a plot from -500ms to +500ms')
     parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
     parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
     parser.add_argument('--dead_gpu',type=str,help='use this option if you want to input a mask for dead GPUs')
@@ -110,8 +110,8 @@ if __name__ == '__main__':
     fetch =args.fetch 
     dedisp = args.dedisp
     rfifind = args.rfifind
-    dead_gpu=args.dead_gpu
-
+    dead_gpu = args.dead_gpu
+    prep_ts = args.prep_ts
     slurm=args.slurm
     if slurm:
         os.chdir(slurm)
@@ -149,4 +149,4 @@ if __name__ == '__main__':
     #prep the file needed for fetch
     if fetch:
         from prep_fetch import prep_fetch_csv
-        prep_fetch_csv(fname+'.fil',rank=5)
+        prep_fetch_csv(fname+'.fil',rank=5,fil_length=prep_ts)

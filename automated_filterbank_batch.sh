@@ -23,10 +23,38 @@ done
 
 #path to automated filterbank file script locations
 #this is set when you run a batch script by default
-#load the module needed
+#load the modules needed, retry if failed... (don't know why it sometimes fails?)
+max_retry=5
+counter=0
 module use /project/6004902/modulefiles
+while [ $? -ne 0 ]; do
+    sleep 1
+    [[ counter -eq $max_retry ]] && echo "failed!" && exit 1
+    echo "trying again. try #$counter"
+    ((counter++))
+    out=$(ls /project/6004902/modulefiles)
+    echo "$out"
+    module use /project/6004902/modulefiles
+done
+counter=0
 module load presto
+while [ $? -ne 0 ]; do
+    sleep 1
+    [[ counter -eq $max_retry ]] && echo "Failed!" && exit 1
+    echo "Trying again. Try #$counter"
+    ((counter++))
+    module load presto
+done
+counter=0
 module load chime-psr
+while [ $? -ne 0 ]; do
+    sleep 1
+    [[ counter -eq $max_retry ]] && echo "Failed!" && exit 1
+    echo "Trying again. Try #$counter"
+    ((counter++))
+    module load chime-psr
+done
+
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 # PULSAR=$(echo "$p" | cut -f 1 -d '.')
@@ -48,7 +76,7 @@ if test -f "$p"; then
     until [ "$n" -ge 1 ]
     do
         DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
-        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --prep_ts 2 --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #FETCH and SPEGID are slow so lets like ignore that for now
         #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #for rapid tests, only do rfifind
