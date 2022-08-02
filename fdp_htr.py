@@ -4,6 +4,12 @@ import sys
 import numpy as np
 import logging
 
+# edit of fdp.py to be slightly speedier and use less RAM
+# edits:
+#   use broadcasting to avoid large tiled arrays
+#   avoid presto's Filterbank file
+#       - the Spectra objet forces a conversion to float32
+#       this also avoids some of the back-and-forth and cuts down on time
 
 def get_dtype(nbits):
     """
@@ -36,6 +42,7 @@ def get_nbits(dtype):
 def write_header(header, outfile):
     header_list = list(header.keys())
     manual_head_start_end = False
+    # this shouldn't happen, but just in case
     if header_list[0] != "HEADER_START" or header_list[-1] != "HEADER_END":
         logging.debug(
             f"HEADER_START not first and/or HEADER_END not last in header_list, removing them from header_list (if present) and writing them manually"
