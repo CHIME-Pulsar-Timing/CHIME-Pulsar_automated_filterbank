@@ -80,7 +80,7 @@ fn_clean = fn.strip('.fil')
 fdp_fn = f"{fn_clean}_fdp.fil"
 new_fil = open(fdp_fn, "wb")
 write_header(header, new_fil)
-fil = open(args.fn, "rb")
+fil = open(fn, "rb")
 fil.seek(hdrlen)
 
 for i in range(loop_iters):
