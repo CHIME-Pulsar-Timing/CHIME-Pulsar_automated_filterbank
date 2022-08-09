@@ -432,14 +432,14 @@ for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in zip(dDMs, dsubDMs, dm
             datdownsamp = 2
             if downsamp < 2: subdownsamp = datdownsamp = 1
             # First create the subbands
-            myexecute("prepsubband -mask %s -ignorechan %s -sub -subdm %.2f -nsub %d -downsamp %d -o %s %s" %
+            myexecute("prepsubband -zerodm -mask %s -ignorechan %s -sub -subdm %.2f -nsub %d -downsamp %d -o %s %s" %
                       (basename+'_rfifind.mask',ignorelist, subDM, nsub, subdownsamp , basename, rawfiles))
             # And now create the time series
             subnames = basename+"_DM%.2f.sub[0-9]*"%subDM
-            myexecute("prepsubband -mask %s -ignorechan %s -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s" %
+            myexecute("prepsubband -zerodm -mask %s -ignorechan %s -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s" %
                       (basename+'_rfifind.mask',ignorelist, loDM, dDM, dmspercall, datdownsamp, basename, subnames))
         else:
-            myexecute("prepsubband -mask %s -ignorechan %s -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %s -o %s %s" %
+            myexecute("prepsubband -zerodm -mask %s -ignorechan %s -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %s -o %s %s" %
                       (basename+'_rfifind.mask',ignorelist, nsub, loDM, dDM, dmspercall, downsamp, basename, rawfiles))
 """
 def usage():
@@ -601,7 +601,8 @@ from '%s'
         dDMs = [m.dDM for m in methods]
         dsubDMs = [m.dsubDM for m in methods]
         startDMs = [m.loDM for m in methods]
-        downsamps = [m.downsamp for m in methods]
+        # downsamps = [m.downsamp for m in methods]
+        downsamps = [24]
         dmspercalls = [m.DMs_per_prepsub for m in methods]
         subcalls = [m.numprepsub for m in methods]
         basename, ext = os.path.splitext(args[0])

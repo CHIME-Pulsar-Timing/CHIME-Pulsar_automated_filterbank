@@ -34,7 +34,7 @@ def run_rfifind(fname,dead_gpus=''):
         else:
             ignore_chan_string = ignore_chan_string+','+str(chan)
     print('ignoring these channels', ignore_chan_string)
-    rfifind_command = 'rfifind -blocks %d -intfrac 0.4 -clip 4 -ignorechan %s -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,ignore_chan_string,ignore_chan_string,fname,fname)
+    rfifind_command = 'rfifind -time 1 -timesig 10 -freqsig 10 -ignorechan %s -zapchan %s -o %s %s.fil' %(ignore_chan_string,ignore_chan_string,fname,fname)
 
     print(rfifind_command)
     try:
@@ -76,7 +76,7 @@ def run_ddplan(fname,dm):
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
     # sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
-    sp_command = 'single_pulse_search.py -b %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py -t 8 -b %s*.dat' %(fname)
     print(sp_command)
     failed=True
     try:
@@ -150,4 +150,4 @@ if __name__ == '__main__':
     #prep the file needed for fetch
     if fetch:
         from prep_fetch import prep_fetch_csv
-        prep_fetch_csv(fname+'.fil',rank=5)
+        prep_fetch_csv(fname+'.fil',rank=5,dm=source_dm)

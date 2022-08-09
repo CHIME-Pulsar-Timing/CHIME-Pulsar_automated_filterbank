@@ -3,16 +3,16 @@ import sys
 import os
 import csv
 
-def prep_fetch_csv(filfile,rank=5):
+def prep_fetch_csv(filfile,rank=5,dm=22.5):
     #get spegid_python3 speg
     from SPEGID_Python3 import SinglePulseEventGroup
     spegs = np.load('spegs.npy',allow_pickle=1)
     #get only rank lower than the rank
     spegs = list([speg for speg in spegs if (speg.group_rank<=rank)&(speg.group_rank>0)])
     # abc = list(speg for speg in spegs if (speg.peak_time < 645) & (speg.peak_time > 630))
-    create_cands(spegs,128,filfile)
+    create_cands(spegs,128,filfile,dm)
 
-def create_cands(spegs,subband,filfile):
+def create_cands(spegs,subband,filfile,dm):
     fetch_len_1 = 1
     fetch_len_0 = 0
     with open('cands'+str(int(subband))+'_'+str(fetch_len_1)+'.csv','w',newline='') as cands_1:
@@ -21,29 +21,31 @@ def create_cands(spegs,subband,filfile):
             writer_1=csv.writer(cands_1,delimiter=',')
 
             for speg in spegs:
-                if speg.peak_SNR>5.5:
-                    # define the width
-                    #the chunks are min size of 128 samples, this means that if we are less than 128, just round up to 128
-                    mint = speg.min_time
-                    maxt = speg.max_time
-                    fn,tsamp,start = prep_fetch_scale_fil(filfile,mint,maxt,float(speg.peak_DM),speg.peak_downfact,subband=subband,downsamp=3)
+                pdm = speg.peak_DM
+                if (pdm > dm-3)&(pdm < dm+3):
+                    if speg.peak_SNR>8:
+                        # define the width
+                        #the chunks are min size of 128 samples, this means that if we are less than 128, just round up to 128
+                        mint = speg.min_time
+                        maxt = speg.max_time
+                        fn,tsamp,start = prep_fetch_scale_fil(filfile,mint,maxt,float(speg.peak_DM),speg.peak_downfact,subband=subband,downsamp=3)
 
-                    deltasamps = (maxt-mint)/tsamp
-                    #try to create a width befitting of the width
-                    width_box_0 = deltasamps*5
-                    #for 1 seconds of width, this gets the really long bursts
-                    width_box_1 = fetch_len_1/tsamp
-                    def get_width(width_box):
-                        if width_box < 256:
-                            width = 2
-                        else:
-                            width = int(np.around(width_box/128))
-                        return width
-                    width_0 = get_width(width_box_0)
-                    width_1 = get_width(width_box_1)
-                    #fetch takes log2 of the downfact
-                    writer_0.writerow([fn,speg.peak_SNR,start,speg.peak_DM,int(np.around(np.log2(width_0))),fn])
-                    writer_1.writerow([fn,speg.peak_SNR,start,speg.peak_DM,int(np.around(np.log2(width_1))),fn])
+                        deltasamps = (maxt-mint)/tsamp
+                        #try to create a width befitting of the width
+                        width_box_0 = deltasamps*5
+                        #for 1 seconds of width, this gets the really long bursts
+                        width_box_1 = fetch_len_1/tsamp
+                        def get_width(width_box):
+                            if width_box < 256:
+                                width = 2
+                            else:
+                                width = int(np.around(width_box/128))
+                            return width
+                        width_0 = get_width(width_box_0)
+                        width_1 = get_width(width_box_1)
+                        #fetch takes log2 of the downfact
+                        writer_0.writerow([fn,speg.peak_SNR,start,speg.peak_DM,int(np.around(np.log2(width_0))),fn])
+                        writer_1.writerow([fn,speg.peak_SNR,start,speg.peak_DM,int(np.around(np.log2(width_1))),fn])
 
 
 
