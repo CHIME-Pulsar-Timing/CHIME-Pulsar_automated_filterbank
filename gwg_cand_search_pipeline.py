@@ -8,6 +8,86 @@ from presto.filterbank import FilterbankFile
 import pipeline_config
 from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
+def write_mask_file(filename, extra_zap_chans, header):
+    """Write a mask numpy array as a rfifind .mask file
+    filename: filename to write mask to (will add a .mask extension if not present)
+    maskarr: 2D mask array of shape (nint, nchan)
+             where the channels follow rfifind convention (index 0 corresponds to the lowest frequency channel)
+             and 1/True in the array means mask, 0/False means don't mask
+    header: dictionary which must contain keys:
+        'time_sig' (float) - from rfifind options, PRESTO default is 10
+        'freq_sig' (float) - from rfifind options, PRESTO default is 4
+        'MJD' (float) - starting MJD of the observation
+        'dtint' (float) - length of one time interval in seconds
+        'lofreq' (float) - center frequency of lowest channel
+        'df' (float) - width of one frequency channel
+        'nchan' (int) - number of frequency channels in the mask
+        'nint' (int) - number of time intervals in the mask
+        'ptsperint' (int) - number of time samples per interval
+    """
+    # Massage inputs
+    if filename[-5:] != ".mask":
+        filename += ".mask"
+    header_params = [
+        np.array(header.time_sig, dtype=np.float64),
+        np.array(header.freq_sig, dtype=np.float64),
+        np.array(header.MJD, dtype=np.float64),
+        np.array(header.dtint, dtype=np.float64),
+        np.array(header.lofreq, dtype=np.float64),
+        np.array(header.df, dtype=np.float64),
+        np.array(header.nchan, dtype=np.int32),
+        np.array(header.nint, dtype=np.int32),
+        np.array(header.ptsperint, dtype=np.int32),
+    ]
+
+    # Check maskarr shape matches nint and nchan in header
+
+    zap_chans = list(header.mask_zap_chans)
+    zap_ints = list(header.mask_zap_ints)
+    zap_chans_per_int = header.mask_zap_chans_per_int
+    # Write to file
+    with open(filename, "wb") as fout:
+        for variable in header_params:
+            variable.tofile(fout)
+
+        for zap in extra_zap_chans:
+            if not (zap in zap_chans):
+                zap_chans.append(zap)
+        zap_chans.sort()
+        zap_chans = np.array(zap_chans)
+        zap_ints = np.array(zap_ints)
+        for i,zap in enumerate(zap_chans_per_int):
+            for z in zap_chans:
+                if not(z in zap):
+                    zap = np.append(zap,z)
+                    zap_chans_per_int[i] = zap
+
+        nzap_chan = np.asarray(zap_chans.size, dtype=np.int32)
+        nzap_chan.tofile(fout)
+        if nzap_chan:
+            zap_chans.tofile(fout)
+
+        nzap_int = np.asarray(zap_ints.size, dtype=np.int32)
+        nzap_int.tofile(fout)
+        if nzap_int:
+            zap_ints.tofile(fout)
+
+        nzap_per_int = []
+        for an_arr in zap_chans_per_int:
+            nzap_per_int.append(an_arr.size)
+        if len(nzap_per_int) != header.nint:
+            raise AttributeError("BUG: nzap_per_int should be of length nint!")
+        nzpi = np.asarray(nzap_per_int, dtype=np.int32)
+        nzpi.tofile(fout)
+
+        # rfifind.py only calls fromfile if nzap != 0 and nzap != nchan
+        for i in range(header.nint):
+            if nzap_per_int[i]:
+                if nzap_per_int[i] != header.nchan:
+                    zap_chans_per_int[i].tofile(fout)
+
+
+
 #original GWG pipeline written by Chiamin
 def run_rfifind(fname,dead_gpus=''):
     pipeline_config_mask = pipeline_config.ignorelist.split(',')
@@ -34,7 +114,7 @@ def run_rfifind(fname,dead_gpus=''):
         else:
             ignore_chan_string = ignore_chan_string+','+str(chan)
     print('ignoring these channels', ignore_chan_string)
-    rfifind_command = 'rfifind -time 1 -timesig 10 -freqsig 10 -ignorechan %s -zapchan %s -o %s %s.fil' %(ignore_chan_string,ignore_chan_string,fname,fname)
+    rfifind_command = 'rfifind -time 1 -timesig 10 -freqsig 10 -ignorechan %s -o %s %s.fil' %(ignore_chan_string,fname,fname)
 
     print(rfifind_command)
     try:
@@ -76,7 +156,7 @@ def run_ddplan(fname,dm):
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
     # sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
-    sp_command = 'single_pulse_search.py -t 8 -b %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py -t 8 -d 1 -b %s*.dat' %(fname)
     print(sp_command)
     failed=True
     try:

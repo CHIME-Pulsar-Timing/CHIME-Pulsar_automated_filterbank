@@ -2,7 +2,7 @@ import numpy as np
 import sys
 import os
 import csv
-
+import pipeline_config
 def prep_fetch_csv(filfile,rank=5,dm=22.5):
     #get spegid_python3 speg
     from SPEGID_Python3 import SinglePulseEventGroup
@@ -53,11 +53,12 @@ def create_cands(spegs,subband,filfile,dm):
 def maskfile(maskfn, data, start_bin, nbinsextra,extra_mask):    
     from presto import rfifind
     rfimask = rfifind.rfifind(maskfn)     
-    mask = get_mask(rfimask, start_bin, nbinsextra)[::-1]    
-    masked_chans = mask.all(axis=1)    
+    mask = get_mask(rfimask, start_bin, nbinsextra)[::-1]
+    masked_chans = mask.all(axis=1)
     # Mask data
     if extra_mask:
-        masked_chans.append(extra_mask)    
+        mask[extra_mask,:] = True
+        masked_chans = np.append(masked_chans,extra_mask)
     data = data.masked(mask, maskval='median-mid80')    
     return data, masked_chans  
 
@@ -136,7 +137,16 @@ def prep_fetch_scale_fil(filfile,min_burst_time,max_burst_time,dm,boxcar=32,subb
     my_spec = fil.get_spectra(start_samp,nsamp)
     #mask the file
     maskfn = filfile.strip('.fil')+'_rfifind.mask'
+    # maskfn = "editted_mask.mask"
     extra_mask=None
+
+    pipeline_config_mask = pipeline_config.ignorelist.split(',')
+    ignore_list_arr = []
+    for chan in pipeline_config_mask:
+        ignore_list_arr.append(int(chan))
+
+    extra_mask = ignore_list_arr
+    extra_mask = None
     data, masked_chans = maskfile(maskfn, my_spec, start_samp, nsamp, extra_mask)
     #subband
     data.subband(subband,subdm=dm,padval='median')
