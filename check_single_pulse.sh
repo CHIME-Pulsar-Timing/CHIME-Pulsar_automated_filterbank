@@ -9,7 +9,7 @@ do
     esac
 done
 
-FILFILES=*.fil
+FILFILES=*.fits
 BATCH=false
 FETCH=false
 for FIL in $FILFILES;

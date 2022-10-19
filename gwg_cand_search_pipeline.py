@@ -5,6 +5,7 @@ import argparse
 import re
 
 from presto.filterbank import FilterbankFile
+from presto.psrfits import PsrfitsFile as p
 import pipeline_config
 from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
@@ -34,8 +35,7 @@ def run_rfifind(fname,dead_gpus=''):
         else:
             ignore_chan_string = ignore_chan_string+','+str(chan)
     print('ignoring these channels', ignore_chan_string)
-    rfifind_command = 'rfifind -blocks %d -intfrac 0.4 -clip 4 -ignorechan %s -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,ignore_chan_string,ignore_chan_string,fname,fname)
-
+    rfifind_command = 'rfifind -blocks %d -ignorechan %s -zapchan %s -o %s %s.fits' %(pipeline_config.rfiblocks,ignore_chan_string,ignore_chan_string,fname,fname)
     print(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
@@ -57,7 +57,7 @@ def run_ddplan(fname,dm):
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
-    ddplan_command = "python %s/DDplan.py -r 1.2 -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dm,dml,dmh,fname,fname)
+    ddplan_command = "python %s/DDplan.py -r 0.1 -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fits" %(path,dm,dml,dmh,fname,fname)
     print(ddplan_command)
     # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
     try:
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         os.chdir(slurm)
     print('Running RFI mitigation')
     #get only the file name
-    fname = fil.rstrip('.fil')
+    fname = fil.rstrip('.fits')
     fname = fname.split('/')
     fname = fname[-1]
     if os.path.islink(fil):
@@ -126,13 +126,6 @@ if __name__ == '__main__':
         if not os.path.isfile(fil):
             print('File does not exist')
             sys.exit()
-
-    #get some header details from the filterbank file
-    filfile = FilterbankFile(fil)
-    tsamp = filfile.dt
-    nsamp = filfile.nspec
-    nchan = filfile.nchan
-
 
     if rfifind:
         run_rfifind(fname,dead_gpu)
@@ -150,4 +143,4 @@ if __name__ == '__main__':
     #prep the file needed for fetch
     if fetch:
         from prep_fetch import prep_fetch_csv
-        prep_fetch_csv(fname+'.fil',rank=5)
+        prep_fetch_csv(fname+'.fits',rank=5)
