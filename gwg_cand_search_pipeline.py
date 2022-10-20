@@ -3,14 +3,10 @@ import subprocess
 import os, glob
 import argparse
 import re
-
-from presto.filterbank import FilterbankFile
-from presto.psrfits import PsrfitsFile as p
 import pipeline_config
-from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
 #original GWG pipeline written by Chiamin
-def run_rfifind(fname,dead_gpus=''):
+def run_rfifind(fname,ext,dead_gpus=''):
     pipeline_config_mask = pipeline_config.ignorelist.split(',')
     if dead_gpus!='':
         dead_gpu_mask = dead_gpus.split(',')
@@ -25,7 +21,7 @@ def run_rfifind(fname,dead_gpus=''):
             else:
                 #if something in the dead gpu mask isn't in the pipe config mask
                 pipeline_config_mask.append(dgm)
-                print('ignoring ',dgm)
+                print('ignoring dead gpus',dgm)
 
     #conver pipeline config mask back into string
     ignore_chan_string = ''
@@ -34,8 +30,7 @@ def run_rfifind(fname,dead_gpus=''):
             ignore_chan_string = str(chan)
         else:
             ignore_chan_string = ignore_chan_string+','+str(chan)
-    print('ignoring these channels', ignore_chan_string)
-    rfifind_command = 'rfifind -blocks %d -ignorechan %s -zapchan %s -o %s %s.fits' %(pipeline_config.rfiblocks,ignore_chan_string,ignore_chan_string,fname,fname)
+    rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -zapchan {ignore_chan_string} -o {fname} {fname}{ext}"
     print(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
@@ -46,18 +41,18 @@ def run_rfifind(fname,dead_gpus=''):
         sys.exit(1)
 
 
-def run_ddplan(fname,dm):
-    if dm>20.1:
+def run_ddplan(fname,ext,dm):
+    if dm>26.1:
         dml=dm-20
     else:
-        dml=0
+        dml=6.1
     dmh=dm+20
     #run the ddplan in my current directory, it's got the rfi masking included
     import pathlib
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
-    ddplan_command = "python %s/DDplan.py -r 0.1 -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fits" %(path,dm,dml,dmh,fname,fname)
+    ddplan_command = f"python {path}/DDplan.py -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
     print(ddplan_command)
     # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
     try:
@@ -118,7 +113,12 @@ if __name__ == '__main__':
         os.chdir(slurm)
     print('Running RFI mitigation')
     #get only the file name
-    fname = fil.rstrip('.fits')
+    if fil.endswith(".fits"):
+        fname = fil.rstrip('.fits')
+        ext = '.fits'
+    elif fil.endswith(".fil"):
+        fname = fil.rstrip('.fil')
+        ext = '.fil'
     fname = fname.split('/')
     fname = fname[-1]
     if os.path.islink(fil):
@@ -128,10 +128,10 @@ if __name__ == '__main__':
             sys.exit()
 
     if rfifind:
-        run_rfifind(fname,dead_gpu)
+        run_rfifind(fname,ext,dead_gpu)
     if dedisp:
         #run ddplan
-        run_ddplan(fname,source_dm) 
+        run_ddplan(fname,ext,source_dm)
     if sp:
         run_sp(fname)
     #run SPEGID on candidates
@@ -143,4 +143,4 @@ if __name__ == '__main__':
     #prep the file needed for fetch
     if fetch:
         from prep_fetch import prep_fetch_csv
-        prep_fetch_csv(fname+'.fits',rank=5)
+        prep_fetch_csv(fname+ext,rank=5)

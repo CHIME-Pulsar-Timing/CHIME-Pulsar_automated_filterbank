@@ -48,6 +48,7 @@ if test -f "$p"; then
     do
         # DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
         python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+
         #FETCH and SPEGID are slow so lets like ignore that for now
         #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #for rapid tests, only do rfifind
@@ -66,6 +67,12 @@ if test -f "$p"; then
         #exit 1
         #remove the extra fil files
     done
+    #run candmaker
+    mkdir -p nsub_0_5
+    mkdir -p nsub_1
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -ws 500
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -ws 1000
+
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     rm "${SLURM_TMPDIR}"/$FIL
     #remove the .dat files

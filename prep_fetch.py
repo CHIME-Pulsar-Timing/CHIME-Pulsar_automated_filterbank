@@ -20,47 +20,31 @@ def prep_fetch_csv(filfile,rank=5):
     spegs = np.load('spegs.npy',allow_pickle=1)
     #get only rank lower than the rank
     spegs = list([speg for speg in spegs if (speg.group_rank<=rank)&(speg.group_rank>0)])
-    # abc = list(speg for speg in spegs if (speg.peak_time < 645) & (speg.peak_time > 630))
-    create_cands(spegs,128,filfile)
+    create_cands(spegs,filfile)
 
-def create_cands(spegs,subband,filfile):
-    fetch_len_1 = 1
-    fetch_len_0 = 0.005
-    with open('cands'+str(int(subband))+'_'+str(fetch_len_1)+'.csv','w',newline='') as cands_1:
-        with open('cands'+str(int(subband))+'_'+str(fetch_len_0)+'.csv','w',newline='') as cands:
-            writer_0=csv.writer(cands,delimiter=',')
-            writer_1=csv.writer(cands_1,delimiter=',')
-            #write header
-            writer_0.writerow(["file","snr","width","dm","label","stime","chan_mask_path","num_files"])
-            for speg in spegs:
-                if speg.peak_SNR>5.5:
-                    # define the width
-                    #the chunks are min size of 128 samples, this means that if we are less than 128, just round up to 128
-                    mint = speg.min_time
-                    maxt = speg.max_time
-                    dm = float(speg.peak_SNR)
-
-                    #fetch uses time calc is  timestamp-width- dispersion delay ---> timestamp+width+dispersion delay
-                    print(mint,maxt)
-                    fn,tsamp,start,delay = prep_fetch_scale_fil(filfile,mint,maxt,dm)
-                    #length has to be at least 0.5s
-                    print(f"dispersion delay:{delay}")
-                    #calculate the dispersion delay time
-                    def get_width(width_box,delay,tsamp):
-                        if delay>width_box:
-                            width = tsamp*10
-                        else:
-                            width = width_box-delay
-                        return width
-                    #for 1 seconds of width, this gets the really long bursts
-                    width_0 = get_width(fetch_len_0,delay,tsamp)
-                    width_1 = get_width(fetch_len_1,delay,tsamp)
-                    width_box_0 = width_0/tsamp
-                    width_box_1 = width_1/tsamp
-                    #fetch takes log2 of the downfact
-                    print(f"Writing cands file!")
-                    writer_0.writerow([fn,dm,int(np.around(np.log2(width_box_0))),speg.peak_DM,fn,start,"",1])
-                    # writer_1.writerow([fn,speg.peak_SNR,start,speg.peak_DM,int(np.around(np.log2(width_1))),fn])
+def create_cands(spegs,filfile):
+    with open('cands.csv','w',newline='') as cands:
+        writer_0=csv.writer(cands,delimiter=',')
+        #write header
+        writer_0.writerow(["file","snr","width","dm","label","stime","chan_mask_path","num_files"])
+        for speg in spegs:
+            if speg.peak_SNR>5.5:
+                # define the width
+                #the chunks are min size of 128 samples, this means that if we are less than 128, just round up to 128
+                mint = speg.min_time
+                maxt = speg.max_time
+                SNR = float(speg.peak_SNR)
+                dm = speg.peak_DM
+                #fetch uses time calc is  timestamp-width- dispersion delay ---> timestamp+width+dispersion delay
+                fn,tsamp,start,delay = prep_fetch_scale_fil(filfile,mint,maxt,dm)
+                #length has to be at least 0.5s
+                print(f"dispersion delay:{delay}")
+                #calculate the dispersion delay time
+                width = (maxt-mint)/tsamp
+                width_bins = int(np.log2(width))
+                #fetch takes log2 of the downfact
+                print(f"Writing cands file!")
+                writer_0.writerow([fn,SNR,1,dm,fn,start,"",1])
 
 #copied from waterfaller.py
 def maskfile(maskfn, data, start_bin, nbinsextra):
@@ -118,9 +102,10 @@ def prep_fetch_scale_fil(filfile,min_burst_time,max_burst_time,dm):
     out_burst_time: time in the new filterbank file of the burst
     '''
     from sigpyproc import readers as r
-    #calculate the filterbank length required due to dispersion times 2 for plotting purposes
-    #start it a bit later to prevent errors
-    fil = r.PFITSReader(filfile)
+    try:
+        fil = r.PFITSReader(filfile)
+    except:
+        fil = r.FilReader(filfile)
     tsamp = float(fil.header.tsamp)
     try:
         fch1 = float(fil.header.fch1._to_value("MHz"))

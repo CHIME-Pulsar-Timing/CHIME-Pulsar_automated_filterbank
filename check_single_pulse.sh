@@ -9,7 +9,9 @@ do
     esac
 done
 
-FILFILES=*.fits
+FILFILES=*.fil
+FITSFILES=*.fits
+FILFILES=("${FILFILES[@]}" "${FITSFILES[@]}")
 BATCH=false
 FETCH=false
 for FIL in $FILFILES;
