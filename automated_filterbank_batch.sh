@@ -33,7 +33,7 @@ source ~/projects/rrg-istairs-ad/Your/bin/activate
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
-EXT=extension="${p##*.}"
+EXT="${p##*.}"
 # SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
 # SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
 # mkdir -p $SLURM_TMPDIR
