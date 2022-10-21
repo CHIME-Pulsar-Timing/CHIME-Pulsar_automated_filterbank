@@ -33,6 +33,7 @@ source ~/projects/rrg-istairs-ad/Your/bin/activate
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
+EXT=extension="${p##*.}"
 # SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
 # SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
 # mkdir -p $SLURM_TMPDIR
@@ -50,7 +51,12 @@ if test -f "$p"; then
     #basically try catch
     until [ "$n" -ge 1 ]
     do
-        DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
+        if [ $EXT == "fits" ]; then
+            #set dead gpu string to empty if using fits
+            DEAD_GPU=""
+        else
+            DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
+        fi
         echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
         python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #FETCH and SPEGID are slow so lets like ignore that for now
