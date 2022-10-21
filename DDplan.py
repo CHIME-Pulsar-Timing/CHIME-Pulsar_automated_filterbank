@@ -475,7 +475,7 @@ if __name__=='__main__':
         opts, args = getopt.getopt(sys.argv[1:], "hwo:l:d:f:b:n:k:c:t:s:r:i:",
                                    ["help", "write", "output=", "loDM=", "hiDM=",
                                     "fctr=", "bw=", "numchan=", "blocklen=",
-                                    "cDM=", "dt=", "subbands=", "res="])
+                                    "cDM=", "dt=", "subbands="])
 
     except getopt.GetoptError:
         # print help information and exit:
@@ -573,11 +573,11 @@ from '%s'
             cDM = float(a)
         if o in ("-s", "--subbands"):
             numsubbands = int(a)
-        if o in ("-r", "--res"):
-            ok_smearing = float(a)
         if o in ("-i", "--ignorechan"):
             ignorechan = a
-
+    ###########overwrite ok_smearing!!!
+    ok_smearing = dt*4*1000
+    print(ok_smearing*1000)
     # The following is an instance of an "observation" class
     obs = observation(dt, fctr, BW, numchan, cDM)
 
@@ -596,7 +596,6 @@ from '%s'
     # and provide a level of smearing that you are willing to accept (in ms)
     methods = dm_steps(loDM, hiDM, obs, cDM, numsubbands, ok_smearing,
                        blocklen, device)
-    
     if write_dedisp:
         dDMs = [m.dDM for m in methods]
         dsubDMs = [m.dsubDM for m in methods]

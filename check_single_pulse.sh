@@ -11,8 +11,9 @@ do
         t) prep_ts=$OPTARG;;
     esac
 done
-
-FILFILES=*.fil
+shift $(($OPTIND - 1))
+FILFILES=$@
+echo $FILFILES
 BATCH=false
 FETCH=false
 for FIL in $FILFILES;
@@ -25,6 +26,7 @@ do
             #now finally check if results has been run
             #Check FETCH 1 has been run
             FP="${PULSAR}/nsub_128_0/results_a.csv"
+            echo $PULSAR
             if [ ! -f $FP ]; then
                 #echo $FP
                 #echo "$FIL never ran FETCH missing 0"
@@ -57,11 +59,11 @@ do
         if [ -s ${PULSAR}/cands128_0.csv ]
         then
             FETCH=true
-                    echo "**** printing cands *****"
-                cat "${PULSAR}"/*cands*.csv
+            echo "**** printing cands *****"
+            cat "${PULSAR}"/*cands*.csv
             echo "****end cands*****"
-                    echo "$FIL never ran FETCH"
-                    ls -hlHd $FIL
+            echo "$FIL never ran FETCH"
+            ls -lHd $FIL
         else
             FETCH=false
             echo "${PULSAR} - cands file empty"
@@ -92,7 +94,7 @@ do
             echo "submitting FETCH job for $PULSAR"
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-            sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -a -i $PULSAR
+            $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -a -i $PULSAR
         fi
     fi
     
