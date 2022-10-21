@@ -576,7 +576,8 @@ from '%s'
         if o in ("-i", "--ignorechan"):
             ignorechan = a
     ###########overwrite ok_smearing!!!
-    ok_smearing = dt*3
+    ok_smearing = dt*4*1000
+    print(ok_smearing*1000)
     # The following is an instance of an "observation" class
     obs = observation(dt, fctr, BW, numchan, cDM)
 

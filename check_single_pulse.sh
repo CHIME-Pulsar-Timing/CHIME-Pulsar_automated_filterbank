@@ -8,10 +8,9 @@ do
         d) DM=$OPTARG;;
     esac
 done
-
-FILFILES=*.fil
-FITSFILES=*.fits
-FILFILES=("${FILFILES[@]}" "${FITSFILES[@]}")
+shift $(($OPTIND - 1))
+FILFILES=$@
+echo $FILFILES
 BATCH=false
 FETCH=false
 for FIL in $FILFILES;

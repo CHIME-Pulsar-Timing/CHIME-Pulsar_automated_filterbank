@@ -26,7 +26,7 @@ do
 done
 AP=$(readlink -f $MY_PATH)
 #lets find all directories where we've run prep_fetch
-PROCESSED=$(find $AP -name 'cands128_0.csv' -printf '%h\n' | sort -u)
+PROCESSED=$(find $AP -name 'cands.csv' -printf '%h\n' | sort -u)
 
 for CAND_PATH in $PROCESSED;
 do
@@ -39,31 +39,13 @@ do
     #if we have the second argument then
     if [ "$ADDITIONAL" = true ] ; then
         #make plots and do a predict for general pulses
-        PLOT=nsub_128_0/
-        FP128=cands128_0.csv
-        if [ ! -d $PLOT ]; then
-            mkdir $PLOT
-        fi
-        candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
-        predict.py --data_dir $PLOT --model a --probability 0.1
+        predict.py --data_dir nsub_0_5 --model a --probability 0.1
 
         #do the small dm_range one for very short timescales pulses
-        PLOT=nsub_128_0_short/
-        FP128=cands128_0.csv
-        if [ ! -d $PLOT ]; then
-            mkdir $PLOT
-        fi
-        candmaker.py --frequency_size 256 --time_size 256 --dm_range 5 --cand_param_file $FP128 --plot --fout $PLOT
-        predict.py --data_dir $PLOT --model a --probability 0.1
+        predict.py --data_dir nsub_1 --model a --probability 0.1
 
         #do the 1 second one for long timescales pulses
-        PLOT=nsub_128_1/
-        FP128=cands128_1.csv
-        if [ ! -d $PLOT ]; then
-            mkdir $PLOT
-        fi
-        candmaker.py --frequency_size 256 --time_size 256 --cand_param_file $FP128 --plot --fout $PLOT
-        predict.py --data_dir $PLOT --model a --probability 0.1
+        # predict.py --data_dir cands_0_5_short.csv --model a --probability 0.1
 
     fi
     #once it has finished everything, tar all the files up

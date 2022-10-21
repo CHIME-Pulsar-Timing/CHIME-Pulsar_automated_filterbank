@@ -30,7 +30,8 @@ done
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
-SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+# SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
 mkdir -p $SLURM_TMPDIR
 SLURM_JOB_ID=1
 #make sure that $p is a file
@@ -68,10 +69,10 @@ if test -f "$p"; then
         #remove the extra fil files
     done
     #run candmaker
-    mkdir -p nsub_0_5
-    mkdir -p nsub_1
-    python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -ws 500
-    python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -ws 1000
+    mkdir -p ${SLURM_TMPDIR}/nsub_0_5
+    mkdir -p ${SLURM_TMPDIR}/nsub_1
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -ws 500
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -ws 1000
 
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     rm "${SLURM_TMPDIR}"/$FIL
