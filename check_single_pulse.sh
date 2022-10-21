@@ -1,14 +1,11 @@
 #!/bin/bash
 #this file will run to check which filterbank files have been run and which have not
-#set default value for prep_ts
-prep_ts=0
-while getopts "bfd:t:" flag
+while getopts "bfd:" flag
 do
     case "${flag}" in
         b) RBATCH=true;;
         f) RFETCH=true;;
         d) DM=$OPTARG;;
-        t) prep_ts=$OPTARG;;
     esac
 done
 shift $(($OPTIND - 1))
@@ -86,7 +83,7 @@ do
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
             #this will send the batch job and after it's done sent the fetch job
-            $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL -t $prep_ts
+            $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL
         fi
     fi
     if [ "$RFETCH" = true ]; then

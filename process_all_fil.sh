@@ -5,7 +5,6 @@ do
     case "${flag}" in
         d) DM=${OPTARG};;
         f) FIL=${OPTARG};;
-        t) prep_ts=${OPTARG};;
     esac
 done
 

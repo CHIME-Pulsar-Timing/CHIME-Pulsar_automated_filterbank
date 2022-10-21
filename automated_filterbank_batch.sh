@@ -12,13 +12,12 @@
 #3 is filterbank file
 #4 is the location of the scripts
 #if we are not splitting then just set out as the fil file
-while getopts d:a:p:t: flag
+while getopts d:a:p: flag
 do
     case "${flag}" in
         d) DM=${OPTARG};;
         a) AFP=${OPTARG};;
         p) p=${OPTARG};;
-        t) prep_ts=${OPTARG};;
     esac
 done
 
