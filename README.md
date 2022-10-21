@@ -17,7 +17,7 @@ symlink it to your scratch sapce
 # CHIME-Pulsar_automated_filterbank
 the best way to run is to run the following command, it will submit two jobs per `observation.fil`, the first one runs the presto pipeline, the second will run the FETCH pipeline, which is dependent on the success of the first job.
 
-`check_single_pulse.sh -b -d $DM`
+`check_single_pulse.sh -b -d $DM $Filterbank/Fits_files`
 
 
 If for some reason FETCH failed you can run it again with the following command (`check_single_pulse.sh` will check if FETCH ran)
