@@ -51,6 +51,7 @@ if test -f "$p"; then
     #basically try catch
     until [ "$n" -ge 1 ]
     do
+    	echo $EXT
         if [ $EXT == "fits" ]; then
             #set dead gpu string to empty if using fits
             DEAD_GPU=""
