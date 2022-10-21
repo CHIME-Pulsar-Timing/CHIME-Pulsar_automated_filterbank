@@ -29,6 +29,7 @@ counter=0
 module use /project/6004902/modulefiles
 module load presto
 module load chime-psr
+source ~/projects/rrg-istairs-ad/Your/bin/activate
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
