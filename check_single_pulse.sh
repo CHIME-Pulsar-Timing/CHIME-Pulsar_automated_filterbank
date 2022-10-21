@@ -22,7 +22,7 @@ do
         if [ -f $SP ]; then
             #now finally check if results has been run
             #Check FETCH 1 has been run
-            FP="${PULSAR}/nsub_128_0/results_a.csv"
+            FP="${PULSAR}/nsub_0_5/results_a.csv"
             echo $PULSAR
             if [ ! -f $FP ]; then
                 #echo $FP
@@ -32,7 +32,7 @@ do
             fi
 
             #check FETCH 2 has been run
-            FP="${PULSAR}/nsub_128_1/results_a.csv"
+            FP="${PULSAR}/nsub_1/results_a.csv"
             if [ ! -f $FP ]; then
                 #echo $FP
                 #echo "$FIL never ran FETCH missing 1"
@@ -41,19 +41,19 @@ do
             fi
 
             #check FETCH 3 has been run
-            FP="${PULSAR}/nsub_128_0_short/results_a.csv"
-            if [ ! -f $FP ]; then
-                #echo $FP
-                #ls -lHd $FIL
-                #echo "$FIL never ran FETCH missing short"
-                FETCH=true
-            fi
+            # FP="${PULSAR}/nsub_128_0_short/results_a.csv"
+            # if [ ! -f $FP ]; then
+            #     #echo $FP
+            #     #ls -lHd $FIL
+            #     #echo "$FIL never ran FETCH missing short"
+            #     FETCH=true
+            # fi
 
             if [ "$FETCH" = false ]; then
                 echo "$FIL finished everything nothing to see here..." >> completed.csv
         else
         #check if cands is empty
-        if [ -s ${PULSAR}/cands128_0.csv ]
+        if [ -s ${PULSAR}/cands.csv ]
         then
             FETCH=true
             echo "**** printing cands *****"
