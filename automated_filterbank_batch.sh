@@ -34,9 +34,9 @@ source ~/projects/rrg-istairs-ad/Your/bin/activate
 #********************THIS IS THE LAZY WAY OUT!!!
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
 # SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
-SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
-mkdir -p $SLURM_TMPDIR
-SLURM_JOB_ID=1
+# SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
+# mkdir -p $SLURM_TMPDIR
+# SLURM_JOB_ID=1
 #make sure that $p is a file
 if test -f "$p"; then
     #rename it FIL
