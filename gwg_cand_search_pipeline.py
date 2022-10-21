@@ -3,27 +3,25 @@ import subprocess
 import os, glob
 import argparse
 import re
-
-from presto.filterbank import FilterbankFile
 import pipeline_config
-from sk_mad_rficlean import sk_mad_rfi_excision
 import sys
 #original GWG pipeline written by Chiamin
-def run_rfifind(fname,dead_gpus=''):
-    dead_gpu_mask = dead_gpus.split(',')
+def run_rfifind(fname,ext,dead_gpus=''):
     pipeline_config_mask = pipeline_config.ignorelist.split(',')
-    #combine the two masks
-    final_mask = []
-    pipeline_config_mask = list(int(pgm) for pgm in pipeline_config_mask)
-    dead_gpu_mask = list(int(dgm) for dgm in dead_gpu_mask)
-    for dgm in dead_gpu_mask:
-        if dgm in pipeline_config_mask:
-            #do nothing
-            pass
-        else:
-            #if something in the dead gpu mask isn't in the pipe config mask
-            pipeline_config_mask.append(dgm)
-            print('ignoring ',dgm)
+    if dead_gpus!='':
+        dead_gpu_mask = dead_gpus.split(',')
+        #combine the two masks
+        final_mask = []
+        pipeline_config_mask = list(int(pgm) for pgm in pipeline_config_mask)
+        dead_gpu_mask = list(int(dgm) for dgm in dead_gpu_mask)
+        for dgm in dead_gpu_mask:
+            if dgm in pipeline_config_mask:
+                #do nothing
+                pass
+            else:
+                #if something in the dead gpu mask isn't in the pipe config mask
+                pipeline_config_mask.append(dgm)
+                print('ignoring dead gpus',dgm)
 
     #conver pipeline config mask back into string
     ignore_chan_string = ''
@@ -32,9 +30,7 @@ def run_rfifind(fname,dead_gpus=''):
             ignore_chan_string = str(chan)
         else:
             ignore_chan_string = ignore_chan_string+','+str(chan)
-    print('ignoring these channels', ignore_chan_string)
-    rfifind_command = 'rfifind -blocks %d -intfrac 0.4 -clip 4 -ignorechan %s -zapchan %s -o %s %s.fil' %(pipeline_config.rfiblocks,ignore_chan_string,ignore_chan_string,fname,fname)
-
+    rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -zapchan {ignore_chan_string} -o {fname} {fname}{ext}"
     print(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
@@ -44,18 +40,19 @@ def run_rfifind(fname,dead_gpus=''):
         [print(f) for f in os.listdir('.')]
         sys.exit(1)
 
-def run_ddplan(fname,dm):
-    if dm>20.1:
+
+def run_ddplan(fname,ext,dm):
+    if dm>26.1:
         dml=dm-20
     else:
-        dml=0
+        dml=6.1
     dmh=dm+20
     #run the ddplan in my current directory, it's got the rfi masking included
     import pathlib
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
-    ddplan_command = "python %s/DDplan.py -r 1.2 -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dm,dml,dmh,fname,fname)
+    ddplan_command = f"python {path}/DDplan.py -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
     print(ddplan_command)
     # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
     try:
@@ -73,8 +70,7 @@ def run_ddplan(fname,dm):
 
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
-    sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
-    # sp_command = 'single_pulse_search.py %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py -b %s*.dat' %(fname)
     print(sp_command)
     failed=True
     try:
@@ -95,10 +91,9 @@ if __name__ == '__main__':
     parser.add_argument('--dm', type=float,help='DM of the candidate. This will determine the max DM to search for pulsar')
     parser.add_argument('--sp',action='store_true',help='Run single pulse search')
     parser.add_argument('--speg',action='store_true',help='creates the SPEGID files')
-    parser.add_argument('--prep_ts', type=float,default=0,help='prep_ts - this is the length of output you want at the end of the pipeline. i.e a prep-ts of 1s will give you a plot from -500ms to +500ms')
     parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
     parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
-    parser.add_argument('--dead_gpu',type=str,help='use this option if you want to input a mask for dead GPUs')
+    parser.add_argument('--dead_gpu',type=str,default='',help='use this option if you want to input a mask for dead GPUs')
     parser.add_argument('--slurm',type=str,help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
 
     args = parser.parse_args()
@@ -111,13 +106,17 @@ if __name__ == '__main__':
     dedisp = args.dedisp
     rfifind = args.rfifind
     dead_gpu = args.dead_gpu
-    prep_ts = args.prep_ts
     slurm=args.slurm
     if slurm:
         os.chdir(slurm)
     print('Running RFI mitigation')
     #get only the file name
-    fname = fil.rstrip('.fil')
+    if fil.endswith(".fits"):
+        fname = fil.rstrip('.fits')
+        ext = '.fits'
+    elif fil.endswith(".fil"):
+        fname = fil.rstrip('.fil')
+        ext = '.fil'
     fname = fname.split('/')
     fname = fname[-1]
     if os.path.islink(fil):
@@ -126,18 +125,11 @@ if __name__ == '__main__':
             print('File does not exist')
             sys.exit()
 
-    #get some header details from the filterbank file
-    filfile = FilterbankFile(fil)
-    tsamp = filfile.dt
-    nsamp = filfile.nspec
-    nchan = filfile.nchan
-
-
     if rfifind:
-        run_rfifind(fname,dead_gpu)
+        run_rfifind(fname,ext,dead_gpu)
     if dedisp:
         #run ddplan
-        run_ddplan(fname,source_dm) 
+        run_ddplan(fname,ext,source_dm)
     if sp:
         run_sp(fname)
     #run SPEGID on candidates
@@ -149,4 +141,4 @@ if __name__ == '__main__':
     #prep the file needed for fetch
     if fetch:
         from prep_fetch import prep_fetch_csv
-        prep_fetch_csv(fname+'.fil',rank=5,fil_length=prep_ts)
+        prep_fetch_csv(fname+ext,rank=5)

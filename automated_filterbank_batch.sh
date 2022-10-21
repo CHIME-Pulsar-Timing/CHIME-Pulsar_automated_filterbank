@@ -55,14 +55,13 @@ while [ $? -ne 0 ]; do
     ((counter++))
     module load chime-psr
 done
-
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
-# PULSAR=$(echo "$p" | cut -f 1 -d '.')
-# SLURM_TMPDIR='/home/adamdong/scratch/tmpdir/'$PULSAR
-# SLURM_TMPDIR='/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir/'$PULSAR
-# mkdir -p $SLURM_TMPDIR
-# SLURM_JOB_ID=1
+PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
+# SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
+mkdir -p $SLURM_TMPDIR
+SLURM_JOB_ID=1
 #make sure that $p is a file
 if test -f "$p"; then
     #rename it FIL
@@ -77,7 +76,7 @@ if test -f "$p"; then
     until [ "$n" -ge 1 ]
     do
         DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
-        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --prep_ts $prep_ts --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+        python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #FETCH and SPEGID are slow so lets like ignore that for now
         #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #for rapid tests, only do rfifind
@@ -96,6 +95,12 @@ if test -f "$p"; then
         #exit 1
         #remove the extra fil files
     done
+    #run candmaker
+    mkdir -p ${SLURM_TMPDIR}/nsub_0_5
+    mkdir -p ${SLURM_TMPDIR}/nsub_1
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -n 5 -ws 500
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 5 -ws 1000
+
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     rm "${SLURM_TMPDIR}"/$FIL
     #remove the .dat files
@@ -107,7 +112,7 @@ if test -f "$p"; then
     rm "${SLURM_TMPDIR}"/*DM*.singlepulse
     cp -r ${SLURM_TMPDIR}/* .
     #clean up - not needed on compute canada, but nice to run clean up when on my own computer
-    # rm -r ${SLURM_TMPDIR}
+    rm -r ${SLURM_TMPDIR}
     exit 0
 fi
 #didn't find file, throw error
