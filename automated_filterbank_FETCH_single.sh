@@ -54,5 +54,4 @@ do
     #combine the results if we have split things
     cd $AP
     echo $CAND_PATH >> combined_results.csv
-    cat "$CAND_PATH/${PLOT}"results_*.csv >> combined_results.csv
 done
