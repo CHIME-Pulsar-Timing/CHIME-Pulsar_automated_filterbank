@@ -65,8 +65,8 @@ for my_dir in os.listdir(bdir):
                         print(f"copying {plot} with dm:{dm_val}")
                         if ("nsub_128_0" in nsub) and (not ("short" in nsub)) :
                             cp(png_fp,f"{od}_nsub0")
-                        #elif "nsub_128_1" in nsub:
-                        #    cp(png_fp,f"{od}_nsub1")
+                        elif "nsub_128_1" in nsub:
+                            cp(png_fp,f"{od}_nsub1")
                         #elif "nsub_128_0_short" in nsub:
                         #    cp(png_fp,f"{od}_nsub_short")
 

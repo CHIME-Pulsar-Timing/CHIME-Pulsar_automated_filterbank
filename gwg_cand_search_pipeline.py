@@ -73,8 +73,8 @@ def run_ddplan(fname,dm):
 
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
-    sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
-    # sp_command = 'single_pulse_search.py %s*.dat' %(fname)
+    # sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py %s*.dat' %(fname)
     print(sp_command)
     failed=True
     try:

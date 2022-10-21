@@ -61,7 +61,7 @@ do
                 cat "${PULSAR}"/*cands*.csv
             echo "****end cands*****"
                     echo "$FIL never ran FETCH"
-                    ls -lHd $FIL
+                    ls -hlHd $FIL
         else
             FETCH=false
             echo "${PULSAR} - cands file empty"
@@ -70,7 +70,7 @@ do
 
         else
             echo "$FIL never finished running single_pulse_search.py"
-            ls -lHd $FIL
+            ls -hlHd $FIL
             BATCH=true
         fi
     else

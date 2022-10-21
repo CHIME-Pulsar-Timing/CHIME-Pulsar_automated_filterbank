@@ -96,9 +96,9 @@ with open('extracted_bursts.csv','w') as csv_file:
                             success=False
                 if success:
                     print('wrote successfully')
-                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_fb_start,obs_length,pointing_ra_h,pointing_dec_h,''])
+                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_fb_start,obs_length,pointing_ra_h,pointing_dec_h,SNR,''])
                 else:
-                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_fb_start,obs_length,pointing_ra_h,pointing_dec_h,''])
+                    writer.writerow([fb_file,burst[0],60,DM,mask_file,mjd_fb_start,obs_length,pointing_ra_h,pointing_dec_h,SNR,''])
 
                     print("Never found burst in SPEG file")
                     print("day " + str(key))
