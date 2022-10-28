@@ -5,6 +5,7 @@ import argparse
 import re
 import pipeline_config
 import sys
+import your_rfi_sk
 #original GWG pipeline written by Chiamin
 def run_rfifind(fname,ext,dead_gpus=''):
     pipeline_config_mask = pipeline_config.ignorelist.split(',')
@@ -41,7 +42,7 @@ def run_rfifind(fname,ext,dead_gpus=''):
         sys.exit(1)
 
 
-def run_ddplan(fname,ext,dm):
+def run_ddplan(fname,ext,dm,sk_mask):
     if dm>26.1:
         dml=dm-20
     else:
@@ -52,7 +53,11 @@ def run_ddplan(fname,ext,dm):
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
-    ddplan_command = f"python {path}/DDplan.py -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
+    if sk_mask:
+        ddplan_command = f"python {path}/DDplan.py -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
+    else:
+        ddplan_command = f"python {path}/DDplan.py -y -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
+
     print(ddplan_command)
     # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
     try:
@@ -86,7 +91,7 @@ def run_sp(fname):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-
+    parser.add_argument('--sk_mask', action='store_true', help="apply a SK mask from 'your' onto the rfifind mask")
     parser.add_argument('--fil', type=str, help='Input filterbank file')
     parser.add_argument('--dedisp',action='store_true',help='Run prepsubband and dedisperse the data')
     parser.add_argument('--dm', type=float,help='DM of the candidate. This will determine the max DM to search for pulsar')
@@ -108,6 +113,7 @@ if __name__ == '__main__':
     rfifind = args.rfifind
     dead_gpu = args.dead_gpu
     slurm=args.slurm
+    sk_mask = args.sk_mask
     if slurm:
         os.chdir(slurm)
     print('Running RFI mitigation')
@@ -128,9 +134,11 @@ if __name__ == '__main__':
 
     if rfifind:
         run_rfifind(fname,ext,dead_gpu)
+    if sk_mask:
+        your_rfi_sk.merge_mask(fname+ext,fname+'_rfifind.mask')
     if dedisp:
         #run ddplan
-        run_ddplan(fname,ext,source_dm)
+        run_ddplan(fname,ext,source_dm,sk_mask)
     if sp:
         run_sp(fname)
     #run SPEGID on candidates
