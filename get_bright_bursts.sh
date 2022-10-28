@@ -37,7 +37,7 @@ do
                 cp $PATH_H5 positive_bursts_short
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_short.csv
 
-            elif [[ $PATH_PNG == *"nsub_128_1"* ]];
+            elif [[ $PATH_PNG == *"nsub_1"* ]];
             then
                 cp $PATH_PNG positive_bursts_1
                 cp $PATH_H5 positive_bursts_1

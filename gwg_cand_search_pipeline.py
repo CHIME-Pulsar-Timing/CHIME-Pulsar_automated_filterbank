@@ -30,7 +30,7 @@ def run_rfifind(fname,ext,dead_gpus=''):
             ignore_chan_string = str(chan)
         else:
             ignore_chan_string = ignore_chan_string+','+str(chan)
-    rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -zapchan {ignore_chan_string} -o {fname} {fname}{ext}"
+    rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -o {fname} {fname}{ext}"
     print(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
