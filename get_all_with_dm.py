@@ -44,12 +44,13 @@ if not os.path.isdir(f"{od}_nsub_short"):
 #list all dirs in bdir
 for my_dir in os.listdir(bdir):
     #check if the nsubs exist
-    if os.path.isdir(f"{bdir}/{my_dir}/nsub_128_0"):
+    if os.path.isdir(f"{bdir}/{my_dir}/nsub_0_5"):
         #if it does, grab all the filesnames
-        nsub0 = f"{bdir}/{my_dir}/nsub_128_0"
-        nsub1 = f"{bdir}/{my_dir}/nsub_128_1"
-        nsub_short = f"{bdir}/{my_dir}/nsub_128_0_short"
-        nsubs = [nsub0,nsub1,nsub_short]
+        nsub0 = f"{bdir}/{my_dir}/nsub_0_5"
+        nsub1 = f"{bdir}/{my_dir}/nsub_1"
+        print(nsub1)
+        nsub_short = f"{bdir}/{my_dir}/nsub_0_short"
+        nsubs = [nsub0,nsub1]
         for nsub in nsubs:
             fn = os.listdir(nsub)
             #only get the pngs
@@ -63,9 +64,9 @@ for my_dir in os.listdir(bdir):
                     #filter dm_val
                     if (dm_val>dm_min)&(dm_val<dm_max):
                         print(f"copying {plot} with dm:{dm_val}")
-                        if ("nsub_128_0" in nsub) and (not ("short" in nsub)) :
+                        if ("nsub_0" in nsub) and (not ("short" in nsub)) :
                             cp(png_fp,f"{od}_nsub0")
-                        elif "nsub_128_1" in nsub:
+                        elif "nsub_1" in nsub:
                             cp(png_fp,f"{od}_nsub1")
                         #elif "nsub_128_0_short" in nsub:
                         #    cp(png_fp,f"{od}_nsub_short")
