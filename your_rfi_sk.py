@@ -5,6 +5,7 @@ from your.candidate import Candidate
 import your
 from presto import rfifind
 from multiprocessing import Pool
+import matplotlib.pyplot as plt
 def maskfile(maskfn, data, start_bin, nbinsextra):
     print('loading mask')
     rfimask = rfifind.rfifind(maskfn)
@@ -17,7 +18,6 @@ def maskfile(maskfn, data, start_bin, nbinsextra):
     data[masked_chans,:] = mask_vals[masked_chans,np.newaxis]
     print(f"Total_masked chan length {sum(masked_chans)}")
     return data, masked_chans
-
 
 def get_mask(rfimask, startsamp, N):
     """Return an array of boolean values to act as a mask
@@ -52,22 +52,25 @@ def calculate_merge_sk(X):
     i = X['i']
     your_data = your_object.get_data(samp, chunk_sz)
     print(f"starting sk filter on data of shape {your_data.shape}")
-    sk_mask = your.utils.rfi.sk_filter(
-        your_data,
-        your_object.your_header.foff,
-        your_object.your_header.nchans,
-        your_object.your_header.tsamp,
-        sigma=5,
+
+    #strictly speaking this is their combined filter
+    sk_mask = your.utils.rfi.sk_sg_filter(
+        your_data, your_object, your_object.your_header.nchans
     )
-    print("finished sk filter")
     rfimask = rfifind.rfifind(rfifind_mask)
     mask_arr = rfimask.mask_zap_chans_per_int
     int_mask = mask_arr[i]
-    sk_chan = np.where(sk_mask)
+    print(f"size of old mask {len(int_mask)}")
+    sk_chan = 1023 - np.where(sk_mask)[0]
+    # plt.figure()
+    # your_data[:,sk_chan] = 0
+    # plt.imshow(your_data.T,aspect="auto")
+    # plt.show()
     for skc in sk_chan:
         if not (skc in int_mask):
             int_mask = np.append(int_mask,skc)
     int_mask = np.sort(int_mask)
+    print(f"size of new mask {len(int_mask)}")
     return int_mask
 
 def merge_mask(fil,rfifind_mask,presto_block = 8):
@@ -87,6 +90,8 @@ def merge_mask(fil,rfifind_mask,presto_block = 8):
         i+=1
     p = Pool(20)
     new_mask_arr = p.map(calculate_merge_sk,pool_arr)
+    # for p in pool_arr:
+        # calculate_merge_sk(p)
     rfimask = rfifind.rfifind(rfifind_mask)
     maskarr = np.full((rfimask.nint,rfimask.nchan),False)
     for i,m in enumerate(new_mask_arr):

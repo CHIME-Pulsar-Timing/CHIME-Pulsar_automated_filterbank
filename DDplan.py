@@ -433,14 +433,14 @@ for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in zip(dDMs, dsubDMs, dm
             if downsamp < 2: subdownsamp = datdownsamp = 1
             # First create the subbands
             myexecute("prepsubband -mask %s -ignorechan %s -sub -subdm %.2f -nsub %d -downsamp %d -o %s %s" %
-                      (basename+'_rfifind'+sk+'.mask',ignorelist, subDM, nsub, subdownsamp , basename, rawfiles))
+                      (basename+'_rfifind.mask',ignorelist, subDM, nsub, subdownsamp , basename, rawfiles))
             # And now create the time series
             subnames = basename+"_DM%.2f.sub[0-9]*"%subDM
             myexecute("prepsubband -mask %s -ignorechan %s -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s" %
-                      (basename+'_rfifind'+sk+'.mask',ignorelist, loDM, dDM, dmspercall, datdownsamp, basename, subnames))
+                      (basename+'_rfifind.mask',ignorelist, loDM, dDM, dmspercall, datdownsamp, basename, subnames))
         else:
             myexecute("prepsubband -mask %s -ignorechan %s -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %s -o %s %s" %
-                      (basename+'_rfifind'+sk+'.mask',ignorelist, nsub, loDM, dDM, dmspercall, downsamp, basename, rawfiles))
+                      (basename+'_rfifind.mask',ignorelist, nsub, loDM, dDM, dmspercall, downsamp, basename, rawfiles))
 """
 def usage():
     print("""
@@ -458,7 +458,7 @@ def usage():
   [-s subbands, --subbands=nsub]  : Number of subbands (default = #chan) 
   [-r resolution, --res=res]      : Acceptable time resolution (ms)
   [-w, --write]                   : Write a dedisp.py file for the plan
-  [-y --sk]                            : use the SK mask
+
   The program generates a good plan for de-dispersing raw data.  It
   trades a small amount of sensitivity in order to save computation costs.
   It will determine the observation parameters from the raw data file
@@ -472,10 +472,10 @@ if __name__=='__main__':
     import getopt
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hwo:l:d:f:b:n:k:c:t:s:r:i:y",
+        opts, args = getopt.getopt(sys.argv[1:], "hwo:l:d:f:b:n:k:c:t:s:r:i:",
                                    ["help", "write", "output=", "loDM=", "hiDM=",
                                     "fctr=", "bw=", "numchan=", "blocklen=",
-                                    "cDM=", "dt=", "subbands=","sk"])
+                                    "cDM=", "dt=", "subbands="])
 
     except getopt.GetoptError:
         # print help information and exit:
@@ -575,9 +575,6 @@ from '%s'
             numsubbands = int(a)
         if o in ("-i", "--ignorechan"):
             ignorechan = a
-        if o in ("-y", "--sk"):
-            sk = "_SK"
-
     ###########overwrite ok_smearing!!!
     ok_smearing = dt*4*1000
     print(ok_smearing*1000)
@@ -611,7 +608,6 @@ from '%s'
             f.write(dedisp_template1)
             f.write("nsub = %d\n\n"%numsubbands)
             f.write("basename = %s\n"%repr(basename))
-            f.write("sk = %s\n"%repr(sk))
             f.write("rawfiles = %s\n\n"%repr(args[0]))
             f.write("""# dDM steps from DDplan.py
 dDMs        = %s\n"""%repr(dDMs))

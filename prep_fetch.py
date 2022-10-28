@@ -14,7 +14,7 @@ def dispersion_delay(dm, f1, f2):
     """Return DM delay in seconds"""
     return DM_CONST * dm * (1.0 / f2 ** 2 - 1.0 / f1 ** 2)
 
-def prep_fetch_csv(filfile,rank=5,fil_length=0):
+def prep_fetch_csv(filfile,rank=5):
     #get spegid_python3 speg
     from SPEGID_Python3 import SinglePulseEventGroup
     spegs = np.load('spegs.npy',allow_pickle=1)
@@ -36,10 +36,8 @@ def create_cands(spegs,filfile):
                 SNR = float(speg.peak_SNR)
                 dm = speg.peak_DM
                 #fetch uses time calc is  timestamp-width- dispersion delay ---> timestamp+width+dispersion delay
-                fn,tsamp,start,delay = prep_fetch_scale_fil(filfile,mint,maxt,dm)
+                fn,tsamp,start = prep_fetch_scale_fil(filfile,mint,maxt,dm)
                 #length has to be at least 0.5s
-                print(f"dispersion delay:{delay}")
-                #calculate the dispersion delay time
                 width = (maxt-mint)/tsamp
                 width_bins = int(np.log2(width))
                 #fetch takes log2 of the downfact
@@ -101,24 +99,25 @@ def prep_fetch_scale_fil(filfile,min_burst_time,max_burst_time,dm):
     filename: new string filename for the filterbank file created
     out_burst_time: time in the new filterbank file of the burst
     '''
-    from sigpyproc import readers as r
     try:
-        fil = r.PFITSReader(filfile)
+        from presto.psrfits import PsrfitsFile
+        fil = PsrfitsFile(filfile)
+        tsamp = fil.tsamp
     except:
-        fil = r.FilReader(filfile)
-    tsamp = float(fil.header.tsamp)
-    try:
-        fch1 = float(fil.header.fch1._to_value("MHz"))
-        foff = float(fil.header.foff._to_value("MHz"))
-    except:
-        fch1 = float(fil.header.fch1)
-        foff = float(fil.header.foff)
-    nchans = fil.header.nchans
-    freqs = [fch1,fch1+foff*nchans]
+        from presto.filterbank import FilterbankFile
+        fil = FilterbankFile(filfile)
+        tsamp = fil.header['tsamp']
+    # tsamp = float(fil.header.tsamp)
+    # try:
+    #     fch1 = float(fil.header.fch1._to_value("MHz"))
+    #     foff = float(fil.header.foff._to_value("MHz"))
+    # except:
+    #     fch1 = float(fil.header.fch1)
+    #     foff = float(fil.header.foff)
+    # nchans = fil.header.nchans
     #get the number of samples at the bursts, i.e. how many bursts needed to get to sample
     bt = (max_burst_time+min_burst_time)/2
-    delay = dispersion_delay(dm,max(freqs),min(freqs))
-    return filfile,tsamp,bt,delay
+    return filfile,tsamp,bt
     
 if __name__=='__main__':
     prep_fetch_csv(sys.argv[1],rank=5)
