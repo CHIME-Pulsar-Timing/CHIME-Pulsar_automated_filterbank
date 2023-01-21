@@ -1,9 +1,10 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=20:00:00
-#SBATCH --mem=20GB
-#SBATCH --cpus-per-task=10
+#SBATCH --time=10:00:00
+#SBATCH --mem=16GB
+#SBATCH --cpus-per-task=5
+##SBATCH --gres=gpu:v100l:1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
@@ -85,8 +86,8 @@ if test -f "$p"; then
     #run candmaker
     mkdir -p ${SLURM_TMPDIR}/nsub_0_5
     mkdir -p ${SLURM_TMPDIR}/nsub_1
-    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -n 10 -ws 500
-    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 10 -ws 1000
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -n 5 -ws 500
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 5 -ws 1000
 
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     rm "${SLURM_TMPDIR}"/$FIL
