@@ -28,7 +28,7 @@ def create_cands(spegs,filfile):
         #write header
         writer_0.writerow(["file","snr","width","dm","label","stime","chan_mask_path","num_files"])
         for speg in spegs:
-            if speg.peak_SNR>5.5:
+            if speg.peak_SNR>6.5:
                 # define the width
                 #the chunks are min size of 128 samples, this means that if we are less than 128, just round up to 128
                 mint = speg.min_time

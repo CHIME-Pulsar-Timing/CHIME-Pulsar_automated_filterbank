@@ -24,20 +24,18 @@ done
 #path to automated filterbank file script locations
 #this is set when you run a batch script by default
 #load the modules needed, retry if failed... (don't know why it sometimes fails?)
-max_retry=5
-counter=0
-module use /project/6004902/modulefiles
-module load presto
-module load chime-psr
-source ~/projects/rrg-istairs-ad/Your/bin/activate
+#module use /project/6004902/modulefiles
+#module load presto
+#module load chime-psr
+#source ~/projects/rrg-istairs-ad/Your/bin/activate
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
 EXT="${p##*.}"
-# SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
 # SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
-# mkdir -p $SLURM_TMPDIR
-# SLURM_JOB_ID=1
+mkdir -p $SLURM_TMPDIR
+SLURM_JOB_ID=1
 #make sure that $p is a file
 if test -f "$p"; then
     #rename it FIL
@@ -57,11 +55,10 @@ if test -f "$p"; then
             DEAD_GPU=""
             echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
             python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
-
         else
             DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
             echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-            python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+            python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         fi
 
         #FETCH and SPEGID are slow so lets like ignore that for now

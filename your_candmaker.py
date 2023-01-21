@@ -24,7 +24,7 @@ import pandas as pd
 from your.candidate import Candidate, crop
 from your.utils.gpu import gpu_dedisp_and_dmt_crop
 from your.utils.misc import YourArgparseFormatter
-from your.utils.plotter import plot_h5
+from plot_h5 import plot_h5
 import textwrap
 
 logger = logging.getLogger()
@@ -32,17 +32,11 @@ logger = logging.getLogger()
 
 def cpu_dedisp_dmt(cand, args):
 
-    cand.dmtime()
-    logger.info("Made DMT")
-    if args.opt_dm:
-        logger.info("Optimising DM")
-        logger.warning("This feature is experimental!")
-        cand.optimize_dm()
-    else:
-        cand.dm_opt = -1
-        cand.snr_opt = -1
+    cand.dmtime(target="GPU")
+    print("Made DMT")
+
     cand.dedisperse()
-    logger.info("Made Dedispersed profile")
+    print("Made Dedispersed profile")
     #resize
     #crop out1 the center data
     tsamp = cand.your_header.tsamp
@@ -140,18 +134,7 @@ def cand2h5(cand_val):
         cand.fp.close()
     logger.info("Got Chunk")
     print("dedispersing")
-    if gpu_id >= 0:
-        logger.debug(f"Using the GPU {gpu_id}")
-        try:
-            cand = gpu_dedisp_and_dmt_crop(cand, device=gpu_id)
-        except CudaAPIError:
-            logger.info(
-                "Ran into a CudaAPIError, using the CPU version for this candidate"
-            )
-            cand = cpu_dedisp_dmt(cand, args)
-    else:
-        cand = cpu_dedisp_dmt(cand, args)
-
+    cand = cpu_dedisp_dmt(cand, args)
     print("Resizing")
     cand.resize(
         key="ft", size=args.frequency_size, axis=1, anti_aliasing=True, mode="constant"
