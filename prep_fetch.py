@@ -38,8 +38,6 @@ def create_cands(spegs,filfile):
                 #fetch uses time calc is  timestamp-width- dispersion delay ---> timestamp+width+dispersion delay
                 fn,tsamp,start = prep_fetch_scale_fil(filfile,mint,maxt,dm)
                 #length has to be at least 0.5s
-                width = (maxt-mint)/tsamp
-                width_bins = int(np.log2(width))
                 #fetch takes log2 of the downfact
                 print(f"Writing cands file!")
                 writer_0.writerow([fn,SNR,1,dm,fn,start,"",1])

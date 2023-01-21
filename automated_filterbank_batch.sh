@@ -58,7 +58,6 @@ if test -f "$p"; then
             DEAD_GPU=""
             echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
             python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
-
         else
             DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
             echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
@@ -74,13 +73,13 @@ if test -f "$p"; then
         n=$((n+1))
         # sleep 15
         #if it fails, lets copy all the things to my scratch directory then exit with error code
-        # PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-        #ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
-        #echo "copying error files to ${ERRORS}"
-        #df -h
-        #mkdir -p $ERRORS
-        #   cp -r -d ${SLURM_TMPDIR}/* $ERRORS
-        #exit 1
+        PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+        ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
+        echo "copying error files to ${ERRORS}"
+        df -h
+        mkdir -p $ERRORS
+        cp -r -d ${SLURM_TMPDIR}/* $ERRORS
+        exit 1
         #remove the extra fil files
     done
     #run candmaker
