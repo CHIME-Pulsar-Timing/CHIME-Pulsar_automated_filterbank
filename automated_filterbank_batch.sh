@@ -1,13 +1,13 @@
 #!/bin/bash
-#SBATCH --account=rrg-istairs-ad
+#SBATCH --account=def-istairs
 #SBATCH --export=NONE
 #SBATCH --time=10:00:00
 #SBATCH --mem=16GB
 #SBATCH --cpus-per-task=5
-##SBATCH --gres=gpu:v100l:1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
+#SBATCH --gres=gpu:v100l:1
 #1 is number of splits
 #2 is DM
 #3 is filterbank file
@@ -31,6 +31,7 @@ module use /project/6004902/modulefiles
 module load presto
 module load chime-psr
 source ~/projects/rrg-istairs-ad/Your/bin/activate
+module load cuda
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
