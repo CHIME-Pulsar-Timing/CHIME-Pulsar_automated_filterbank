@@ -115,6 +115,7 @@ def run_rfifind(fname,dead_gpus=''):
             ignore_chan_string = ignore_chan_string+','+str(chan)
     print('ignoring these channels', ignore_chan_string)
     rfifind_command = 'rfifind -time 1 -timesig 10 -freqsig 10 -ignorechan %s -o %s %s.fil' %(ignore_chan_string,fname,fname)
+    # rfifind_command = 'rfifind -time 1 -ignorechan %s -o %s %s.fil' %(ignore_chan_string,fname,fname)
 
     print(rfifind_command)
     try:
@@ -137,7 +138,9 @@ def run_ddplan(fname,dm):
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
-    ddplan_command = "python %s/DDplan.py -r 1.2 -c %.2f -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dm,dml,dmh,fname,fname)
+    fb_file = FilterbankFile(f"{fname}.fil")
+    dt = fb_file.dt
+    ddplan_command = f"python {path}/DDplan.py -r 0.1 -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}.fil"
     print(ddplan_command)
     # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
     try:
@@ -156,7 +159,7 @@ def run_ddplan(fname,dm):
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
     # sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
-    sp_command = 'single_pulse_search.py -t 8 -d 1 -b %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py -t 8 %s*.dat' %(fname)
     print(sp_command)
     failed=True
     try:

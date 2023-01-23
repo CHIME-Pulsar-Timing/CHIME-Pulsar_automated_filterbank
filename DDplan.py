@@ -255,7 +255,6 @@ def dm_steps(loDM, hiDM, obs, cohdm=0.0, numsub=0, ok_smearing=0.0,
     downsamp = allow_downsamps[index_downsamps]
     dDM = allow_dDMs[index_dDMs]
     dtms = 1000.0*obs.dt
-    
     # Fudge factor that "softens" the boundary defining
     # if 2 time scales are equal or not
     ff = 1.2
@@ -304,7 +303,6 @@ def dm_steps(loDM, hiDM, obs, cohdm=0.0, numsub=0, ok_smearing=0.0,
     print("Best guess for optimal initial dDM is %.3f" % dDM)
     while (allow_dDMs[index_dDMs+1] < ff*dDM):
         index_dDMs += 1
-
     # Create the first method
     methods = [dedisp_method(obs, downsamp, loDM, hiDM,
                              allow_dDMs[index_dDMs], numsub=numsub)]
@@ -580,7 +578,6 @@ from '%s'
 
     # The following is an instance of an "observation" class
     obs = observation(dt, fctr, BW, numchan, cDM)
-
     if write_dedisp: # Always use subbands if writing a dedisp routine
         if numsubbands==0:
             divs = [20, 16, 15, 12, 10, 9, 8, 7, 6, 5, 4, 3]
