@@ -20,6 +20,7 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
+from your.utils.misc import _decimate
 
 from your.candidate import Candidate, crop
 from your.utils.gpu import gpu_dedisp_and_dmt_crop
@@ -29,10 +30,22 @@ import textwrap
 
 logger = logging.getLogger()
 
+def crop_data_for_decimate(cand,downsamp):
+    crop_amount = cand.data.shape[0]%downsamp
+    start = crop_amount//2
+    length = cand.data.shape[0]-crop_amount
+    return int(start),int(length)
+
 
 def cpu_dedisp_dmt(cand, args):
-
-    cand.dmtime(target="GPU")
+    #decimate before dmt to 1 ms time samples
+    # downfact = 1e-3//cand.your_header.tsamp
+    # start,length = crop_data_for_decimate(cand.data,downfact)
+    # cand.data = crop(cand.data,start,length,axis=0)
+    # cand.your_header.time_decimation_factor = downfact
+    # cand.tsamp = cand.your_header.tsamp
+    # cand.data = _decimate(cand.data,decimate_factor = downfact,axis=0)
+    cand.dmtime(target = "GPU")
     print("Made DMT")
 
     cand.dedisperse()
@@ -42,24 +55,44 @@ def cpu_dedisp_dmt(cand, args):
     tsamp = cand.your_header.tsamp
     #gotta crop to the widths we want
     width = args.ws/1000 #convert to seconds
-    extra = cand.dedispersed.shape[0]-int(width/tsamp)
-    start = int(extra//2)
     length = int(width//tsamp)
+    if length<256:
+        length = 256
+    extra = cand.dedispersed.shape[0]-length
+    start = int(extra//2)
     cand.dedispersed = crop(cand.dedispersed, start, length, 0)
     cand.dmt = crop(cand.dmt, start, length, 1)
+    #use decimate instead of resize
+    time_decimate_factor = length // 256
+    freq_decimate_factor = cand.your_header.native_nchans // 256
 
-    #this might not be 100% accurate... but whatever
-    downsample_factor = cand.dedispersed.shape[0]//args.time_size+4
-    cand.your_header.time_decimation_factor = downsample_factor
+    cand.decimate(key = "ft", decimate_factor=time_decimate_factor,axis=0,pad=True,mode='median')
+    if freq_decimate_factor != 0:
+        cand.decimate(key = "ft", decimate_factor=freq_decimate_factor,axis=1,pad=True,mode='median')
+        cand.your_header.frequency_decimation_factor = freq_decimate_factor
+    else:
+        print("Resizing freq")
+        cand.resize(key="ft", size=args.frequency_size, axis=1, anti_aliasing=True)
 
-    cand.resize(
-        key="ft", size=args.time_size+4, axis=0, anti_aliasing=True, mode="constant"
-    )
-    cand.resize(
-        key="dmt", size=args.time_size+4, axis=1, anti_aliasing=True, mode="constant"
-    )
-    cand.dedispersed = crop(cand.dedispersed, 2, args.time_size, 0)
-    cand.dmt = crop(cand.dmt, 2, args.time_size, 1)
+    cand.decimate(key = "dmt" , decimate_factor=time_decimate_factor,axis=1,pad=True,mode='median')
+    cand.your_header.time_decimation_factor = time_decimate_factor
+    #rsize to the right size
+    cand.resize(key="ft", size=256, axis=0, anti_aliasing=True, mode="constant")
+    cand.resize(key="dmt", size=256, axis=1, anti_aliasing=True, mode="constant")
+    print("normalising dmt")
+    cand.dmt = normalise(cand.dmt)
+    print("normalising ft")
+    cand.dedispersed = normalise(cand.dedispersed)
+
+
+    # cand.resize(
+    #     key="ft", size=args.time_size+4, axis=0, anti_aliasing=True, mode="constant"
+    # )
+    # cand.resize(
+    #     key="dmt", size=args.time_size+4, axis=1, anti_aliasing=True, mode="constant"
+    # )
+    # cand.dedispersed = crop(cand.dedispersed, 2, args.time_size, 0)
+    # cand.dmt = crop(cand.dmt, 2, args.time_size, 1)
     return cand
 
 
@@ -135,15 +168,8 @@ def cand2h5(cand_val):
     logger.info("Got Chunk")
     print("dedispersing")
     cand = cpu_dedisp_dmt(cand, args)
-    print("Resizing")
-    cand.resize(
-        key="ft", size=args.frequency_size, axis=1, anti_aliasing=True, mode="constant"
-    )
-    logger.info(f"Resized Frequency axis of FT to fsize: {cand.dedispersed.shape[1]}")
-    print("normalising dmt")
-    cand.dmt = normalise(cand.dmt)
-    print("normalising ft")
-    cand.dedispersed = normalise(cand.dedispersed)
+
+    #saving
     fout = cand.save_h5(out_dir=args.fout)
     fout2 = plot_h5(fout,save=True,detrend_ft=True)
     logger.debug(f"Filesize of {fout} is {os.path.getsize(fout)}")
@@ -348,7 +374,7 @@ if __name__ == "__main__":
             ]
         )
 
-    with Pool(processes=values.nproc) as pool:
-        pool.map(cand2h5, process_list, chunksize=1)
-    # for p in process_list:
-        # cand2h5(p)
+    # with Pool(processes=values.nproc) as pool:
+        # pool.map(cand2h5, process_list, chunksize=1)
+    for p in process_list:
+        cand2h5(p)

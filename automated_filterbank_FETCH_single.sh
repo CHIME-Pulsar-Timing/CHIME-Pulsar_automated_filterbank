@@ -39,9 +39,9 @@ do
     #don't do predict as we don't have GPU allocation... this can be done in seperate script
     #if we have the second argument then
     #make plots and do a predict for general pulses
-    predict.py --data_dir nsub_0_5 --model a --probability 0.1
+    predict.py --data_dir nsub_0_5 --model a --probability 0.1 -n 1
     #do the small dm_range one for very short timescales pulses
-    predict.py --data_dir nsub_1 --model a --probability 0.1
+    predict.py --data_dir nsub_1 --model a --probability 0.1 -n 1
     #do the 1 second one for long timescales pulses
     # predict.py --data_dir cands_0_5_short.csv --model a --probability 0.1
     #once it has finished everything, tar all the files up
