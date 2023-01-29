@@ -14,12 +14,13 @@ def dispersion_delay(dm, f1, f2):
     """Return DM delay in seconds"""
     return DM_CONST * dm * (1.0 / f2 ** 2 - 1.0 / f1 ** 2)
 
-def prep_fetch_csv(filfile,rank=5):
+def prep_fetch_csv(filfile,dm,dm_range=5,rank=5):
     #get spegid_python3 speg
     from SPEGID_Python3 import SinglePulseEventGroup
     spegs = np.load('spegs.npy',allow_pickle=1)
     #get only rank lower than the rank
     spegs = list([speg for speg in spegs if (speg.group_rank<=rank)&(speg.group_rank>0)])
+    spegs = list([speg for speg in spegs if (speg.peak_DM<=dm+dm_range)&(speg.peak_DM>dm-dm_range)])
     create_cands(spegs,filfile)
 
 def create_cands(spegs,filfile):
@@ -118,4 +119,4 @@ def prep_fetch_scale_fil(filfile,min_burst_time,max_burst_time,dm):
     return filfile,tsamp,bt
     
 if __name__=='__main__':
-    prep_fetch_csv(sys.argv[1],rank=5)
+    prep_fetch_csv(sys.argv[1],float(sys.argv[2]),rank=5)

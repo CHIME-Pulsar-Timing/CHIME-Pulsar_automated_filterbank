@@ -150,4 +150,4 @@ if __name__ == '__main__':
     #prep the file needed for fetch
     if fetch:
         from prep_fetch import prep_fetch_csv
-        prep_fetch_csv(fname+ext,rank=5)
+        prep_fetch_csv(fname+ext,float(source_dm),rank=5)
