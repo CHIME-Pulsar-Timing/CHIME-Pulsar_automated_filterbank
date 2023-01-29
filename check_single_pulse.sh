@@ -51,20 +51,20 @@ do
 
             if [ "$FETCH" = false ]; then
                 echo "$FIL finished everything nothing to see here..." >> completed.csv
-        else
-        #check if cands is empty
-        if [ -s ${PULSAR}/cands.csv ]
-        then
-            FETCH=true
-            echo "**** printing cands *****"
-            cat "${PULSAR}"/*cands*.csv
-            echo "****end cands*****"
-            echo "$FIL never ran FETCH"
-            ls -lHd $FIL
-        else
-            FETCH=false
-            echo "${PULSAR} - cands file empty"
-        fi
+            else
+                #check if cands is empty
+                if [ -s ${PULSAR}/cands.csv ]
+                then
+                    FETCH=true
+                    # echo "**** printing cands *****"
+                    # cat "${PULSAR}"/*cands*.csv
+                    # echo "****end cands*****"
+                    echo "$FIL never ran FETCH"
+                    ls -lHd $FIL
+                else
+                    FETCH=false
+                    echo "${PULSAR} - cands file empty"
+                fi
             fi
 
         else
@@ -91,7 +91,13 @@ do
             echo "submitting FETCH job for $PULSAR"
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-            sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PULSAR
+            AP=$(readlink -f $PULSAR)
+            #lets find all directories where we've run prep_fetch
+            PROCESSED=$(find $AP -name 'cands.csv' -printf '%h\n' | sort -u)
+            echo $PROCESSED
+            cd $PROCESSED
+            sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh
+            cd ..
         fi
     fi
     
