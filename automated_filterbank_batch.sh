@@ -86,8 +86,8 @@ if test -f "$p"; then
     #run candmaker
     mkdir -p ${SLURM_TMPDIR}/nsub_0_5
     mkdir -p ${SLURM_TMPDIR}/nsub_1
-    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -n 5 -ws 500
-    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 5 -ws 1000
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 5 -ws 1000 --gpu_id 0
 
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     rm "${SLURM_TMPDIR}"/$FIL
