@@ -52,7 +52,7 @@ def run_rfifind(fname,ext,dead_gpus=''):
             else:
                 #if something in the dead gpu mask isn't in the pipe config mask
                 pipeline_config_mask.append(dgm)
-                logging.info('ignoring dead gpus',dgm)
+                logging.info(f'ignoring dead gpus {dgm}')
 
     #conver pipeline config mask back into string
     ignore_chan_string = ''
@@ -147,9 +147,7 @@ if __name__ == '__main__':
     slurm=args.slurm
     sk_mask = args.sk_mask
 
-    if slurm:
-        os.chdir(slurm)
-    logging.info('Running RFI mitigation')
+    current_dir = os.getcwd()
     #get only the file name
     if fil.endswith(".fits"):
         fname = fil.rstrip('.fits')
@@ -160,7 +158,8 @@ if __name__ == '__main__':
     fname = fname.split('/')
     fname = fname[-1]
 
-    logging_fn = args.log+fname+".log"
+    logging_fn = os.path.join(current_dir,args.log+fname+".log")
+    print(f"logging file path {logging_fn}")
     logging.basicConfig(
         filename=logging_fn,
         filemode="a",
@@ -171,23 +170,34 @@ if __name__ == '__main__':
     log = logging.getLogger('stdlogger')
     sys.stdout = StreamToLogger(log,logging.INFO)
     sys.stderr = StreamToLogger(log,logging.ERROR)
+    logging.info("test logging info")
     print('Test to standard out')
-    raise Exception('Test to standard error')
 
+    if slurm:
+        os.chdir(slurm)
+    slurm_dir = os.getcwd()
+    logging.info(f"current cwd: {slurm_dir}")
+    fname = os.path.join(slurm_dir,fname)
+    logging.info(f"fname:{fname}")
     if os.path.islink(fil):
         fil = os.readlink(fil)
         if not os.path.isfile(fil):
             logging.info('File does not exist')
             sys.exit()
 
+    logging.info('Running RFI mitigation')
     if rfifind:
+        logging.info("Running rfifind")
         run_rfifind(fname,ext,dead_gpu)
     if sk_mask:
+        logging.info("Running SK")
         your_rfi_sk.merge_mask(fname+ext,fname+'_rfifind.mask')
     if dedisp:
         #run ddplan
+        logging.info("Running DDplan")
         run_ddplan(fname,ext,source_dm,sk_mask)
     if sp:
+        logging.info("Running single pulse search")
         run_sp(fname)
     #run SPEGID on candidates
     if speg:
