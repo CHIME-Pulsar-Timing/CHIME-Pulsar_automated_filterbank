@@ -76,10 +76,12 @@ def calculate_merge_sk(X):
 def merge_mask(fil,rfifind_mask,presto_block = 8):
     #chunk size in seconds
     your_object = your.Your(fil)
-    #presto uses 2400 as a standard block size
-    chunk_sz = presto_block*2400
-    total_ints = np.ceil(your_object.your_header.nspectra/chunk_sz)
+
+    rfimask = rfifind.rfifind(rfifind_mask)
+    total_ints = rfimask.nint
+    chunk_sz = rfimask.ptsperint
     print(f"total ints {total_ints}")
+    print(f"nspec: {your_object.your_header.nspectra} total ints:{your_object.your_header.nspectra/chunk_sz} mask_size:{total_ints}")
     samp = 0
     i = 0
     new_mask_arr = []

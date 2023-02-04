@@ -99,10 +99,8 @@ do
             AP=$(readlink -f $PULSAR)
             #lets find all directories where we've run prep_fetch
             PROCESSED=$(find $AP -name 'cands.csv' -printf '%h\n' | sort -u)
-            echo $PROCESSED
-            cd $PROCESSED
             if [ "$LOCAL" = true ]; then
-                $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l
+                $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED
             else
                 sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh
             fi

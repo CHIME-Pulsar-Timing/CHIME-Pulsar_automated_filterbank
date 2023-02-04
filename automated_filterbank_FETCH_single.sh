@@ -10,10 +10,11 @@
 #SBATCH --gres=gpu:v100l:1
 #the first argument is the tree to search down
 #run FETCH
-while getopts "l" flag
+while getopts "li:" flag
 do
     case "${flag}" in
         l) LOCAL=true;;
+        i) CAND_PATH=$OPTARG;;
     esac
 done
 
@@ -33,12 +34,14 @@ else
     SLURM_JOB_ID=1
 fi
 
-
-
+echo $SLURM_TMPDIR
+AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 #work in absolute paths, CC is weird when launching batch script
 #
-cd $CAND_PATH
-cp -a ./* $SLURM_TMPDIR
+echo "copying files to tmpdir"
+echo $PWD $CAND_PATH
+read -p "pausing"
+cp -a $CAND_PATH/* $SLURM_TMPDIR
 cd $SLURM_TMPDIR
 if test -f filfiles.tar.gz; then
     tar -xzf filfiles.tar.gz
@@ -46,9 +49,11 @@ fi
 
 mkdir -p ${SLURM_TMPDIR}/nsub_0_5
 mkdir -p ${SLURM_TMPDIR}/nsub_1
+echo "making candidates"
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 5 -ws 1000 --gpu_id 0
 #make plots and do a predict for general pulses
+echo "grading candidates"
 source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
 predict.py --data_dir nsub_0_5 --model a --probability 0.1
 #do the small dm_range one for very short timescales pulses
@@ -56,6 +61,7 @@ predict.py --data_dir nsub_1 --model a --probability 0.1
 #do the 1 second one for long timescales pulses
 # predict.py --data_dir cands_0_5_short.csv --model a --probability 0.1
 #once it has finished everything, tar all the files up
+echo "tarring files"
 tar -zcvf filfiles.tar.gz *.fil
 rm *.fil
 cp -a $SLURM_TMPDIR/* $CAND_PATH/
