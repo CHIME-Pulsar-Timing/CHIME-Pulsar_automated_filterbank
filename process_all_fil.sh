@@ -1,8 +1,9 @@
 #!/bin/bash
 #this function makes the folder structures, furthermore it will submit the job
-while getopts d:f:t: flag
+while getopts "ld:f:" flag
 do
     case "${flag}" in
+        l) LOCAL=true;;
         d) DM=${OPTARG};;
         f) FIL=${OPTARG};;
     esac
@@ -17,12 +18,16 @@ fi
 #copy the symbolic link into the folder we made
 cp -d $FIL $FN
 cd $FN
-jbid_batch=$(sbatch $AFP/automated_filterbank_batch.sh -d $DM -p $FIL -a $AFP)
+if [ "$LOCAL" = true ]; then
+    $AFP/automated_filterbank_batch.sh -l -d $DM -p $FIL -a $AFP
+else
+    jbid_batch=$(sbatch $AFP/automated_filterbank_batch.sh -d $DM -p $FIL -a $AFP)
 
-#batch job submit string
-jbid_batch=${jbid_batch#*job }
-cd ..
-sleep 1
-echo "sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -a -i $FN"
-jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -a -i $FN)
-jbid_fetch=${jbid_fetch#*job }
+    #batch job submit string
+    jbid_batch=${jbid_batch#*job }
+    cd ..
+    sleep 1
+    echo "sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -a -i $FN"
+    jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -a -i $FN)
+    jbid_fetch=${jbid_fetch#*job }
+fi

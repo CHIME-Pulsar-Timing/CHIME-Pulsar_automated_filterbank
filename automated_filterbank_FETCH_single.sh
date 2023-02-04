@@ -10,13 +10,30 @@
 #SBATCH --gres=gpu:v100l:1
 #the first argument is the tree to search down
 #run FETCH
+while getopts "l" flag
+do
+    case "${flag}" in
+        l) LOCAL=true;;
+    esac
+done
+
 
 #the following code is only valid for Adam's personal computer comment out if on CC
 # source ~/anaconda3/etc/profile.d/conda.sh
 # conda activate fetch
 #the following is valid for CC
-source ~/projects/rrg-istairs-ad/Your/bin/activate
-module load cuda
+if [ "$LOCAL" != true ]; then
+    source ~/projects/rrg-istairs-ad/Your/bin/activate
+    module load cuda
+else
+    SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+    # SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+    # SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
+    mkdir -p $SLURM_TMPDIR
+    SLURM_JOB_ID=1
+fi
+
+
 
 #work in absolute paths, CC is weird when launching batch script
 #

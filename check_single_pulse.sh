@@ -1,10 +1,11 @@
 #!/bin/bash
 #this file will run to check which filterbank files have been run and which have not
-while getopts "bfd:" flag
+while getopts "bfld:" flag
 do
     case "${flag}" in
         b) RBATCH=true;;
         f) RFETCH=true;;
+        l) LOCAL=true;;
         d) DM=$OPTARG;;
     esac
 done
@@ -83,7 +84,11 @@ do
             #find the directory that the script belongs to
             SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
             #this will send the batch job and after it's done sent the fetch job
-            $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL
+            if [ "$LOCAL" = true ]; then
+                $SCRIPT_DIR/process_all_fil.sh -l -d $DM -f $FIL
+            else
+                $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL
+            fi
         fi
     fi
     if [ "$RFETCH" = true ]; then
@@ -96,7 +101,11 @@ do
             PROCESSED=$(find $AP -name 'cands.csv' -printf '%h\n' | sort -u)
             echo $PROCESSED
             cd $PROCESSED
-            sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh
+            if [ "$LOCAL" = true ]; then
+                $SCRIPT_DIR/automated_filterbank_FETCH_single.sh
+            else
+                sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh
+            fi
             cd ..
         fi
     fi
