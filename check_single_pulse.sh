@@ -102,7 +102,7 @@ do
             echo $PROCESSED
             cd $PROCESSED
             if [ "$LOCAL" = true ]; then
-                $SCRIPT_DIR/automated_filterbank_FETCH_single.sh
+                $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l
             else
                 sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh
             fi

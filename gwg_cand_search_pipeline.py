@@ -83,6 +83,8 @@ def run_ddplan(fname,ext,dm,sk_mask):
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
+    fname = fname.split('/')[-1]
+
     if sk_mask:
         ddplan_command = f"python {path}/DDplan.py -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
     else:
@@ -166,6 +168,7 @@ if __name__ == '__main__':
         format="%(asctime)s %(levelname)s:%(message)s",
         datefmt="%d-%b-%y %H:%M:%S",
         level=logging.DEBUG,
+        force=True
     )
     log = logging.getLogger('stdlogger')
     sys.stdout = StreamToLogger(log,logging.INFO)
