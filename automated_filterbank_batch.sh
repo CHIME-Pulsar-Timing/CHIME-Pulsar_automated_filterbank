@@ -3,7 +3,7 @@
 #SBATCH --export=NONE
 #SBATCH --time=20:00:00
 #SBATCH --mem=16GB
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=5
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
