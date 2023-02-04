@@ -1,13 +1,12 @@
 #!/bin/bash
-#SBATCH --account=def-istairs
+#SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
 #SBATCH --time=20:00:00
 #SBATCH --mem=16GB
-#SBATCH --cpus-per-task=5
+#SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
-#SBATCH --gres=gpu:v100l:1
 #1 is number of splits
 #2 is DM
 #3 is filterbank file
@@ -31,7 +30,7 @@ module use /project/6004902/modulefiles
 module load presto
 module load chime-psr
 source ~/projects/rrg-istairs-ad/Your/bin/activate
-module load cuda
+# module load cuda
 # check that the filterbank file exists this prevents accidental deletion of files with the later rm command
 #********************THIS IS THE LAZY WAY OUT!!!
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
@@ -84,10 +83,10 @@ if test -f "$p"; then
         #remove the extra fil files
     done
     #run candmaker
-    mkdir -p ${SLURM_TMPDIR}/nsub_0_5
-    mkdir -p ${SLURM_TMPDIR}/nsub_1
-    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
-    python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 5 -ws 1000 --gpu_id 0
+    # mkdir -p ${SLURM_TMPDIR}/nsub_0_5
+    # mkdir -p ${SLURM_TMPDIR}/nsub_1
+    # python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
+    # python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 5 -ws 1000 --gpu_id 0
 
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     rm "${SLURM_TMPDIR}"/$FIL

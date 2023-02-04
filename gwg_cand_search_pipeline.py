@@ -6,6 +6,36 @@ import re
 import pipeline_config
 import sys
 import your_rfi_sk
+import logging
+
+#create a fake stream logger to redirect stdout and stderr
+class StreamToLogger(object):
+    """
+    Fake file-like stream object that redirects writes to a logger instance.
+    """
+    def __init__(self, logger, level):
+       self.logger = logger
+       self.level = level
+       self.linebuf = ''
+
+    def write(self, buf):
+       for line in buf.rstrip().splitlines():
+          self.logger.log(self.level, line.rstrip())
+
+    def flush(self):
+        pass
+
+
+#handling exceptions
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+    logging.critical(
+        "Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback)
+    )
+
 #original GWG pipeline written by Chiamin
 def run_rfifind(fname,ext,dead_gpus=''):
     pipeline_config_mask = pipeline_config.ignorelist.split(',')
@@ -22,7 +52,7 @@ def run_rfifind(fname,ext,dead_gpus=''):
             else:
                 #if something in the dead gpu mask isn't in the pipe config mask
                 pipeline_config_mask.append(dgm)
-                print('ignoring dead gpus',dgm)
+                logging.info('ignoring dead gpus',dgm)
 
     #conver pipeline config mask back into string
     ignore_chan_string = ''
@@ -32,13 +62,13 @@ def run_rfifind(fname,ext,dead_gpus=''):
         else:
             ignore_chan_string = ignore_chan_string+','+str(chan)
     rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -o {fname} {fname}{ext}"
-    print(rfifind_command)
+    logging.info(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
     except subprocess.CalledProcessError:
         import traceback
         traceback.print_exc()
-        [print(f) for f in os.listdir('.')]
+        [logging.info(f) for f in os.listdir('.')]
         sys.exit(1)
 
 
@@ -58,7 +88,7 @@ def run_ddplan(fname,ext,dm,sk_mask):
     else:
         ddplan_command = f"python {path}/DDplan.py -y -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
 
-    print(ddplan_command)
+    logging.info(ddplan_command)
     # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
     try:
         run_ddplan = subprocess.check_call([ddplan_command],shell=True)
@@ -69,7 +99,7 @@ def run_ddplan(fname,ext,dm,sk_mask):
     except subprocess.CalledProcessError:
         import traceback
         traceback.print_exc()
-        [print(f) for f in os.listdir('.')]
+        [logging.info(f) for f in os.listdir('.')]
         sys.exit(1)
 
 
@@ -77,13 +107,13 @@ def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
     # sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
     sp_command = 'single_pulse_search.py %s*.dat' %(fname)
-    print(sp_command)
+    logging.info(sp_command)
     failed=True
     try:
         run_sp_cmd = subprocess.check_call([sp_command],shell=True)
         #run_sp_cmd.wait()
     except subprocess.CalledProcessError:
-        [print(f) for f in os.listdir('.')]
+        [logging.info(f) for f in os.listdir('.')]
         import traceback
         traceback.print_exc()
         sys.exit(1)
@@ -101,6 +131,8 @@ if __name__ == '__main__':
     parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
     parser.add_argument('--dead_gpu',type=str,default='',help='use this option if you want to input a mask for dead GPUs')
     parser.add_argument('--slurm',type=str,help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
+    parser.add_argument("--log",type=str,help="name of file to write log to",default="automated_filterbank_batch_")
+
 
     args = parser.parse_args()
 
@@ -114,9 +146,10 @@ if __name__ == '__main__':
     dead_gpu = args.dead_gpu
     slurm=args.slurm
     sk_mask = args.sk_mask
+
     if slurm:
         os.chdir(slurm)
-    print('Running RFI mitigation')
+    logging.info('Running RFI mitigation')
     #get only the file name
     if fil.endswith(".fits"):
         fname = fil.rstrip('.fits')
@@ -126,10 +159,25 @@ if __name__ == '__main__':
         ext = '.fil'
     fname = fname.split('/')
     fname = fname[-1]
+
+    logging_fn = args.log+fname+".log"
+    logging.basicConfig(
+        filename=logging_fn,
+        filemode="a",
+        format="%(asctime)s %(levelname)s:%(message)s",
+        datefmt="%d-%b-%y %H:%M:%S",
+        level=logging.DEBUG,
+    )
+    log = logging.getLogger('stdlogger')
+    sys.stdout = StreamToLogger(log,logging.INFO)
+    sys.stderr = StreamToLogger(log,logging.ERROR)
+    print('Test to standard out')
+    raise Exception('Test to standard error')
+
     if os.path.islink(fil):
         fil = os.readlink(fil)
         if not os.path.isfile(fil):
-            print('File does not exist')
+            logging.info('File does not exist')
             sys.exit()
 
     if rfifind:
@@ -146,8 +194,10 @@ if __name__ == '__main__':
         from prep_speg import prep_speg
         # prep_speg
         #run SPEGID
+        logging.info("running prep speg")
         prep_speg(fname+'_rfifind.inf')
     #prep the file needed for fetch
     if fetch:
+        logging.info("running prep fetch")
         from prep_fetch import prep_fetch_csv
         prep_fetch_csv(fname+ext,float(source_dm),rank=5)
