@@ -27,6 +27,7 @@ if [ "$LOCAL" != true ]; then
     source ~/projects/rrg-istairs-ad/Your/bin/activate
     module load cuda
 else
+    PULSAR=$(basename $CAND_PATH)
     SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
     # SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
     # SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
@@ -40,7 +41,6 @@ AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 #
 echo "copying files to tmpdir"
 echo $PWD $CAND_PATH
-read -p "pausing"
 cp -a $CAND_PATH/* $SLURM_TMPDIR
 cd $SLURM_TMPDIR
 if test -f filfiles.tar.gz; then
@@ -54,7 +54,13 @@ python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 5 -ws 1000 --gpu_id 0
 #make plots and do a predict for general pulses
 echo "grading candidates"
-source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
+if [ "$LOCAL" != true ]; then
+    source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
+else
+    source ~/anaconda3/etc/profile.d/conda.sh
+    conda activate fetch
+fi
+
 predict.py --data_dir nsub_0_5 --model a --probability 0.1
 #do the small dm_range one for very short timescales pulses
 predict.py --data_dir nsub_1 --model a --probability 0.1
@@ -62,11 +68,11 @@ predict.py --data_dir nsub_1 --model a --probability 0.1
 # predict.py --data_dir cands_0_5_short.csv --model a --probability 0.1
 #once it has finished everything, tar all the files up
 echo "tarring files"
-tar -zcvf filfiles.tar.gz *.fil
-rm *.fil
+# tar -zcvf filfiles.tar.gz *.fil
+# rm $SLURM_TMPDIR/*.fil
 cp -a $SLURM_TMPDIR/* $CAND_PATH/
 #remove all the fil files
-rm $CAND_PATH/*.fil
+# rm $CAND_PATH/*.fil
 
 #combine the results if we have split things
 # cd $AP
