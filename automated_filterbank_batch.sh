@@ -100,7 +100,8 @@ if test -f "$p"; then
     #remove the .dat files
     rm "${SLURM_TMPDIR}"/*.dat
     #tarball the infs and singlepulse files
-    tar -cf "${SLURM_TMPDIR}/${PULSAR}_singlepulse.tar" "${SLURM_TMPDIR}/"*.singlepulse" ${SLURM_TMPDIR}/"*DM*.inf
+    tar -cf "${SLURM_TMPDIR}/${PULSAR}_singlepulse.tar" "${SLURM_TMPDIR}/"*.singlepulse
+    tar -cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.singlepulse
     cp -r ${SLURM_TMPDIR}/* .
