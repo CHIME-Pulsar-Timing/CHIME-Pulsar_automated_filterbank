@@ -169,8 +169,8 @@ if __name__ == '__main__':
         force=True
     )
     log = logging.getLogger('stdlogger')
-    # sys.stdout = StreamToLogger(log,logging.INFO)
-    # sys.stderr = StreamToLogger(log,logging.ERROR)
+    sys.stdout = StreamToLogger(log,logging.INFO)
+    sys.stderr = StreamToLogger(log,logging.ERROR)
     logging.info("test logging info")
     print('Test to standard out')
 
