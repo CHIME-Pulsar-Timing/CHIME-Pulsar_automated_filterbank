@@ -3,7 +3,7 @@
 #SBATCH --export=NONE
 #SBATCH --time=20:00:00
 #SBATCH --mem=16GB
-#SBATCH --cpus-per-task=5
+#SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
@@ -55,7 +55,7 @@ if test -f "$p"; then
     #basically try catch
     until [ "$n" -ge 1 ]
     do
-    	echo $EXT
+        echo $EXT
         if [ $EXT == "fits" ]; then
             #set dead gpu string to empty if using fits
             echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
@@ -64,10 +64,10 @@ if test -f "$p"; then
             if [ "$LOCAL" != true ]; then
                 DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
                 echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
             else
                 echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
             fi
         fi
 
@@ -100,13 +100,12 @@ if test -f "$p"; then
     #remove the .dat files
     rm "${SLURM_TMPDIR}"/*.dat
     #tarball the infs and singlepulse files
-    tar cf "${SLURM_TMPDIR}/${PULSAR}_singlepulse.tar" "${SLURM_TMPDIR}/"*.singlepulse
-    tar cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
+    tar -cf "${SLURM_TMPDIR}/${PULSAR}_singlepulse.tar" "${SLURM_TMPDIR}/"*.singlepulse" ${SLURM_TMPDIR}/"*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.singlepulse
     cp -r ${SLURM_TMPDIR}/* .
-    #clean up - not needed on compute canada, but nice to run clean up when on my own computer
-    rm -r ${SLURM_TMPDIR}
+    # clean up - not needed on compute canada, but nice to run clean up when on my own computer
+    # rm -r ${SLURM_TMPDIR}
     exit 0
 fi
 #didn't find file, throw error

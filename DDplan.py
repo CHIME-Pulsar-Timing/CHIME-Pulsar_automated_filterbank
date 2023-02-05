@@ -433,14 +433,14 @@ for dDM, dsubDM, dmspercall, downsamp, subcall, startDM in zip(dDMs, dsubDMs, dm
             if downsamp < 2: subdownsamp = datdownsamp = 1
             # First create the subbands
             myexecute("prepsubband -mask %s -ignorechan %s -sub -subdm %.2f -nsub %d -downsamp %d -o %s %s" %
-                      (basename+'_rfifind.mask',ignorelist, subDM, nsub, subdownsamp , basename, rawfiles))
+                      (basename+mask_name,ignorelist, subDM, nsub, subdownsamp , basename, rawfiles))
             # And now create the time series
             subnames = basename+"_DM%.2f.sub[0-9]*"%subDM
             myexecute("prepsubband -mask %s -ignorechan %s -lodm %.2f -dmstep %.2f -numdms %d -downsamp %d -o %s %s" %
-                      (basename+'_rfifind.mask',ignorelist, loDM, dDM, dmspercall, datdownsamp, basename, subnames))
+                      (basename+mask_name,ignorelist, loDM, dDM, dmspercall, datdownsamp, basename, subnames))
         else:
             myexecute("prepsubband -mask %s -ignorechan %s -nsub %d -lodm %.2f -dmstep %.2f -numdms %d -downsamp %s -o %s %s" %
-                      (basename+'_rfifind.mask',ignorelist, nsub, loDM, dDM, dmspercall, downsamp, basename, rawfiles))
+                      (basename+mask_name,ignorelist, nsub, loDM, dDM, dmspercall, downsamp, basename, rawfiles))
 """
 def usage():
     print("""
@@ -472,10 +472,10 @@ if __name__=='__main__':
     import getopt
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hwo:l:d:f:b:n:k:c:t:s:r:i:",
+        opts, args = getopt.getopt(sys.argv[1:], "hwo:l:d:f:b:n:k:c:t:s:r:i:y:",
                                    ["help", "write", "output=", "loDM=", "hiDM=",
                                     "fctr=", "bw=", "numchan=", "blocklen=",
-                                    "cDM=", "dt=", "subbands="])
+                                    "cDM=", "dt=", "subbands=","mask_name"])
 
     except getopt.GetoptError:
         # print help information and exit:
@@ -575,6 +575,9 @@ from '%s'
             numsubbands = int(a)
         if o in ("-i", "--ignorechan"):
             ignorechan = a
+        if o in ("-y", "--mask_name"):
+            mask_name = a
+
     ###########overwrite ok_smearing!!!
     ok_smearing = dt*4*1000
     print(ok_smearing*1000)
@@ -608,6 +611,7 @@ from '%s'
             f.write(dedisp_template1)
             f.write("nsub = %d\n\n"%numsubbands)
             f.write("basename = %s\n"%repr(basename))
+            f.write("mask_name = %s\n"%repr(mask_name))
             f.write("rawfiles = %s\n\n"%repr(args[0]))
             f.write("""# dDM steps from DDplan.py
 dDMs        = %s\n"""%repr(dDMs))

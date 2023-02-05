@@ -61,6 +61,7 @@ def run_rfifind(fname,ext,dead_gpus=''):
             ignore_chan_string = str(chan)
         else:
             ignore_chan_string = ignore_chan_string+','+str(chan)
+    logging.info(f"RFIFIND out fname {fname}")
     rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -o {fname} {fname}{ext}"
     logging.info(rfifind_command)
     try:
@@ -72,7 +73,7 @@ def run_rfifind(fname,ext,dead_gpus=''):
         sys.exit(1)
 
 
-def run_ddplan(fname,ext,dm,sk_mask):
+def run_ddplan(fname,ext,dm,mask_name):
     if dm>26.1:
         dml=dm-20
     else:
@@ -85,10 +86,7 @@ def run_ddplan(fname,ext,dm,sk_mask):
     # ignorechan= pipeline_config.ignorechan
     fname = fname.split('/')[-1]
 
-    if sk_mask:
-        ddplan_command = f"python {path}/DDplan.py -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
-    else:
-        ddplan_command = f"python {path}/DDplan.py -y -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
+    ddplan_command = f"python {path}/DDplan.py -y {mask_name} -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
 
     logging.info(ddplan_command)
     # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
@@ -171,8 +169,8 @@ if __name__ == '__main__':
         force=True
     )
     log = logging.getLogger('stdlogger')
-    sys.stdout = StreamToLogger(log,logging.INFO)
-    sys.stderr = StreamToLogger(log,logging.ERROR)
+    # sys.stdout = StreamToLogger(log,logging.INFO)
+    # sys.stderr = StreamToLogger(log,logging.ERROR)
     logging.info("test logging info")
     print('Test to standard out')
 
@@ -192,13 +190,19 @@ if __name__ == '__main__':
     if rfifind:
         logging.info("Running rfifind")
         run_rfifind(fname,ext,dead_gpu)
+        mask_name = "_rfifind.mask"
+
     if sk_mask:
         logging.info("Running SK")
-        your_rfi_sk.merge_mask(fname+ext,fname+'_rfifind.mask')
+        try:
+            mask_name = your_rfi_sk.merge_mask(fname+ext,fname+'_rfifind.mask')
+        except:
+            logging.info("SK failed, just using rfifind mask")
+            mask_name = "_rfifind.mask"
     if dedisp:
         #run ddplan
         logging.info("Running DDplan")
-        run_ddplan(fname,ext,source_dm,sk_mask)
+        run_ddplan(fname,ext,source_dm,mask_name)
     if sp:
         logging.info("Running single pulse search")
         run_sp(fname)
