@@ -17,6 +17,9 @@ rm positive_bursts_1.csv
 mkdir -p positive_bursts
 mkdir -p positive_bursts_short
 mkdir -p positive_bursts_1
+mkdir -p positive_bursts_0_1
+mkdir -p positive_bursts_0_1_short
+
 
 for RESULT_PATH in $PROCESSED;
 do
@@ -30,25 +33,35 @@ do
             CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
             PATH_PNG=${CAND_PATH}.png
             PATH_H5=${CAND_PATH}.h5
-            if [[ $PATH_PNG == *"short"* ]];
+            if [[ $PATH_PNG == *"nsub_short/"* ]];
             then
                 # code if found
                 cp $PATH_PNG positive_bursts_short
-                cp $PATH_H5 positive_bursts_short
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_short.csv
 
-            elif [[ $PATH_PNG == *"nsub_1"* ]];
+            elif [[ $PATH_PNG == *"nsub_1_0/"* ]];
             then
                 cp $PATH_PNG positive_bursts_1
-                cp $PATH_H5 positive_bursts_1
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_1.csv
 
-            else
+            elif [[ $PATH_PNG == *"nsub_0_5/"* ]];
+            then
                 # code if not found
                 cp $PATH_PNG positive_bursts
-                cp $PATH_H5 positive_bursts
+                echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
+
+            elif [[ $PATH_PNG == *"nsub_0_1/"* ]];
+            then
+                # code if not found
+                cp $PATH_PNG positive_bursts_0_1
+                echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
+            elif [[ $PATH_PNG == *"nsub_0_1_short/"* ]];
+            then
+                # code if not found
+                cp $PATH_PNG positive_bursts_0_1_short
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
             fi
+
         fi
     done < $RESULT_FILE
     #once it has finished everything, tar all the files up

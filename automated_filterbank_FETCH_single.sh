@@ -42,9 +42,17 @@ ls
 
 mkdir -p nsub_0_5
 mkdir -p nsub_1
+mkdir -p nsub_short_0_5
+mkdir -p nsub_0_1
+mkdir -p nsub_0_1_short
 echo "making candidates"
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -n 5 -ws 1000 --gpu_id 0
+python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_short_0_5 -r -n 5 -ws 500 --gpu_id 0 --range_dm 5
+python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1 -r -n 5 -ws 100 --gpu_id 0
+python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1_short -r -n 5 -ws 100 --gpu_id 0 --range_dm 5
+
+
 #make plots and do a predict for general pulses
 echo "grading candidates"
 if [ "$LOCAL" != true ]; then
@@ -56,4 +64,6 @@ fi
 
 predict.py --data_dir nsub_0_5 --model a --probability 0.1
 predict.py --data_dir nsub_1 --model a --probability 0.1
-#remove all the fil files
+predict.py --data_dir nsub_short_0_5 --model a --probability 0.1
+predict.py --data_dir nsub_0_1 --model a --probability 0.1
+predict.py --data_dir nsub_0_1_short --model a --probability 0.1

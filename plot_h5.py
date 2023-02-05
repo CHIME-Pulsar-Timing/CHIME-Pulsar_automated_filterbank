@@ -22,6 +22,7 @@ def plot_h5(
     publication=False,
     mad_filter=False,
     outdir=None,
+    range_dm = 0,
 ):
     """
     Plot the h5 candidates
@@ -114,13 +115,23 @@ def plot_h5(
             cmap = 'YlGnBu'
         )
         ax2.set_ylabel("Frequency (MHz)")
-        ax3.imshow(
-            dm_time,
-            aspect="auto",
-            extent=[ts[0], ts[-1], 2 * dm, 0],
-            interpolation="none",
-            cmap = 'YlGnBu'
-        )
+        if range_dm == 0:
+            ax3.imshow(
+                dm_time,
+                aspect="auto",
+                extent=[ts[0], ts[-1], 2 * dm, 0],
+                interpolation="none",
+                cmap = 'YlGnBu'
+            )
+        else:
+            ax3.imshow(
+                dm_time,
+                aspect="auto",
+                extent=[ts[0], ts[-1], dm+range_dm, dm-range_dm],
+                interpolation="none",
+                cmap = 'YlGnBu'
+            )
+
         ax3.set_ylabel(r"DM (pc cm$^{-3}$)")
         ax3.set_xlabel("Time (ms)")
 

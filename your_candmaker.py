@@ -45,7 +45,7 @@ def cpu_dedisp_dmt(cand, args):
     # cand.your_header.time_decimation_factor = downfact
     # cand.tsamp = cand.your_header.tsamp
     # cand.data = _decimate(cand.data,decimate_factor = downfact,axis=0)
-    cand.dmtime(target = "GPU")
+    cand.dmtime(target = "GPU", range_dm = args.range_dm)
     print("Made DMT")
 
     cand.dedisperse()
@@ -171,7 +171,7 @@ def cand2h5(cand_val):
 
     #saving
     fout = cand.save_h5(out_dir=args.fout)
-    fout2 = plot_h5(fout,save=True,detrend_ft=True)
+    fout2 = plot_h5(fout,save=True,detrend_ft=True,range_dm=args.range_dm)
     logger.debug(f"Filesize of {fout} is {os.path.getsize(fout)}")
     if not os.path.isfile(fout):
         raise IOError(f"File with {cand.id} not written")
@@ -200,7 +200,8 @@ if __name__ == "__main__":
                 - label: Label of candidate (can be just set to 0, if not known)
                 - stime: Start time (seconds) of the candidate.
                 - chan_mask_path: Path of the channel mask file. 
-                - num_files: Number of files. 
+                - num_files: Number of files.
+                - range_dm: is the range of the DM time in the fetch plots, this can be used to give finer dm time resolution
             """
         ),
     )
@@ -292,7 +293,14 @@ if __name__ == "__main__":
         type=float,
         default=500,
     )
-
+    parser.add_argument(
+        "-rdm",
+        "--range_dm",
+        dest="range_dm",
+        help="the range of DMT plots for the dm axis, default is 2x range of candidate DM",
+        type=float,
+        default=0,
+    )
     parser.add_argument(
         "--no_log_file", help="Do not write a log file", action="store_true"
     )
@@ -374,7 +382,7 @@ if __name__ == "__main__":
             ]
         )
 
-    # with Pool(processes=values.nproc) as pool:
-        # pool.map(cand2h5, process_list, chunksize=1)
-    for p in process_list:
-        cand2h5(p)
+    with Pool(processes=values.nproc) as pool:
+        pool.map(cand2h5, process_list, chunksize=1)
+    # for p in process_list:
+        # cand2h5(p)

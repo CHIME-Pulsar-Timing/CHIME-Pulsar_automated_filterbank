@@ -41,14 +41,32 @@ do
                 FETCH=true
             fi
 
-            #check FETCH 3 has been run
-            # FP="${PULSAR}/nsub_128_0_short/results_a.csv"
-            # if [ ! -f $FP ]; then
-            #     #echo $FP
-            #     #ls -lHd $FIL
-            #     #echo "$FIL never ran FETCH missing short"
-            #     FETCH=true
-            # fi
+            #check FETCH 2 has been run
+            FP="${PULSAR}/nsub_short_0_5/results_a.csv"
+            if [ ! -f $FP ]; then
+                #echo $FP
+                #echo "$FIL never ran FETCH missing 1"
+                #ls -lHd $FIL
+                FETCH=true
+            fi
+
+            #check FETCH 2 has been run
+            FP="${PULSAR}/nsub_0_1/results_a.csv"
+            if [ ! -f $FP ]; then
+                #echo $FP
+                #echo "$FIL never ran FETCH missing 1"
+                #ls -lHd $FIL
+                FETCH=true
+            fi
+
+            FP="${PULSAR}/nsub_0_1_short/results_a.csv"
+            if [ ! -f $FP ]; then
+                #echo $FP
+                #echo "$FIL never ran FETCH missing 1"
+                #ls -lHd $FIL
+                FETCH=true
+            fi
+
 
             if [ "$FETCH" = false ]; then
                 echo "$FIL finished everything nothing to see here..." >> completed.csv
