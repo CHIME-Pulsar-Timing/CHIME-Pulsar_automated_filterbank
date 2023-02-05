@@ -175,11 +175,13 @@ if __name__ == '__main__':
     print('Test to standard out')
 
     if slurm:
+        #this is a change to the SLURM tmpdir directory
         os.chdir(slurm)
-    slurm_dir = os.getcwd()
-    logging.info(f"current cwd: {slurm_dir}")
-    fname = os.path.join(slurm_dir,fname)
-    logging.info(f"fname:{fname}")
+        slurm_dir = os.getcwd()
+        logging.info(f"current cwd: {slurm_dir}")
+        fname = os.path.join(slurm_dir,fname)
+        logging.info(f"fname:{fname}")
+
     if os.path.islink(fil):
         fil = os.readlink(fil)
         if not os.path.isfile(fil):
@@ -217,4 +219,6 @@ if __name__ == '__main__':
     if fetch:
         logging.info("running prep fetch")
         from prep_fetch import prep_fetch_csv
+        #this script needs the actual file name
+        fname = fname.split('/')[-1]
         prep_fetch_csv(fname+ext,float(source_dm),rank=5)

@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=20:00:00
+#SBATCH --time=4:00:00
 #SBATCH --mem=16GB
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -59,7 +59,7 @@ if test -f "$p"; then
         if [ $EXT == "fits" ]; then
             #set dead gpu string to empty if using fits
             echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-            python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+            python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         else
             if [ "$LOCAL" != true ]; then
                 DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
@@ -76,7 +76,6 @@ if test -f "$p"; then
         #for rapid tests, only do rfifind
         # python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         # Should never get here. if it does exit with an error
-        exit 1
         n=$((n+1))
         # sleep 15
         #if it fails, lets copy all the things to my scratch directory then exit with error code
