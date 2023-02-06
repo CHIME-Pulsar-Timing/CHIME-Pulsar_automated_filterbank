@@ -36,7 +36,6 @@ fi
 
 #work in absolute paths, CC is weird when launching batch script
 echo $AFP
-echo "copying files to tmpdir"
 echo $PWD $CAND_PATH
 ls
 
@@ -56,6 +55,12 @@ python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1_short -r 
 #make plots and do a predict for general pulses
 echo "grading candidates"
 if [ "$LOCAL" != true ]; then
+    #go backwards, deactivate everything
+    module unload cuda
+    deactivate
+    module unload chime-psr
+    module unload presto
+    module unuse /project/6004902/modulefiles
     source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
 else
     source ~/anaconda3/etc/profile.d/conda.sh
