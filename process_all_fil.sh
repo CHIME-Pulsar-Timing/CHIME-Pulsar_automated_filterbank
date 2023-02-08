@@ -28,6 +28,6 @@ else
     #sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR
 
     echo "sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -i $FN -p $AFP"
-    jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh i $FN -p $AFP)
+    jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -i $FN -p $AFP)
     jbid_fetch=${jbid_fetch#*job }
 fi

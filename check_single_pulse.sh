@@ -72,12 +72,13 @@ do
                 echo "$FIL finished everything nothing to see here..." >> completed.csv
             else
                 #check if cands is empty
-                if [ -s ${PULSAR}/cands.csv ]
+		LINES=$(cat "$PULSAR"/cands.csv | wc -l)
+                if [ "$LINES" -gt 1 ]
                 then
                     FETCH=true
-                    # echo "**** printing cands *****"
-                    # cat "${PULSAR}"/*cands*.csv
-                    # echo "****end cands*****"
+                    #echo "**** printing cands *****"
+                    #cat "${PULSAR}"/*cands*.csv
+                    #echo "****end cands*****"
                     echo "$FIL never ran FETCH"
                     ls -lHd $FIL
                 else
