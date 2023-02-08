@@ -65,7 +65,7 @@ def run_rfifind(fname,ext,dead_gpus=''):
     rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -o {fname} {fname}{ext}"
     logging.info(rfifind_command)
     try:
-        run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
     except subprocess.CalledProcessError:
         import traceback
         traceback.print_exc()
