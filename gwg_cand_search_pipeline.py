@@ -105,8 +105,8 @@ def run_ddplan(fname,ext,dm,mask_name):
 
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
-    # sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
-    sp_command = 'single_pulse_search.py %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
+    # sp_command = 'single_pulse_search.py %s*.dat' %(fname)
     logging.info(sp_command)
     failed=True
     try:
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     dead_gpu = args.dead_gpu
     slurm=args.slurm
     sk_mask = args.sk_mask
-
+    import pdb; pdb.set_trace()
     current_dir = os.getcwd()
     #get only the file name
     if fil.endswith(".fits"):
@@ -193,7 +193,7 @@ if __name__ == '__main__':
         logging.info("Running rfifind")
         run_rfifind(fname,ext,dead_gpu)
         mask_name = "_rfifind.mask"
-
+    import pdb; pdb.set_trace()
     if sk_mask:
         logging.info("Running SK")
         try:

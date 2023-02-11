@@ -6,6 +6,7 @@ import your
 from presto import rfifind
 from multiprocessing import Pool
 import matplotlib.pyplot as plt
+import shutil
 def maskfile(maskfn, data, start_bin, nbinsextra):
     print('loading mask')
     rfimask = rfifind.rfifind(maskfn)
@@ -91,14 +92,18 @@ def merge_mask(fil,rfifind_mask):
         samp += chunk_sz
         i+=1
     p = Pool(20)
-    # new_mask_arr = p.map(calculate_merge_sk,pool_arr)
-    for p in pool_arr:
-        calculate_merge_sk(p)
+    new_mask_arr = p.map(calculate_merge_sk,pool_arr)
+    # for p in pool_arr:
+        # calculate_merge_sk(p)
     rfimask = rfifind.rfifind(rfifind_mask)
     maskarr = np.full((rfimask.nint,rfimask.nchan),False)
     for i,m in enumerate(new_mask_arr):
         maskarr[i,m] = True
     write_mask_file(rfifind_mask.strip(".mask")+"_SK", np.array(maskarr), rfimask.__dict__)
+    #copy the stats file
+    old_stats_fn = rfifind_mask.strip(".mask")+".stats"
+    new_stats_fn = rfifind_mask.strip(".mask")+"_SK.stats"
+    shutil.copyfile(old_stats_fn,new_stats_fn)
     return "_rfifind_SK.mask"
 
 def mask_params_from_array(maskarr):
