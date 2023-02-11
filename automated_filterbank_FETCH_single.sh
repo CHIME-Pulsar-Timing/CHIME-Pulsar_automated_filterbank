@@ -48,7 +48,6 @@ mkdir -p nsub_0_1_short
 echo "making candidates"
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -n 5 -ws 1000 --gpu_id 0
-python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_2 -r -n 5 -ws 2000 --gpu_id 0
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_short_0_5 -r -n 5 -ws 500 --gpu_id 0 --range_dm 5
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1 -r -n 5 -ws 100 --gpu_id 0
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1_short -r -n 5 -ws 100 --gpu_id 0 --range_dm 5
