@@ -66,6 +66,7 @@ def run_rfifind(fname,ext,dead_gpus=''):
     logging.info(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
+        return ignore_chan_string
     except subprocess.CalledProcessError:
         import traceback
         traceback.print_exc()
@@ -73,20 +74,24 @@ def run_rfifind(fname,ext,dead_gpus=''):
         sys.exit(1)
 
 
-def run_ddplan(fname,ext,dm,mask_name):
+def run_ddplan(fname,ext,dm,mask_name,ignorelist):
+    from presto import infodata
+    #run the ddplan in my current directory, it's got the rfi masking included
+    import pathlib
+
+    info = infodata.infodata(fname+'_rfifind.inf')
+    dt = info.dt
     if dm>26.1:
         dml=dm-20
     else:
         dml=6.1
     dmh=dm+20
-    #run the ddplan in my current directory, it's got the rfi masking included
-    import pathlib
     #run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
     fname = fname.split('/')[-1]
 
-    ddplan_command = f"python {path}/DDplan.py -y {mask_name} -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
+    ddplan_command = f"python {path}/DDplan.py --ignore {ignorelist} -t {dt} -y {mask_name} -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
 
     logging.info(ddplan_command)
     # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
@@ -105,7 +110,7 @@ def run_ddplan(fname,ext,dm,mask_name):
 
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
-    sp_command = 'single_pulse_search.py -b -m 300 %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py -b %s*.dat' %(fname)
     # sp_command = 'single_pulse_search.py %s*.dat' %(fname)
     logging.info(sp_command)
     failed=True
@@ -146,7 +151,6 @@ if __name__ == '__main__':
     dead_gpu = args.dead_gpu
     slurm=args.slurm
     sk_mask = args.sk_mask
-    import pdb; pdb.set_trace()
     current_dir = os.getcwd()
     #get only the file name
     if fil.endswith(".fits"):
@@ -191,20 +195,19 @@ if __name__ == '__main__':
     logging.info('Running RFI mitigation')
     if rfifind:
         logging.info("Running rfifind")
-        run_rfifind(fname,ext,dead_gpu)
+        ignore_chan_string = run_rfifind(fname,ext,dead_gpu)
         mask_name = "_rfifind.mask"
-    import pdb; pdb.set_trace()
     if sk_mask:
         logging.info("Running SK")
         try:
-            mask_name = your_rfi_sk.merge_mask(fname+ext,fname+'_rfifind.mask')
+            mask_name = your_rfi_sk.merge_mask(fname+ext,fname+'_rfifind.mask',ignore_chan_string)
         except:
             logging.info("SK failed, just using rfifind mask")
             mask_name = "_rfifind.mask"
     if dedisp:
         #run ddplan
         logging.info("Running DDplan")
-        run_ddplan(fname,ext,source_dm,mask_name)
+        run_ddplan(fname,ext,source_dm,mask_name,ignorelist =ignore_chan_string)
     if sp:
         logging.info("Running single pulse search")
         run_sp(fname)

@@ -54,5 +54,6 @@ def prep_speg(inffile,fpath=''):
         fch = info.lofreq
         bw=info.BW
         writer.writerow([obj_n,ra,dec,fch,bw])
-        
-#prep_speg(sys.argv[1])
+
+if __name__=="__main__":
+    prep_speg(sys.argv[1])

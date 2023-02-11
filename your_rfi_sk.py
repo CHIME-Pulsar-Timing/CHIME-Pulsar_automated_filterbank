@@ -51,6 +51,7 @@ def calculate_merge_sk(X):
     rfifind_mask = X['rfifind_mask']
     your_object = your.Your(fil)
     i = X['i']
+    zap_list = X['zap_list']
     your_data = your_object.get_data(samp, chunk_sz)
     print(f"starting sk filter on data of shape {your_data.shape}")
 
@@ -69,15 +70,27 @@ def calculate_merge_sk(X):
     # plt.show()
     for skc in sk_chan:
         if not (skc in int_mask):
-            int_mask = np.append(int_mask,skc)
+            if not (skc in zap_list):
+                int_mask = np.append(int_mask,skc)
+            else:
+                print("chan in zap list so not adding")
     int_mask = np.sort(int_mask)
     print(f"size of new mask {len(int_mask)}")
+    if False:
+        #plot the channels being masked
+        import matplotlib.pyplot as plt
+        plt.figure()
+        plt.hist(sk_chan,bins=1024)
+        plt.hist(int_mask,bins=1024,alpha=0.3)
+        plt.hist(zap_list,bins=1024,alpha=0.3)
+        plt.show()
     return int_mask
 
-def merge_mask(fil,rfifind_mask):
+def merge_mask(fil,rfifind_mask,zap_list):
     #chunk size in seconds
     your_object = your.Your(fil)
-
+    zaplist = zap_list.split(',')
+    zaplist = list(int(z) for z in zaplist)
     rfimask = rfifind.rfifind(rfifind_mask)
     total_ints = rfimask.nint
     chunk_sz = rfimask.ptsperint
@@ -88,13 +101,13 @@ def merge_mask(fil,rfifind_mask):
     new_mask_arr = []
     pool_arr = []
     while samp<your_object.your_header.nspectra:
-        pool_arr.append({"chunk_sz":chunk_sz,"samp":samp,"fil":fil,"rfifind_mask":rfifind_mask,"i":i})
+        pool_arr.append({"chunk_sz":chunk_sz,"samp":samp,"fil":fil,"rfifind_mask":rfifind_mask,"i":i,"zap_list":zaplist})
         samp += chunk_sz
         i+=1
     p = Pool(20)
-    new_mask_arr = p.map(calculate_merge_sk,pool_arr)
-    # for p in pool_arr:
-        # calculate_merge_sk(p)
+    # new_mask_arr = p.map(calculate_merge_sk,pool_arr)
+    for p in pool_arr:
+        calculate_merge_sk(p)
     rfimask = rfifind.rfifind(rfifind_mask)
     maskarr = np.full((rfimask.nint,rfimask.nchan),False)
     for i,m in enumerate(new_mask_arr):
@@ -199,5 +212,5 @@ def write_mask_file(filename, maskarr, header):
 
 if __name__ == '__main__':
     import sys
-
-    merge_mask(sys.argv[1],sys.argv[2])
+    from pipeline_config import ignorelist as zap_list
+    merge_mask(sys.argv[1],sys.argv[2],zap_list)

@@ -7,7 +7,6 @@ from presto.Pgplot import *
 import presto.filterbank as fil
 import presto.psrfits as pfits
 import pipeline_config
-ignorelist = pipeline_config.ignorelist
 class observation(object):
     def __init__(self, dt, f_ctr, BW, numchan, cDM):
         # dt in sec, f_ctr and in MHz
@@ -458,6 +457,7 @@ def usage():
   [-s subbands, --subbands=nsub]  : Number of subbands (default = #chan) 
   [-r resolution, --res=res]      : Acceptable time resolution (ms)
   [-w, --write]                   : Write a dedisp.py file for the plan
+  [--ignore]                      : channels to ignore
 
   The program generates a good plan for de-dispersing raw data.  It
   trades a small amount of sensitivity in order to save computation costs.
@@ -475,7 +475,7 @@ if __name__=='__main__':
         opts, args = getopt.getopt(sys.argv[1:], "hwo:l:d:f:b:n:k:c:t:s:r:i:y:",
                                    ["help", "write", "output=", "loDM=", "hiDM=",
                                     "fctr=", "bw=", "numchan=", "blocklen=",
-                                    "cDM=", "dt=", "subbands=","mask_name"])
+                                    "cDM=", "dt=", "subbands=","mask_name","ignore="])
 
     except getopt.GetoptError:
         # print help information and exit:
@@ -577,10 +577,9 @@ from '%s'
             ignorechan = a
         if o in ("-y", "--mask_name"):
             mask_name = a
+        if o in ("--ignore"):
+            ignorelist = a
 
-    ###########overwrite ok_smearing!!!
-    ok_smearing = dt*4*1000
-    print(ok_smearing*1000)
     # The following is an instance of an "observation" class
     obs = observation(dt, fctr, BW, numchan, cDM)
 
@@ -607,6 +606,7 @@ from '%s'
         dmspercalls = [m.DMs_per_prepsub for m in methods]
         subcalls = [m.numprepsub for m in methods]
         basename, ext = os.path.splitext(args[0])
+        print(f"ignoring in DDplan: {ignorelist}")
         with open('dedisp_%s.py'%basename, 'w') as f:
             f.write(dedisp_template1)
             f.write("nsub = %d\n\n"%numsubbands)
