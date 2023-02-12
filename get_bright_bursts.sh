@@ -33,13 +33,13 @@ do
             CAND_PATH=$(echo "$CAND_PATH" | sed 's/.h5//')
             PATH_PNG=${CAND_PATH}.png
             PATH_H5=${CAND_PATH}.h5
-            if [[ $PATH_PNG == *"nsub_short/"* ]];
+            if [[ $PATH_PNG == *"nsub_short_0_5/"* ]];
             then
                 # code if found
                 cp $PATH_PNG positive_bursts_short
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_short.csv
 
-            elif [[ $PATH_PNG == *"nsub_1_0/"* ]];
+            elif [[ $PATH_PNG == *"nsub_1/"* ]];
             then
                 cp $PATH_PNG positive_bursts_1
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_1.csv

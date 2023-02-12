@@ -32,16 +32,18 @@ if [ "$LOCAL" != true ]; then
     module load cuda
 else
     PULSAR=$(basename $CAND_PATH)
+    SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+    mkdir -p $SLURM_TMPDIR
 fi
 
 #work in absolute paths, CC is weird when launching batch script
 echo $AFP
 echo $PWD $CAND_PATH
 ls
-
+cp -r ./* $SLURM_TMPDIR
+cd $SLURM_TMPDIR
 mkdir -p nsub_0_5
 mkdir -p nsub_1
-mkdir -p nsub_2
 mkdir -p nsub_short_0_5
 mkdir -p nsub_0_1
 mkdir -p nsub_0_1_short
@@ -73,3 +75,4 @@ predict.py --data_dir nsub_1 --model a --probability 0.1
 predict.py --data_dir nsub_short_0_5 --model a --probability 0.1
 predict.py --data_dir nsub_0_1 --model a --probability 0.1
 predict.py --data_dir nsub_0_1_short --model a --probability 0.1
+cp -r $SLURM_TMPDIR/* $CAND_PATH/
