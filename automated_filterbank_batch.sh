@@ -3,7 +3,7 @@
 #SBATCH --export=NONE
 #SBATCH --time=10:00:00
 #SBATCH --mem=16GB
-#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
@@ -83,8 +83,8 @@ if test -f "$p"; then
         ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
         echo "copying error files to ${ERRORS}"
         df -h
-        mkdir -p $ERRORS
-        cp -r -d ${SLURM_TMPDIR}/* $ERRORS
+        #mkdir -p $ERRORS
+        #cp -r -d ${SLURM_TMPDIR}/* $ERRORS
         exit 1
         #remove the extra fil files
     done
