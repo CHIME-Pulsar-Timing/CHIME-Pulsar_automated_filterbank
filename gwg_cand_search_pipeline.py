@@ -225,3 +225,9 @@ if __name__ == '__main__':
         #this script needs the actual file name
         fname = fname.split('/')[-1]
         prep_fetch_csv(fname+ext,float(source_dm),rank=5)
+
+    #finally edit the mask to include the pipeline things
+
+    ignorelist = pipeline_config.ignorelist
+    command = f"rfifind -mask {fname}{mask_name} -zapchan {ignorelist} -nocompute -o {fname} {fname}.fil"
+    run_rfifind_cmd = subprocess.check_call([command], shell=True)
