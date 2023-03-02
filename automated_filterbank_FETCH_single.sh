@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=30:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=16GB
 #SBATCH --cpus-per-task=5
 #SBATCH --job-name=fetch
@@ -38,6 +38,7 @@ fi
 
 #work in absolute paths, CC is weird when launching batch script
 echo $AFP
+CAND_PATH=$(pwd)
 echo $PWD $CAND_PATH
 ls
 cp -r ./* $SLURM_TMPDIR

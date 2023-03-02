@@ -27,7 +27,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                 # writer.writerow([key,burst[0]])
                 # the key is the day, the burst[0] is the timestamp,
                 # first gotta find the file and load up filterbank
-                fb_file = glob.glob('%s_*%s_pow_fdp.fil'%(basename,key))
+                fb_file = glob.glob(f"{basename}_pow_fdp.fil")
                 # print(basename,key)
                 if len(fb_file)>1:
                     print('error globbing')
@@ -45,7 +45,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                     print('error globbing mask')
                     sys.exit(1)
                 else:
-                    # print(mask_file)
+                    print(mask_file)
                     mask_file = mask_file[0]
 
 
@@ -84,7 +84,7 @@ with open('extracted_bursts.csv','w') as csv_file:
                             burst[0] = np.around(burst[0],decimals=1)
 
                             SNR = row[14]
-                            #import pdb; pdb.set_trace()
+                            import pdb; pdb.set_trace()
                             if (av_time==burst[0]) & (burst[3]==float(SNR)):
                                 success=True
                                 if nom_DM >0:

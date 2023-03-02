@@ -41,18 +41,21 @@ def run_rfifind(fname,ext,dead_gpus=''):
     pipeline_config_mask = pipeline_config.ignorelist.split(',')
     if dead_gpus!='':
         dead_gpu_mask = dead_gpus.split(',')
-        #combine the two masks
-        final_mask = []
-        pipeline_config_mask = list(int(pgm) for pgm in pipeline_config_mask)
-        dead_gpu_mask = list(int(dgm) for dgm in dead_gpu_mask)
-        for dgm in dead_gpu_mask:
-            if dgm in pipeline_config_mask:
-                #do nothing
-                pass
-            else:
-                #if something in the dead gpu mask isn't in the pipe config mask
-                pipeline_config_mask.append(dgm)
-                logging.info(f'ignoring dead gpus {dgm}')
+        if len(dead_gpu_mask)<400:
+            #combine the two masks
+            final_mask = []
+            pipeline_config_mask = list(int(pgm) for pgm in pipeline_config_mask)
+            dead_gpu_mask = list(int(dgm) for dgm in dead_gpu_mask)
+            for dgm in dead_gpu_mask:
+                if dgm in pipeline_config_mask:
+                    #do nothing
+                    pass
+                else:
+                    #if something in the dead gpu mask isn't in the pipe config mask
+                    pipeline_config_mask.append(dgm)
+                    logging.info(f'ignoring dead gpus {dgm}')
+        else:
+            logging.info("dead GPU mask is huge, it's probably wrong, ignore")
 
     #conver pipeline config mask back into string
     ignore_chan_string = ''
