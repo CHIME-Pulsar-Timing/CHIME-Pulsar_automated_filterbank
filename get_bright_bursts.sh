@@ -54,12 +54,12 @@ do
             then
                 # code if not found
                 ln -s $PATH_PNG positive_bursts_0_1
-                echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
+                echo "$CAND_PATH,$probability,$score" >> positive_bursts_0_1.csv
             elif [[ $PATH_PNG == *"nsub_0_1_short/"* ]];
             then
                 # code if not found
                 ln -s $PATH_PNG positive_bursts_0_1_short
-                echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
+                echo "$CAND_PATH,$probability,$score" >> positive_bursts_0_1_short.csv
             fi
 
         fi

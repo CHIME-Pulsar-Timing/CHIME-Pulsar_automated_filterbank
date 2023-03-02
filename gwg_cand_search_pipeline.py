@@ -41,7 +41,7 @@ def run_rfifind(fname,ext,dead_gpus=''):
     pipeline_config_mask = pipeline_config.ignorelist.split(',')
     if dead_gpus!='':
         dead_gpu_mask = dead_gpus.split(',')
-        if len(dead_gpu_mask)<50:
+        if len(dead_gpu_mask)<400:
             #combine the two masks
             final_mask = []
             pipeline_config_mask = list(int(pgm) for pgm in pipeline_config_mask)
