@@ -19,7 +19,7 @@ fi
 cp -d $FIL $FN
 cd $FN
 if [ "$LOCAL" = true ]; then
-    $AFP/automated_filterbank_batch.sh -l -d $DM -p $FIL -a $AFP
+    $AFP/automated_filterbank_batch.sh -l -d $DM -p $FIL -a $AFP &
 else
     jbid_batch=$(sbatch $AFP/automated_filterbank_batch.sh -d $DM -p $FIL -a $AFP)
     #batch job submit string

@@ -95,6 +95,39 @@ def cpu_dedisp_dmt(cand, args):
     # cand.dmt = crop(cand.dmt, 2, args.time_size, 1)
     return cand
 
+def maskfile(maskfn, start_bin, nbinsextra):
+    from presto import rfifind
+    print('loading mask')
+    rfimask = rfifind.rfifind(maskfn)
+    print('getting mask')
+    mask = get_mask(rfimask, start_bin, nbinsextra)[::-1]
+    print('get mask finished')
+    masked_chans = mask.all(axis=1)
+    return masked_chans
+
+def get_mask(rfimask, startsamp, N):
+    """Return an array of boolean values to act as a mask
+        for a Spectra object.
+
+        Inputs:
+            rfimask: An rfifind.rfifind object
+            startsamp: Starting sample
+            N: number of samples to read
+
+        Output:
+            mask: 2D numpy array of boolean values.
+                True represents an element that should be masked.
+    """
+    sampnums = np.arange(startsamp, startsamp+N)
+    blocknums = np.floor(sampnums/rfimask.ptsperint).astype('int')
+    mask = np.zeros((N, rfimask.nchan), dtype='bool')
+    for blocknum in np.unique(blocknums):
+        blockmask = np.zeros_like(mask[blocknums==blocknum])
+        chans_to_mask = rfimask.mask_zap_chans_per_int[blocknum]
+        if chans_to_mask.any():
+            blockmask[:,chans_to_mask] = True
+        mask[blocknums==blocknum] = blockmask
+    return mask.T
 
 def cand2h5(cand_val):
     """
@@ -139,30 +172,59 @@ def cand2h5(cand_val):
 
     logger.debug(f"Source file list: {files}")
     print("loading candidate")
-    cand = Candidate(
-        files,
-        snr=snr,
-        width=width,
-        dm=dm,
-        label=label,
-        tcand=tcand,
-        device=gpu_id,
-        spectral_kurtosis_sigma=args.spectral_kurtosis_sigma,
-        savgol_frequency_window=args.savgol_frequency_window,
-        savgol_sigma=args.savgol_sigma,
-        flag_rfi=args.flag_rfi,
-        min_samp=25000,
-    )
-    # get the tsamp
-    tsamp = cand.your_header.tsamp
-    cand.min_samp = (args.ws/1000)//tsamp
-    print(f"min width: {cand.min_samp} samples")
-    if os.path.exists(str(kill_mask_path)):
-        kill_mask = np.zeros(cand.nchans, dtype=np.bool_)
-        kill_mask[kill_chans] = True
-        cand.kill_mask = kill_mask
-    print("Getting chunk")
-    cand.get_chunk(for_preprocessing=True)
+    try:
+        cand = Candidate(
+            files,
+            snr=snr,
+            width=width,
+            dm=dm,
+            label=label,
+            tcand=tcand,
+            device=gpu_id,
+            spectral_kurtosis_sigma=args.spectral_kurtosis_sigma,
+            savgol_frequency_window=args.savgol_frequency_window,
+            savgol_sigma=args.savgol_sigma,
+            flag_rfi=args.flag_rfi,
+            min_samp=25000,
+        )
+        # get the tsamp
+        tsamp = cand.your_header.tsamp
+        cand.min_samp = (args.ws/1000)//tsamp
+        print(f"min width: {cand.min_samp} samples")
+        if os.path.exists(str(kill_mask_path)):
+            kill_mask = np.zeros(cand.nchans, dtype=np.bool_)
+            kill_mask[kill_chans] = True
+            cand.kill_mask = kill_mask
+        print("Getting chunk")
+        cand.get_chunk(for_preprocessing=True)
+    except:
+        cand = Candidate(
+            files,
+            snr=snr,
+            width=width,
+            dm=dm,
+            label=label,
+            tcand=tcand,
+            device=gpu_id,
+            spectral_kurtosis_sigma=args.spectral_kurtosis_sigma,
+            savgol_frequency_window=args.savgol_frequency_window,
+            savgol_sigma=args.savgol_sigma,
+            flag_rfi=False,
+            min_samp=25000,
+        )
+        # get the tsamp
+        tsamp = cand.your_header.tsamp
+        cand.min_samp = (args.ws/1000)//tsamp
+        print(f"min width: {cand.min_samp} samples")
+        rfifind_mask = files[0].replace('.fil','_rfifind.mask')
+        masked_chans = maskfile(rfifind_mask,int(tcand/tsamp),int(cand.min_samp*2))
+        if os.path.exists(str(kill_mask_path)):
+            kill_mask = np.zeros(cand.nchans, dtype=np.bool_)
+            kill_mask[kill_chans] = True
+            cand.kill_mask = kill_mask
+        print("Getting chunk")
+        cand.get_chunk(for_preprocessing=True)
+
     if cand.format == "fil":
         cand.fp.close()
     logger.info("Got Chunk")
@@ -170,6 +232,16 @@ def cand2h5(cand_val):
     cand = cpu_dedisp_dmt(cand, args)
 
     #saving
+    #make sure all the header columns have a valid key
+    your_header = vars(cand.your_header)
+    for key in your_header.keys():
+        if key == "dtype":
+            if np.dtype(your_header[key]).name == None:
+                setattr(cand.your_header,key,"None")
+        else:
+            if your_header[key] == None:
+                setattr(cand.your_header,key,"None")
+
     fout = cand.save_h5(out_dir=args.fout)
     fout2 = plot_h5(fout,save=True,detrend_ft=True,range_dm=args.range_dm)
     logger.debug(f"Filesize of {fout} is {os.path.getsize(fout)}")
@@ -382,7 +454,7 @@ if __name__ == "__main__":
             ]
         )
 
-    with Pool(processes=values.nproc) as pool:
-        pool.map(cand2h5, process_list, chunksize=1)
-    # for p in process_list:
-        # cand2h5(p)
+    # with Pool(processes=values.nproc) as pool:
+        # pool.map(cand2h5, process_list, chunksize=1)
+    for p in process_list:
+        cand2h5(p)
