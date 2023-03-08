@@ -454,7 +454,7 @@ if __name__ == "__main__":
             ]
         )
 
-    # with Pool(processes=values.nproc) as pool:
-        # pool.map(cand2h5, process_list, chunksize=1)
-    for p in process_list:
-        cand2h5(p)
+    with Pool(processes=values.nproc) as pool:
+        pool.map(cand2h5, process_list, chunksize=1)
+    # for p in process_list:
+        # cand2h5(p)
