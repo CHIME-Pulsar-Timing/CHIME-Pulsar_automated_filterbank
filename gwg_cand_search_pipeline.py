@@ -126,6 +126,12 @@ def run_sp(fname):
         traceback.print_exc()
         sys.exit(1)
 
+def edit_mask(fname,ext,mask_name):
+    #finally edit the mask to include the pipeline things
+    ignorelist = pipeline_config.ignorelist
+    command = f"rfifind -mask {fname}{mask_name} -zapchan {ignorelist} -nocompute -o {fname} {fname}.{ext}"
+    run_rfifind_cmd = subprocess.check_call([command], shell=True)
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -229,8 +235,4 @@ if __name__ == '__main__':
         fname = fname.split('/')[-1]
         prep_fetch_csv(fname+ext,float(source_dm),rank=5)
 
-    #finally edit the mask to include the pipeline things
-
-    ignorelist = pipeline_config.ignorelist
-    command = f"rfifind -mask {fname}{mask_name} -zapchan {ignorelist} -nocompute -o {fname} {fname}.fil"
-    run_rfifind_cmd = subprocess.check_call([command], shell=True)
+    edit_mask(fname,mask_name,ext)

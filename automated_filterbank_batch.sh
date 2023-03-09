@@ -34,7 +34,7 @@ if [ "$LOCAL" != true ]; then
     module load chime-psr
     source ~/projects/rrg-istairs-ad/Your/bin/activate
 else
-    SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+    SLURM_TMPDIR='/media/adam/d0fdb915-c69f-4fba-9759-ed1844c4685b/tmpdir/'$PULSAR
     # SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
     # SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
     mkdir -p $SLURM_TMPDIR
