@@ -235,4 +235,4 @@ if __name__ == '__main__':
         fname = fname.split('/')[-1]
         prep_fetch_csv(fname+ext,float(source_dm),rank=5)
 
-    edit_mask(fname,mask_name,ext)
+    edit_mask(fname,ext,mask_name)
