@@ -32,7 +32,7 @@ if [ "$LOCAL" != true ]; then
     module load cuda
 else
     PULSAR=$(basename $CAND_PATH)
-    SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
+    SLURM_TMPDIR='/media/adam/d0fdb915-c69f-4fba-9759-ed1844c4685b/tmpdir/'$PULSAR
     mkdir -p $SLURM_TMPDIR
 fi
 
