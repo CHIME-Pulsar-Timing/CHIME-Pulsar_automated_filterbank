@@ -10,11 +10,11 @@ parser.add_argument('-fil', type=str, help='Input filterbank file')
 args = parser.parse_args()
 fname = args.fil
 fname_base = fname.replace(".fits","")
-chunk_size = 1*1024*1024*1024 #GB each
+chunk_size = 4*1024*1024*1024 #Bytes each (first number is gigabytes)
 
 filesize = os.path.getsize(fname)
 total_files = np.ceil(filesize/chunk_size)
-print(total_files)
+print("total files:",total_files)
 #read the file
 filfile = PFITSReader(fname)
 nsubints = filfile.sub_hdr.nsubint
@@ -25,7 +25,7 @@ nsamps = filfile.header.nsamples
 subint_samples = filfile.sub_hdr.subint_samples
 gulp = int(gulp_subints*subint_samples)
 
-print(gulp)
+print("gulp size:",gulp)
 current_samp = 0
 i=0
 filfile.header.foff=filfile.header.foff.value
@@ -33,10 +33,13 @@ filfile.header.fch1=filfile.header.fch1.value
 # filfile.header.azimuth=filfile.header.azimuth.value
 # filfile.header.zenith=filfile.header.zenith.value
 while current_samp<nsamps:
-    print(current_samp,i)
+    if (nsamps-current_samp)<gulp:
+        #set gulp to end of range
+        gulp = nsamps-current_samp
+    print("current sample",current_samp,"iteration",i)
     block = filfile.read_block(current_samp,gulp)
-    print(block.shape)
-    out_fn = fname_base+f"_{i}.fits"
+    # print(block.shape)
+    out_fn = fname_base+f"_split_{i}.fits"
     block.to_file(filename=out_fn)
     i += 1
     current_samp += gulp
