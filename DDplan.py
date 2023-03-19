@@ -321,7 +321,9 @@ def dm_steps(loDM, hiDM, obs, cohdm=0.0, numsub=0, ok_smearing=0.0,
         while (BW_smear(allow_dDMs[index_dDMs+1], obs.BW, obs.f_ctr) < ff*eff_dt):
             index_dDMs += 1
         dDM = allow_dDMs[index_dDMs]
-
+        m = dedisp_method(obs, downsamp, methods[-1].hiDM,hiDM, dDM, numsub=numsub)
+        if len(m.DMs)==0:
+            continue
         # Get the next method
         methods.append(dedisp_method(obs, downsamp, methods[-1].hiDM,
                                      hiDM, dDM, numsub=numsub))
