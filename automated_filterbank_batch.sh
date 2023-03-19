@@ -7,11 +7,8 @@
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
-#1 is number of splits
-#2 is DM
-#3 is filterbank file
-#4 is the location of the scripts
-#if we are not splitting then just set out as the fil file
+set -euo pipefail
+
 while getopts "ld:a:p:" flag
 do
     case "${flag}" in
@@ -22,10 +19,6 @@ do
     esac
 done
 
-#path to automated filterbank file script locations
-#this is set when you run a batch script by default
-#load the modules needed, retry if failed... (don't know why it sometimes fails?)
-#
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
 EXT="${p##*.}"
 if [ "$LOCAL" != true ]; then
@@ -35,8 +28,6 @@ if [ "$LOCAL" != true ]; then
     source ~/projects/rrg-istairs-ad/Your/bin/activate
 else
     SLURM_TMPDIR='/media/adam/d0fdb915-c69f-4fba-9759-ed1844c4685b/tmpdir/'$PULSAR
-    # SLURM_TMPDIR='/home/adam/scratch/tmpdir/'$PULSAR
-    # SLURM_TMPDIR='/media/adam/C/tmpdir/'$PULSAR
     mkdir -p $SLURM_TMPDIR
     SLURM_JOB_ID=1
 fi
@@ -71,6 +62,7 @@ if test -f "$p"; then
             fi
         fi
 
+        #ANYTHING BEYOND HERE IS DEBUGGING
         #FETCH and SPEGID are slow so lets like ignore that for now
         #python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         #for rapid tests, only do rfifind
@@ -88,11 +80,6 @@ if test -f "$p"; then
         exit 1
         #remove the extra fil files
     done
-    #run candmaker
-    # mkdir -p ${SLURM_TMPDIR}/nsub_0_5
-    # mkdir -p ${SLURM_TMPDIR}/nsub_1
-    # python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
-    # python $AFP/your_candmaker.py -fs 256 -ts 256 -c ${SLURM_TMPDIR}/cands.csv -o ${SLURM_TMPDIR}/nsub_1 -r -n 5 -ws 1000 --gpu_id 0
 
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     rm "${SLURM_TMPDIR}"/$FIL
@@ -105,8 +92,13 @@ if test -f "$p"; then
     rm "${SLURM_TMPDIR}"/*DM*.singlepulse
     cp -r ${SLURM_TMPDIR}/* .
     # clean up - not needed on compute canada, but nice to run clean up when on my own computer
-    # rm -r ${SLURM_TMPDIR}
-    exit 0
+    if [ "$LOCAL" == true ]; then
+        #gotta do this for some weird reason on my local machine
+        touch "${PULSAR}"_singlepulse.ps
+        rm -r ${SLURM_TMPDIR}
+    fi
+
+        exit 0
 fi
 #didn't find file, throw error
 echo "filterbank file not found"

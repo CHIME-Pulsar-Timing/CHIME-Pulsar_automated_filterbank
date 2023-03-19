@@ -25,6 +25,7 @@ for RESULT_PATH in $PROCESSED;
 do
     RESULT_FILE="$RESULT_PATH/results_a.csv"
     echo $RESULT_PATH
+    touch positive_bursts_1.csv
     while IFS=, read -r cand filepath probability score
     do
         ROOT=$(dirname $RESULT_PATH)
@@ -37,10 +38,12 @@ do
             then
                 # code if found
                 ln -s $PATH_PNG positive_bursts_short
+
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_short.csv
 
             elif [[ $PATH_PNG == *"nsub_1/"* ]];
             then
+
                 ln -s $PATH_PNG positive_bursts_1
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_1.csv
 
