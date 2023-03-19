@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+
+import numpy as np
+from sigpyproc.readers import PFITSReader
+import os
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-fil', type=str, help='Input filterbank file')
+args = parser.parse_args()
+fname = args.fil
+fname_base = fname.replace(".fits","")
+chunk_size = 1*1024*1024*1024 #GB each
+
+filesize = os.path.getsize(fname)
+total_files = np.ceil(filesize/chunk_size)
+print(total_files)
+#read the file
+filfile = PFITSReader(fname)
+nsubints = filfile.sub_hdr.nsubint
+gulp_subints = nsubints//total_files
+nsamps = filfile.header.nsamples
+#gulp size
+#this is a fits file, so it's split but subints.
+subint_samples = filfile.sub_hdr.subint_samples
+gulp = int(gulp_subints*subint_samples)
+
+print(gulp)
+current_samp = 0
+i=0
+filfile.header.foff=filfile.header.foff.value
+filfile.header.fch1=filfile.header.fch1.value
+# filfile.header.azimuth=filfile.header.azimuth.value
+# filfile.header.zenith=filfile.header.zenith.value
+while current_samp<nsamps:
+    print(current_samp,i)
+    block = filfile.read_block(current_samp,gulp)
+    print(block.shape)
+    out_fn = fname_base+f"_{i}.fits"
+    block.to_file(filename=out_fn)
+    i += 1
+    current_samp += gulp
