@@ -37,31 +37,31 @@ do
             if [[ $PATH_PNG == *"nsub_short_0_5/"* ]];
             then
                 # code if found
-                ln -s $PATH_PNG positive_bursts_short
+                ln -s -f $PATH_PNG positive_bursts_short
 
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_short.csv
 
             elif [[ $PATH_PNG == *"nsub_1/"* ]];
             then
 
-                ln -s $PATH_PNG positive_bursts_1
+                ln -s -f $PATH_PNG positive_bursts_1
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_1.csv
 
             elif [[ $PATH_PNG == *"nsub_0_5/"* ]];
             then
                 # code if not found
-                ln -s $PATH_PNG positive_bursts
+                ln -s -f $PATH_PNG positive_bursts
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts.csv
 
             elif [[ $PATH_PNG == *"nsub_0_1/"* ]];
             then
                 # code if not found
-                ln -s $PATH_PNG positive_bursts_0_1
+                ln -s -f $PATH_PNG positive_bursts_0_1
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_0_1.csv
             elif [[ $PATH_PNG == *"nsub_0_1_short/"* ]];
             then
                 # code if not found
-                ln -s $PATH_PNG positive_bursts_0_1_short
+                ln -s -f $PATH_PNG positive_bursts_0_1_short
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_0_1_short.csv
             fi
 
