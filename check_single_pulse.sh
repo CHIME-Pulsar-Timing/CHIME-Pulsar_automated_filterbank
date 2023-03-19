@@ -19,7 +19,7 @@ do
     #strip the extension
     PULSAR=$(echo "$FIL" | rev | cut -f2- -d '.' | rev)
     if [ -d $PULSAR ]; then
-        SP="${PULSAR}/"*"singlepulse.ps"
+        SP="${PULSAR}/"*"cands.csv"
         if [ -f $SP ]; then
             #now finally check if results has been run
             #Check FETCH 1 has been run
