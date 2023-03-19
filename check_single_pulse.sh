@@ -72,7 +72,7 @@ do
                 echo "$FIL finished everything nothing to see here..." >> completed.csv
             else
                 #check if cands is empty
-		LINES=$(cat "$PULSAR"/cands.csv | wc -l)
+                LINES=$(cat "$PULSAR"/cands.csv | wc -l)
                 if [ "$LINES" -gt 1 ]
                 then
                     FETCH=true
