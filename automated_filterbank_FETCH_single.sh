@@ -10,6 +10,7 @@
 #SBATCH --gres=gpu:v100l:1
 #the first argument is the tree to search down
 #run FETCH
+LOCAL=false
 while getopts "li:p:" flag
 do
     case "${flag}" in
