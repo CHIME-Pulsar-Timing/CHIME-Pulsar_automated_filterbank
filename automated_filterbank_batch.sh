@@ -8,7 +8,7 @@
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
 set -euo pipefail
-
+LOCAL=false
 while getopts "ld:a:p:" flag
 do
     case "${flag}" in
