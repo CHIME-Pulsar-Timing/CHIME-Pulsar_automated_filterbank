@@ -38,10 +38,13 @@ def prep_speg(inffile,fpath=''):
         for fn,DM in sorted_arr:
             with open(fn) as csvfile:
                 reader=csv.reader(csvfile,delimiter=' ')
+
                 for i,row in enumerate(reader):
                     row = list(filter(None,row))
                     if i>0:
-                        writer.writerow(row)
+                        if float(row[3])!=0:
+                            #ignore something with sample=0, it causes division error in SPEGID
+                            writer.writerow(row)
 
     #write the inf file
     with open(last_folder+'_inf.txt','w',newline='') as speginf:
