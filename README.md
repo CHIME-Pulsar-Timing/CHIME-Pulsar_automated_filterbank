@@ -15,6 +15,7 @@ symlink it to your scratch sapce
 `ln -s $FULL_PATH_TO_FILTERBANK $DESTINATION`
 
 # CHIME-Pulsar_automated_filterbank
+*make sure your have adjusted your channel mask in pipeline config.py*
 the best way to run is to run the following command, it will submit two jobs per `observation.fil`, the first one runs the presto pipeline, the second will run the FETCH pipeline, which is dependent on the success of the first job.
 
 `check_single_pulse.sh -b -d $DM $Filterbank/Fits_files`
