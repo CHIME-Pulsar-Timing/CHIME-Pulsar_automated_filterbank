@@ -24,7 +24,7 @@ If for some reason FETCH failed you can run it again with the following command 
 MAKE SURE YOU HAVE NO MODULES LOADED ON CC. THE SCRIPT WILL LOAD THEM FOR YOU.
 
 
-`check_single_pulses.sh -f` 
+`check_single_pulses.sh -f *.fil` 
 
 will run FETCH on any unprocessed `.fil` files in your current directory.
 
