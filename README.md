@@ -20,13 +20,15 @@ symlink it to your scratch sapce
 the best way to run is to run the following command, it will submit two jobs per `observation.fil`, the first one runs the presto pipeline, the second will run the FETCH pipeline, which is dependent on the success of the first job.
 
 `check_single_pulse.sh -b -d $DM $Filterbank/Fits_files`
-
-
+to run locally use the -l flag (on your own computer i.e. not on a SLURM controlled computer)
+`check_single_pulse.sh -l -b -d $DM $Filterbank/Fits_files`
 If for some reason FETCH failed you can run it again with the following command (`check_single_pulse.sh` will check if FETCH ran)
 MAKE SURE YOU HAVE NO MODULES LOADED ON CC. THE SCRIPT WILL LOAD THEM FOR YOU.
 
 
 `check_single_pulses.sh -f *.fil` 
+similarly
+`check_single_pulses.sh -l -f *.fil` to run locally
 
 will run FETCH on any unprocessed `.fil` files in your current directory.
 
