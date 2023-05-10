@@ -1,7 +1,7 @@
 # heretofore known as CHIme/Pulsar Single-pulse PIPEline (CHIPSPIPE)
 Video tutorials of how to run CHIPSPIPE 
 
-On Cedar/SLURM based super computers: https://youtu.be/pZlYtUMod4A
+Introduction and on Cedar/SLURM based super computers: https://youtu.be/pZlYtUMod4A
 
 On local machines: https://youtu.be/qDWkxYvxOns
 
