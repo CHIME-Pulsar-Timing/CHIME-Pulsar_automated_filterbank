@@ -87,7 +87,7 @@ if test -f "$p"; then
     done
 
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-    rm "${SLURM_TMPDIR}"/$FIL
+    # rm "${SLURM_TMPDIR}"/$FIL
     #remove the .dat files
     rm "${SLURM_TMPDIR}"/*.dat
     #tarball the infs and singlepulse files

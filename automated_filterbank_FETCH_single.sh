@@ -67,8 +67,8 @@ if [ "$LOCAL" != true ]; then
     source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
 else
     echo "running locally, make sure FETCH, Your and sigpyproc are installed!!"
-    #source ~/anaconda3/etc/profile.d/conda.sh
-    #conda activate fetch
+    source ~/anaconda3/etc/profile.d/conda.sh
+    conda activate fetch
 fi
 
 predict.py --data_dir nsub_0_5 --model a --probability 0.1
