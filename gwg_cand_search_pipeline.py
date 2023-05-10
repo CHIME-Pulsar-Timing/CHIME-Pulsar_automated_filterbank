@@ -65,7 +65,13 @@ def run_rfifind(fname,ext,dead_gpus=''):
         else:
             ignore_chan_string = ignore_chan_string+','+str(chan)
     logging.info(f"RFIFIND out fname {fname}")
-    rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -o {fname} {fname}{ext}"
+    if ignore_chan_string=='':
+        #don't have any ignore channels if there's no zaplist
+        #print warning
+        print("WARNING: no zaplist, so no channels will be ignored")
+        rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -o {fname} {fname}{ext}"
+    else:
+        rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -o {fname} {fname}{ext}"
     logging.info(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
@@ -84,6 +90,11 @@ def run_ddplan(fname,ext,dm,mask_name,ignorelist):
 
     info = infodata.infodata(fname+'_rfifind.inf')
     dt = info.dt
+    numchan = info.numchan
+    if numchan>1024:
+        subband = int(numchan/4)
+    else:
+        subband = numchan
     if dm>26.1:
         dml=dm-20
     else:
@@ -93,8 +104,10 @@ def run_ddplan(fname,ext,dm,mask_name,ignorelist):
     path=pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
     fname = fname.split('/')[-1]
-
-    ddplan_command = f"python {path}/DDplan.py --ignore {ignorelist} -t {dt} -y {mask_name} -c {dm} -l {dml} -d {dmh} -s 256 -o {fname}_ddplan -w {fname}{ext}"
+    if ignorelist=='':
+        ddplan_command = f"python {path}/DDplan.py -t {dt} -y {mask_name} -c {dm} -l {dml} -d {dmh} -s {subband} -o {fname}_ddplan -w {fname}{ext}"
+    else:
+        ddplan_command = f"python {path}/DDplan.py --ignore {ignorelist} -t {dt} -y {mask_name} -c {dm} -l {dml} -d {dmh} -s {subband} -o {fname}_ddplan -w {fname}{ext}"
 
     logging.info(ddplan_command)
     # ddplan_command = "python %s/DDplan.py -l %.2f -d %.2f -s 256 -o %s_ddplan -w %s.fil" %(path,dml,dmh,fname,fname)
@@ -129,6 +142,9 @@ def run_sp(fname):
 def edit_mask(fname,ext,mask_name):
     #finally edit the mask to include the pipeline things
     ignorelist = pipeline_config.ignorelist
+    if ignorelist=='':
+        print("WARNING: no zaplist, so no channels will be ignored")
+        return None
     command = f"rfifind -mask {fname}{mask_name} -zapchan {ignorelist} -nocompute -o {fname} {fname}.{ext}"
     run_rfifind_cmd = subprocess.check_call([command], shell=True)
 

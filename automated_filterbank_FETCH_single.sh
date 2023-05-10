@@ -31,19 +31,17 @@ if [ "$LOCAL" != true ]; then
     module load chime-psr
     source ~/projects/rrg-istairs-ad/Your/bin/activate
     module load cuda
-else
-    PULSAR=$(basename $CAND_PATH)
-    SLURM_TMPDIR='/media/adam/d0fdb915-c69f-4fba-9759-ed1844c4685b/tmpdir/'$PULSAR
-    mkdir -p $SLURM_TMPDIR
 fi
 
 #work in absolute paths, CC is weird when launching batch script
 echo $AFP
 CAND_PATH=$(pwd)
 echo $PWD $CAND_PATH
-ls
-cp -r ./* $SLURM_TMPDIR
-cd $SLURM_TMPDIR
+if [ "$LOCAL" != true ]; then
+    ls
+    cp -r ./* $SLURM_TMPDIR
+    cd $SLURM_TMPDIR
+fi
 mkdir -p nsub_0_5
 mkdir -p nsub_1
 mkdir -p nsub_short_0_5
@@ -68,8 +66,9 @@ if [ "$LOCAL" != true ]; then
     module unuse /project/6004902/modulefiles
     source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
 else
-    source ~/anaconda3/etc/profile.d/conda.sh
-    conda activate fetch
+    echo "running locally, make sure FETCH, Your and sigpyproc are installed!!"
+    #source ~/anaconda3/etc/profile.d/conda.sh
+    #conda activate fetch
 fi
 
 predict.py --data_dir nsub_0_5 --model a --probability 0.1
@@ -77,4 +76,7 @@ predict.py --data_dir nsub_1 --model a --probability 0.1
 predict.py --data_dir nsub_short_0_5 --model a --probability 0.1
 predict.py --data_dir nsub_0_1 --model a --probability 0.1
 predict.py --data_dir nsub_0_1_short --model a --probability 0.1
-cp -r $SLURM_TMPDIR/* $CAND_PATH/
+
+if [ "$LOCAL" != true ]; then
+    cp -r $SLURM_TMPDIR/* $CAND_PATH/
+fi
