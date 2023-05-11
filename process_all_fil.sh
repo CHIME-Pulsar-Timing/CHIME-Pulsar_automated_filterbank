@@ -9,7 +9,7 @@ do
     esac
 done
 
-AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+AFP="$(dirname $(readlink -f $0))"
 FN=$(echo "$FIL" | rev | cut -f2- -d '.' | rev)
 #make a new folder and set up to run main pipeline
 if [ ! -d $FN ]; then
