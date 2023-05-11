@@ -2,7 +2,7 @@
 while true; do
     input="pulsar"
     filterbank="test/"
-    AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+    AFP="$(dirname $(readlink -f $0))"
     while IFS= read -r my_pulsar
     do   
         echo "Process $my_pulsar"

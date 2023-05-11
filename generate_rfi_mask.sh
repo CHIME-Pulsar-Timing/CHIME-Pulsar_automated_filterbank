@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+AFP="$(dirname $(readlink -f $0))"
 for FIL in $@
 do
     python $AFP/generate_rfi_mask.py $FIL &
