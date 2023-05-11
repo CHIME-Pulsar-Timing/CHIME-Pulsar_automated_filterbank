@@ -1,7 +1,9 @@
 #!/bin/bash
 module use /project/6004902/modulefiles
 module load presto
-AFP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+echo "$0"
+AFP="$(dirname $(readlink -f "$0"))"
+echo "$AFP"
 #comment out on cc
 # SLURM_TMPDIR="/media/adam/1c126a4b-fb16-4471-909f-4b0fda74a5d2/tmpdir"
 SCRATCH_DIR=$(pwd)
