@@ -6,7 +6,7 @@ from presto.psrfits import PsrfitsFile as p
 from presto import psrfits
 from presto import filterbank
 from presto import sigproc
-from .pipeline_config import min_spegid_snr
+from pipeline_config import min_spegid_snr
 
 DM_CONST = 4149.377593360996  # dispersion constant
 

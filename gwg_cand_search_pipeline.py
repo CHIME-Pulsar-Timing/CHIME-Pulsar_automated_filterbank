@@ -91,7 +91,7 @@ def run_ddplan(fname,ext,dm,mask_name,ignorelist):
     info = infodata.infodata(fname+'_rfifind.inf')
     dt = info.dt
     numchan = info.numchan
-    if numchan>1024:
+    if numchan>=1024:
         subband = int(numchan/4)
     else:
         subband = numchan
