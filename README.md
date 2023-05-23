@@ -42,7 +42,7 @@ MAKE SURE YOU HAVE NO MODULES LOADED ON CC. THE SCRIPT WILL LOAD THEM FOR YOU.
 
 similarly
 
-`check_single_pulses.sh -l -f *.fil` to run locally
+`check_single_pulses.sh -l -f *.fil` to run locally (make sure that you have fetch installed in a conda environment called fetch. i.e. `conda activate fetch` loads the environment that works with FETCH
 
 will run FETCH on any unprocessed `.fil` files in your current directory.
 
