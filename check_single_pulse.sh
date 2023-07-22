@@ -23,14 +23,14 @@ do
         if [ -f $SP ]; then
             #now finally check if results has been run
             #Check FETCH 1 has been run
-            FP="${PULSAR}/nsub_0_5/results_a.csv"
-            echo $PULSAR
-            if [ ! -f $FP ]; then
-                #echo $FP
-                #echo "$FIL never ran FETCH missing 0"
-                #ls -lHd $FIL
-                FETCH=true
-            fi
+            # FP="${PULSAR}/nsub_0_5/results_a.csv"
+            # echo $PULSAR
+            # if [ ! -f $FP ]; then
+            #     #echo $FP
+            #     #echo "$FIL never ran FETCH missing 0"
+            #     #ls -lHd $FIL
+            #     FETCH=true
+            # fi
 
             #check FETCH 2 has been run
             FP="${PULSAR}/nsub_1/results_a.csv"
@@ -42,30 +42,30 @@ do
             fi
 
             #check FETCH 2 has been run
-            FP="${PULSAR}/nsub_short_0_5/results_a.csv"
-            if [ ! -f $FP ]; then
-                #echo $FP
-                #echo "$FIL never ran FETCH missing 1"
-                #ls -lHd $FIL
-                FETCH=true
-            fi
+            # FP="${PULSAR}/nsub_short_0_5/results_a.csv"
+            # if [ ! -f $FP ]; then
+            #     #echo $FP
+            #     #echo "$FIL never ran FETCH missing 1"
+            #     #ls -lHd $FIL
+            #     FETCH=true
+            # fi
 
-            #check FETCH 2 has been run
-            FP="${PULSAR}/nsub_0_1/results_a.csv"
-            if [ ! -f $FP ]; then
-                #echo $FP
-                #echo "$FIL never ran FETCH missing 1"
-                #ls -lHd $FIL
-                FETCH=true
-            fi
+            # #check FETCH 2 has been run
+            # FP="${PULSAR}/nsub_0_1/results_a.csv"
+            # if [ ! -f $FP ]; then
+            #     #echo $FP
+            #     #echo "$FIL never ran FETCH missing 1"
+            #     #ls -lHd $FIL
+            #     FETCH=true
+            # fi
 
-            FP="${PULSAR}/nsub_0_1_short/results_a.csv"
-            if [ ! -f $FP ]; then
-                #echo $FP
-                #echo "$FIL never ran FETCH missing 1"
-                #ls -lHd $FIL
-                FETCH=true
-            fi
+            # FP="${PULSAR}/nsub_0_1_short/results_a.csv"
+            # if [ ! -f $FP ]; then
+            #     #echo $FP
+            #     #echo "$FIL never ran FETCH missing 1"
+            #     #ls -lHd $FIL
+            #     FETCH=true
+            # fi
 
 
             if [ "$FETCH" = false ]; then
@@ -120,7 +120,7 @@ do
             PROCESSED=$(find $AP -name 'cands.csv' -printf '%h\n' | sort -u)
             cd $PROCESSED
             if [ "$LOCAL" = true ]; then
-                $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR
+                $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -g 0 -n 20
             else
                 sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR
             fi

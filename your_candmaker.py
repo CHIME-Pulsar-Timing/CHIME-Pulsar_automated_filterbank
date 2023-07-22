@@ -241,7 +241,6 @@ def cand2h5(cand_val):
         else:
             if your_header[key] == None:
                 setattr(cand.your_header,key,"None")
-
     fout = cand.save_h5(out_dir=args.fout)
     fout2 = plot_h5(fout,save=True,detrend_ft=True,range_dm=args.range_dm)
     logger.debug(f"Filesize of {fout} is {os.path.getsize(fout)}")

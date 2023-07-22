@@ -10,7 +10,7 @@ parser.add_argument('-fil', type=str, help='Input filterbank file')
 args = parser.parse_args()
 fname = args.fil
 fname_base = fname.replace(".fits","")
-chunk_size = 4*1024*1024*1024 #Bytes each (first number is gigabytes)
+chunk_size = 1*1024*1024*1024 #Bytes each (first number is gigabytes)
 
 filesize = os.path.getsize(fname)
 total_files = np.ceil(filesize/chunk_size)
@@ -39,7 +39,7 @@ while current_samp<nsamps:
     print("current sample",current_samp,"iteration",i)
     block = filfile.read_block(current_samp,gulp)
     # print(block.shape)
-    out_fn = fname_base+f"_split_{i}.fits"
+    out_fn = fname_base+f"_split_{i}.fil"
     block.to_file(filename=out_fn)
     i += 1
     current_samp += gulp
