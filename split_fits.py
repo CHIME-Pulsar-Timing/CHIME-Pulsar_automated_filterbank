@@ -10,7 +10,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-fil', type=str, help='Input filterbank file')
 args = parser.parse_args()
 fname = args.fil
-fname_base = fname.replace(".fil","")
+if fname.endswith(".fits"):
+    fname_base = fname.replace(".fits","")
+else:
+    fname_base = fname.replace(".fil","")
 chunk_size = 1*1024*1024*1024 #Bytes each (first number is gigabytes)
 
 filesize = os.path.getsize(fname)

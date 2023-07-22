@@ -131,7 +131,7 @@ def run_sp(fname):
     logging.info(sp_command)
     failed=True
     try:
-        run_sp_cmd = subprocess.check_call([sp_command],shell=True)
+        run_sp_cmd = subprocess.check_call([sp_command],shell=True,executable="/bin/bash")
         #run_sp_cmd.wait()
     except subprocess.CalledProcessError:
         [logging.info(f) for f in os.listdir('.')]

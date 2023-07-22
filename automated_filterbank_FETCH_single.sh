@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=20:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=16GB
 #SBATCH --cpus-per-task=5
 #SBATCH --job-name=fetch
@@ -10,21 +10,26 @@
 #SBATCH --gres=gpu:v100l:1
 #the first argument is the tree to search down
 #run FETCH
+
 LOCAL=false
-while getopts "li:p:" flag
+GPU=0
+n=5
+TIME=1
+SHORT=false
+while getopts "li:p:g:n:t:s" flag
 do
     case "${flag}" in
         l) LOCAL=true;;
         i) CAND_PATH=$OPTARG;;
         p) AFP=$OPTARG;;
+        g) GPU=$OPTARG;;
+        n) n=$OPTARG;;
+        t) TIME=$OPTARG;;
+        s) SHORT=true;;
     esac
 done
+echo $GPU
 
-
-#the following code is only valid for Adam's personal computer comment out if on CC
-# source ~/anaconda3/etc/profile.d/conda.sh
-# conda activate fetch
-#the following is valid for CC
 if [ "$LOCAL" != true ]; then
     module use /project/6004902/modulefiles
     module load presto
@@ -34,7 +39,6 @@ if [ "$LOCAL" != true ]; then
 fi
 
 #work in absolute paths, CC is weird when launching batch script
-echo $AFP
 CAND_PATH=$(pwd)
 echo $PWD $CAND_PATH
 if [ "$LOCAL" != true ]; then
@@ -42,17 +46,39 @@ if [ "$LOCAL" != true ]; then
     cp -r ./* $SLURM_TMPDIR
     cd $SLURM_TMPDIR
 fi
-mkdir -p nsub_0_5
-mkdir -p nsub_1
-mkdir -p nsub_short_0_5
-mkdir -p nsub_0_1
-mkdir -p nsub_0_1_short
-echo "making candidates"
-#python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
-python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -n 5 -ws 1000 --gpu_id 0
-#python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_short_0_5 -r -n 5 -ws 500 --gpu_id 0 --range_dm 5
-#python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1 -r -n 5 -ws 100 --gpu_id 0
-#python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1_short -r -n 5 -ws 100 --gpu_id 0 --range_dm 5
+
+
+if [ "$TIME" == 0.1 ]; then
+    #see if $SHORT is true
+    if [ "$SHORT" == true ]; then
+        mkdir -p nsub_0_1_short
+        echo "short 0.1"
+        python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1_short -r -n $n -ws 100 --gpu_id $GPU --range_dm 5
+
+    else
+        mkdir -p nsub_0_1
+        echo "not short 0.1"
+        python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1 -r -n $n -ws 100 --gpu_id $GPU
+    fi
+
+elif [ "$TIME" == 0.5]; then
+    if [ "$SHORT" == true ]; then
+        mkdir -p nsub_0_5
+        echo "short 0.5"
+        echo here 0_5
+        python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_short_0_5 -r -n $n -ws 500 --gpu_id $GPU --range_dm 5
+    else
+        mkdir -p nsub_short_0_5
+        echo "not short 0.5"
+        python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -n $n -ws 500 --gpu_id $GPU
+    fi
+
+elif [ "$TIME" == 1]; then
+    mkdir -p nsub_1
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -n $n -ws 1000 --gpu_id $GPU
+fi
+
+echo "candidates made"
 
 
 #make plots and do a predict for general pulses
@@ -68,17 +94,28 @@ if [ "$LOCAL" != true ]; then
 else
     echo "running locally, make sure FETCH, Your and sigpyproc are installed!!"
     source ~/anaconda3/etc/profile.d/conda.sh
+    echo "activating fetch"
     conda activate fetch
+    echo "Fetch activated"
 fi
-echo "predicting now" >> $CAND_PATH/FETCH_output.log
-#predict.py --data_dir nsub_0_5 --model a --probability 0.1
-predict.py --data_dir nsub_1 --model a --probability 0.1
-#predict.py --data_dir nsub_short_0_5 --model a --probability 0.1
-#predict.py --data_dir nsub_0_1 --model a --probability 0.1
-#predict.py --data_dir nsub_0_1_short --model a --probability 0.1
-echo "predicting finished" > $CAND_PATH/FETCH_output.log
+echo "predicting candidates"
+if [ "$TIME" == 0.1 ]; then
+    #see if $SHORT is true
+    if [ "$SHORT" == true ]; then
+        predict.py --data_dir nsub_0_1_short --model a --probability 0.1 -g $GPU
+    else
+        predict.py --data_dir nsub_0_1 --model a --probability 0.1 -g $GPU
+    fi
+elif [ "$TIME" == 0.5]; then
+    if [ "$SHORT" == true ]; then
+        predict.py --data_dir nsub_short_0_5 --model a --probability 0.1 -g $GPU
+    else
+        predict.py --data_dir nsub_0_5 --model a --probability 0.1 -g $GPU
+    fi
+elif [ "$TIME" == 1]; then
+    predict.py --data_dir nsub_1 --model a --probability 0.1 -g $GPU
+fi
 
 if [ "$LOCAL" != true ]; then
-    echo "copying files back to scratch" >> $CAND_PATH/FETCH_output.log
     cp -r $SLURM_TMPDIR/nsub* $CAND_PATH/
 fi
