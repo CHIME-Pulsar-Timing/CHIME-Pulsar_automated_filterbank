@@ -1,11 +1,12 @@
 #!/bin/bash
 #this file will run to check which filterbank files have been run and which have not
-while getopts "bfld:" flag
+while getopts "bflad:" flag
 do
     case "${flag}" in
         b) RBATCH=true;;
         f) RFETCH=true;;
         l) LOCAL=true;;
+        a) ALL=true;;
         d) DM=$OPTARG;;
     esac
 done
@@ -22,50 +23,54 @@ do
         SP="${PULSAR}/"*"cands.csv"
         if [ -f $SP ]; then
             #now finally check if results has been run
-            #Check FETCH 1 has been run
-            # FP="${PULSAR}/nsub_0_5/results_a.csv"
-            # echo $PULSAR
-            # if [ ! -f $FP ]; then
-            #     #echo $FP
-            #     #echo "$FIL never ran FETCH missing 0"
-            #     #ls -lHd $FIL
-            #     FETCH=true
-            # fi
+            if [ "$ALL" = true ]; then
 
-            #check FETCH 2 has been run
+                FP="${PULSAR}/nsub_0_5/results_a.csv"
+                echo $PULSAR
+                if [ ! -f $FP ]; then
+                    #echo $FP
+                    #echo "$FIL never ran FETCH missing 0"
+                    #ls -lHd $FIL
+                    FETCH_0_5=true
+                    FETCH=true
+                fi
+
+                FP="${PULSAR}/nsub_short_0_5/results_a.csv"
+                if [ ! -f $FP ]; then
+                    #echo $FP
+                    #echo "$FIL never ran FETCH missing 1"
+                    #ls -lHd $FIL
+                    FETCH_S_0_5=true
+                    FETCH=true
+                fi
+
+                FP="${PULSAR}/nsub_0_1/results_a.csv"
+                if [ ! -f $FP ]; then
+                    #echo $FP
+                    #echo "$FIL never ran FETCH missing 1"
+                    #ls -lHd $FIL
+                    FETCH_0_1=true
+                    FETCH=true
+                fi
+
+                FP="${PULSAR}/nsub_0_1_short/results_a.csv"
+                if [ ! -f $FP ]; then
+                    #echo $FP
+                    #echo "$FIL never ran FETCH missing 1"
+                    #ls -lHd $FIL
+                    FETCH_S_0_1=true
+                    FETCH=true
+                fi
+            fi
             FP="${PULSAR}/nsub_1/results_a.csv"
             if [ ! -f $FP ]; then
                 #echo $FP
                 #echo "$FIL never ran FETCH missing 1"
                 #ls -lHd $FIL
+                FETCH_1=true
                 FETCH=true
             fi
 
-            #check FETCH 2 has been run
-            # FP="${PULSAR}/nsub_short_0_5/results_a.csv"
-            # if [ ! -f $FP ]; then
-            #     #echo $FP
-            #     #echo "$FIL never ran FETCH missing 1"
-            #     #ls -lHd $FIL
-            #     FETCH=true
-            # fi
-
-            # #check FETCH 2 has been run
-            # FP="${PULSAR}/nsub_0_1/results_a.csv"
-            # if [ ! -f $FP ]; then
-            #     #echo $FP
-            #     #echo "$FIL never ran FETCH missing 1"
-            #     #ls -lHd $FIL
-            #     FETCH=true
-            # fi
-
-            # FP="${PULSAR}/nsub_0_1_short/results_a.csv"
-            # if [ ! -f $FP ]; then
-            #     #echo $FP
-            #     #echo "$FIL never ran FETCH missing 1"
-            #     #ls -lHd $FIL
-            #     FETCH=true
-            # fi
 
 
             if [ "$FETCH" = false ]; then
@@ -86,7 +91,6 @@ do
                     echo "${PULSAR} - cands file empty"
                 fi
             fi
-
         else
             echo "$FIL never finished running single_pulse_search.py"
             ls -hlHd $FIL
@@ -106,7 +110,11 @@ do
             if [ "$LOCAL" = true ]; then
                 $SCRIPT_DIR/process_all_fil.sh -l -d $DM -f $FIL
             else
-                $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL
+                if [ "$ALL" = true ]; then
+                    sbatch $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL -a
+                else
+                    sbatch $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL
+                fi
             fi
         fi
     fi
@@ -122,7 +130,17 @@ do
             if [ "$LOCAL" = true ]; then
                 $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -g 0 -n 20
             else
-                sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR
+                if [ "$FETCH_0_5" = true ]; then
+                    sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5
+                elif [ "$FETCH_S_0_5" = true ]; then
+                    sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5 -s
+                elif [ "$FETCH_0_1" = true ]; then
+                    sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1
+                elif [ "$FETCH_S_0_1" = true ]; then
+                    sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1 -s
+                elif [ "$FETCH_1" = true ]; then
+                    sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 1
+                fi
             fi
             cd ..
         fi

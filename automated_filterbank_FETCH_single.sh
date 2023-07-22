@@ -14,8 +14,9 @@
 LOCAL=false
 GPU=0
 n=5
-
-while getopts "li:p:g:n:" flag
+TIME=1
+SHORT=false
+while getopts "li:p:g:n:t:s" flag
 do
     case "${flag}" in
         l) LOCAL=true;;
@@ -23,6 +24,8 @@ do
         p) AFP=$OPTARG;;
         g) GPU=$OPTARG;;
         n) n=$OPTARG;;
+        t) TIME=$OPTARG;;
+        s) SHORT=true;;
     esac
 done
 echo $GPU
@@ -43,17 +46,39 @@ if [ "$LOCAL" != true ]; then
     cp -r ./* $SLURM_TMPDIR
     cd $SLURM_TMPDIR
 fi
-mkdir -p nsub_0_5
-mkdir -p nsub_1
-mkdir -p nsub_short_0_5
-mkdir -p nsub_0_1
-mkdir -p nsub_0_1_short
-echo "making candidates"
-# python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -n $n -ws 500 --gpu_id $GPU
-python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -n $n -ws 1000 --gpu_id $GPU
-# python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_short_0_5 -r -n $n -ws 500 --gpu_id $GPU --range_dm 5
-# python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1 -r -n $n -ws 100 --gpu_id $GPU
-# python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1_short -r -n $n -ws 100 --gpu_id $GPU --range_dm 5
+
+
+if [ "$TIME" == 0.1 ]; then
+    #see if $SHORT is true
+    if [ "$SHORT" == true ]; then
+        mkdir -p nsub_0_1_short
+        echo "short 0.1"
+        python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1_short -r -n $n -ws 100 --gpu_id $GPU --range_dm 5
+
+    else
+        mkdir -p nsub_0_1
+        echo "not short 0.1"
+        python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1 -r -n $n -ws 100 --gpu_id $GPU
+    fi
+
+elif [ "$TIME" == 0.5]; then
+    if [ "$SHORT" == true ]; then
+        mkdir -p nsub_0_5
+        echo "short 0.5"
+        echo here 0_5
+        python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_short_0_5 -r -n $n -ws 500 --gpu_id $GPU --range_dm 5
+    else
+        mkdir -p nsub_short_0_5
+        echo "not short 0.5"
+        python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -n $n -ws 500 --gpu_id $GPU
+    fi
+
+elif [ "$TIME" == 1]; then
+    mkdir -p nsub_1
+    python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -n $n -ws 1000 --gpu_id $GPU
+fi
+
+echo "candidates made"
 
 
 #make plots and do a predict for general pulses
@@ -74,11 +99,23 @@ else
     echo "Fetch activated"
 fi
 echo "predicting candidates"
-# predict.py --data_dir nsub_0_5 --model a --probability 0.1 -g $GPU
-predict.py --data_dir nsub_1 --model a --probability 0.1 -g $GPU
-# predict.py --data_dir nsub_short_0_5 --model a --probability 0.1 -g $GPU
-# predict.py --data_dir nsub_0_1 --model a --probability 0.1 -g $GPU
-# predict.py --data_dir nsub_0_1_short --model a --probability 0.1 -g $GPU
+
+if [ "$TIME" == 0.1 ]; then
+    #see if $SHORT is true
+    if [ "$SHORT" == true ]; then
+        predict.py --data_dir nsub_0_1_short --model a --probability 0.1 -g $GPU
+    else
+        predict.py --data_dir nsub_0_1 --model a --probability 0.1 -g $GPU
+    fi
+elif [ "$TIME" == 0.5]; then
+    if [ "$SHORT" == true ]; then
+        predict.py --data_dir nsub_short_0_5 --model a --probability 0.1 -g $GPU
+    else
+        predict.py --data_dir nsub_0_5 --model a --probability 0.1 -g $GPU
+    fi
+elif [ "$TIME" == 1]; then
+    predict.py --data_dir nsub_1 --model a --probability 0.1 -g $GPU
+fi
 
 if [ "$LOCAL" != true ]; then
     cp -r $SLURM_TMPDIR/nsub* $CAND_PATH/

@@ -1,9 +1,10 @@
 #!/bin/bash
 #this function makes the folder structures, furthermore it will submit the job
-while getopts "ld:f:" flag
+while getopts "lad:f:" flag
 do
     case "${flag}" in
         l) LOCAL=true;;
+        a) ALL=true;;
         d) DM=${OPTARG};;
         f) FIL=${OPTARG};;
     esac
@@ -26,8 +27,13 @@ else
     jbid_batch=${jbid_batch#*job }
     sleep 1
     #sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR
-
     echo "sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -i $FN -p $AFP"
-    jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -i $FN -p $AFP)
+    if [ "$ALL" = true ]; then
+        jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -i $FN -p $AFP -t 0.1)
+        jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -i $FN -p $AFP -t 0.5)
+        jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -i $FN -p $AFP -t 0.1 -s)
+        jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -i $FN -p $AFP -t 0.5 -s)
+    fi
+    jbid_fetch=$(sbatch --dependency=afterok:$jbid_batch $AFP/automated_filterbank_FETCH_single.sh -i $FN -p $AFP -t 1)
     jbid_fetch=${jbid_fetch#*job }
 fi
