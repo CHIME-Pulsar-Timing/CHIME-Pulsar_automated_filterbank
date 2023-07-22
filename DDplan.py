@@ -301,9 +301,11 @@ def dm_steps(loDM, hiDM, obs, cohdm=0.0, numsub=0, ok_smearing=0.0,
     # Calculate the appropriate initial dDM 
     dDM = guess_DMstep(obs.dt*downsamp, obs.BW, obs.f_ctr)
     print("Best guess for optimal initial dDM is %.3f" % dDM)
-    while (allow_dDMs[index_dDMs+1] < ff*dDM):
-        index_dDMs += 1
-
+    try:
+        while (allow_dDMs[index_dDMs+1] < ff*dDM):
+            index_dDMs += 1
+    except:
+        index_dDMs = int(len(allow_dDMs)/2)
     # Create the first method
     methods = [dedisp_method(obs, downsamp, loDM, hiDM,
                              allow_dDMs[index_dDMs], numsub=numsub)]
@@ -581,7 +583,13 @@ from '%s'
             mask_name = a
         if o in ("--ignore"):
             ignorelist = a
+    try:
 
+        ignorelist
+    except NameError:
+        #set ignorelist to just the 0th channel if it doesn't exist. change this later...
+        print("WARNING: No ignore list specified")
+        ignorelist = '0'
     # The following is an instance of an "observation" class
     obs = observation(dt, fctr, BW, numchan, cDM)
 

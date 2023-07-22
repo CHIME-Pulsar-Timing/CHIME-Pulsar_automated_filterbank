@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=3:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mem=16GB
 #SBATCH --ntasks=1
 #SBATCH --job-name=automated_filterbank
@@ -27,9 +27,10 @@ if [ "$LOCAL" != true ]; then
     module load chime-psr
     source ~/projects/rrg-istairs-ad/Your/bin/activate
 else
-    SLURM_TMPDIR='/media/adam/d0fdb915-c69f-4fba-9759-ed1844c4685b/tmpdir/'$PULSAR
-    mkdir -p $SLURM_TMPDIR
+    #set slurm tmpdir to current directory
+    SLURM_TMPDIR='./'
     SLURM_JOB_ID=1
+
 fi
 # module load cuda
 
@@ -37,10 +38,13 @@ fi
 if test -f "$p"; then
     #rename it FIL
     FIL=$p
-    cp -d $FIL ${SLURM_TMPDIR}
-    echo $FIL
-    if [ ! -d ${SLURM_TMPDIR} ]; then
-        mkdir ${SLURM_TMPDIR}
+    if [ "$LOCAL" != true ]; then
+        #copy it to the scratch directory
+        cp -d $FIL ${SLURM_TMPDIR}
+        echo $FIL
+        if [ ! -d ${SLURM_TMPDIR} ]; then
+            mkdir ${SLURM_TMPDIR}
+        fi
     fi
     n=0
     #basically try catch
@@ -71,18 +75,19 @@ if test -f "$p"; then
         n=$((n+1))
         # sleep 15
         #if it fails, lets copy all the things to my scratch directory then exit with error code
-        PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-        ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
-        echo "copying error files to ${ERRORS}"
-        df -h
+        # PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
+        # ERRORS=~/"scratch/errors/${PULSAR}_${SLURM_JOB_ID}"
+        # echo "copying error files to ${ERRORS}"
+        # df -h
         #mkdir -p $ERRORS
         #cp -r -d ${SLURM_TMPDIR}/* $ERRORS
+        echo "ERRORS IN PROCESSING CHECK LOGS OR ENABLE DEBUGGING"
         exit 1
         #remove the extra fil files
     done
 
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
-    rm "${SLURM_TMPDIR}"/$FIL
+    # rm "${SLURM_TMPDIR}"/$FIL
     #remove the .dat files
     rm "${SLURM_TMPDIR}"/*.dat
     #tarball the infs and singlepulse files
@@ -90,15 +95,15 @@ if test -f "$p"; then
     tar -cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.singlepulse
-    cp -r ${SLURM_TMPDIR}/* .
-    # clean up - not needed on compute canada, but nice to run clean up when on my own computer
     if [ "$LOCAL" == true ]; then
+    # clean up - not needed on compute canada, but nice to run clean up when on my own computer
         #gotta do this for some weird reason on my local machine
         touch "${PULSAR}"_singlepulse.ps
-        rm -r ${SLURM_TMPDIR}
+    else
+        cp -r ${SLURM_TMPDIR}/* .
     fi
-
-        exit 0
+    exit 0
+    echo "ALL DONE"
 fi
 #didn't find file, throw error
 echo "filterbank file not found"

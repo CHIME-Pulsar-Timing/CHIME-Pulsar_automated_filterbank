@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=10:00:00
+#SBATCH --time=16:00:00
 #SBATCH --mem=16GB
 #SBATCH --cpus-per-task=5
 #SBATCH --job-name=fetch
@@ -33,16 +33,16 @@ if [ "$LOCAL" != true ]; then
     module load chime-psr
     source ~/projects/rrg-istairs-ad/Your/bin/activate
     module load cuda
-else
-    PULSAR=$(basename $CAND_PATH)
-    SLURM_TMPDIR='/media/adam/d0fdb915-c69f-4fba-9759-ed1844c4685b/tmpdir/'$PULSAR
-    mkdir -p $SLURM_TMPDIR
 fi
 
 #work in absolute paths, CC is weird when launching batch script
 CAND_PATH=$(pwd)
-cp -r ./* $SLURM_TMPDIR
-cd $SLURM_TMPDIR
+echo $PWD $CAND_PATH
+if [ "$LOCAL" != true ]; then
+    ls
+    cp -r ./* $SLURM_TMPDIR
+    cd $SLURM_TMPDIR
+fi
 mkdir -p nsub_0_5
 mkdir -p nsub_1
 mkdir -p nsub_short_0_5
@@ -67,7 +67,7 @@ if [ "$LOCAL" != true ]; then
     module unuse /project/6004902/modulefiles
     source ~/projects/rrg-istairs-ad/GWG2/environments/AFP/bin/activate
 else
-    echo "activating environemnt"
+    echo "running locally, make sure FETCH, Your and sigpyproc are installed!!"
     source ~/anaconda3/etc/profile.d/conda.sh
     echo "activating fetch"
     conda activate fetch
@@ -79,5 +79,7 @@ predict.py --data_dir nsub_1 --model a --probability 0.1 -g $GPU
 # predict.py --data_dir nsub_short_0_5 --model a --probability 0.1 -g $GPU
 # predict.py --data_dir nsub_0_1 --model a --probability 0.1 -g $GPU
 # predict.py --data_dir nsub_0_1_short --model a --probability 0.1 -g $GPU
-cp -r $SLURM_TMPDIR/* $CAND_PATH/
-rm -r $SLURM_TMPDIR
+
+if [ "$LOCAL" != true ]; then
+    cp -r $SLURM_TMPDIR/nsub* $CAND_PATH/
+fi

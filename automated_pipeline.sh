@@ -6,7 +6,7 @@
 #3) DM
 if [ $1 -gt 1 ]
 then
-    out=`python $(dirname "$BASH_SOURCE")/split_filterbank.py $1 $2`
+    out=$(python $(dirname (readlink -f $0))/split_filterbank.py $1 $2)
 else
     out=$2
 fi
@@ -19,7 +19,7 @@ do
     mv $fil $i
     cd $i
     #run pipeline and prep_fetch prep spegID
-    python $(dirname "$BASH_SOURCE")/gwg_cand_search_pipeline.py --dm $3 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $fil
+    python $(dirname (readlink -f $0))/gwg_cand_search_pipeline.py --dm $3 --speg --fetch --no_fft --rfifind --sk_mad --dedisp --sp --fil $fil
     mkdir data
     #remove all the large files that we no longer need
     rm *.dat

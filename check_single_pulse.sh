@@ -101,7 +101,7 @@ do
         if [ "$BATCH" = true ]; then
             echo "submitting batch job for $PULSAR"
             #find the directory that the script belongs to
-            SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+            SCRIPT_DIR="$(dirname $(readlink -f $0))"
             #this will send the batch job and after it's done sent the fetch job
             if [ "$LOCAL" = true ]; then
                 $SCRIPT_DIR/process_all_fil.sh -l -d $DM -f $FIL
@@ -114,7 +114,7 @@ do
         if [ "$FETCH" = true ]; then
             echo "submitting FETCH job for $PULSAR"
             #find the directory that the script belongs to
-            SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+            SCRIPT_DIR="$(dirname $(readlink -f $0))"
             AP=$(readlink -f $PULSAR)
             #lets find all directories where we've run prep_fetch
             PROCESSED=$(find $AP -name 'cands.csv' -printf '%h\n' | sort -u)
