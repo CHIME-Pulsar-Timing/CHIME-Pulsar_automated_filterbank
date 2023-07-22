@@ -109,9 +109,9 @@ do
                 $SCRIPT_DIR/process_all_fil.sh -l -d $DM -f $FIL
             else
                 if [ "$ALL" = true ]; then
-                    sbatch $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL -a
+                    $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL -a
                 else
-                    sbatch $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL
+                    $SCRIPT_DIR/process_all_fil.sh -d $DM -f $FIL
                 fi
             fi
         fi
