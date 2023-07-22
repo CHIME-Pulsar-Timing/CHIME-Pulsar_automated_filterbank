@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=16:00:00
+#SBATCH --time=20:00:00
 #SBATCH --mem=16GB
 #SBATCH --cpus-per-task=5
 #SBATCH --job-name=fetch
@@ -48,11 +48,11 @@ mkdir -p nsub_short_0_5
 mkdir -p nsub_0_1
 mkdir -p nsub_0_1_short
 echo "making candidates"
-python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
+#python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -n 5 -ws 500 --gpu_id 0
 python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -n 5 -ws 1000 --gpu_id 0
-python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_short_0_5 -r -n 5 -ws 500 --gpu_id 0 --range_dm 5
-python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1 -r -n 5 -ws 100 --gpu_id 0
-python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1_short -r -n 5 -ws 100 --gpu_id 0 --range_dm 5
+#python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_short_0_5 -r -n 5 -ws 500 --gpu_id 0 --range_dm 5
+#python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1 -r -n 5 -ws 100 --gpu_id 0
+#python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1_short -r -n 5 -ws 100 --gpu_id 0 --range_dm 5
 
 
 #make plots and do a predict for general pulses
@@ -70,13 +70,15 @@ else
     source ~/anaconda3/etc/profile.d/conda.sh
     conda activate fetch
 fi
-
-predict.py --data_dir nsub_0_5 --model a --probability 0.1
+echo "predicting now" >> $CAND_PATH/FETCH_output.log
+#predict.py --data_dir nsub_0_5 --model a --probability 0.1
 predict.py --data_dir nsub_1 --model a --probability 0.1
-predict.py --data_dir nsub_short_0_5 --model a --probability 0.1
-predict.py --data_dir nsub_0_1 --model a --probability 0.1
-predict.py --data_dir nsub_0_1_short --model a --probability 0.1
+#predict.py --data_dir nsub_short_0_5 --model a --probability 0.1
+#predict.py --data_dir nsub_0_1 --model a --probability 0.1
+#predict.py --data_dir nsub_0_1_short --model a --probability 0.1
+echo "predicting finished" > $CAND_PATH/FETCH_output.log
 
 if [ "$LOCAL" != true ]; then
-    cp -r $SLURM_TMPDIR/* $CAND_PATH/
+    echo "copying files back to scratch" >> $CAND_PATH/FETCH_output.log
+    cp -r $SLURM_TMPDIR/nsub* $CAND_PATH/
 fi

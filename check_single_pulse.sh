@@ -25,12 +25,13 @@ do
             #Check FETCH 1 has been run
             FP="${PULSAR}/nsub_0_5/results_a.csv"
             echo $PULSAR
-            if [ ! -f $FP ]; then
+            #if [ ! -f $FP ]; then
                 #echo $FP
                 #echo "$FIL never ran FETCH missing 0"
                 #ls -lHd $FIL
-                FETCH=true
-            fi
+                #FETCH=true
+		
+            #fi
 
             #check FETCH 2 has been run
             FP="${PULSAR}/nsub_1/results_a.csv"
@@ -43,29 +44,29 @@ do
 
             #check FETCH 2 has been run
             FP="${PULSAR}/nsub_short_0_5/results_a.csv"
-            if [ ! -f $FP ]; then
+            #if [ ! -f $FP ]; then
                 #echo $FP
                 #echo "$FIL never ran FETCH missing 1"
                 #ls -lHd $FIL
-                FETCH=true
-            fi
+                #FETCH=true
+            #fi
 
             #check FETCH 2 has been run
             FP="${PULSAR}/nsub_0_1/results_a.csv"
-            if [ ! -f $FP ]; then
+            #if [ ! -f $FP ]; then
                 #echo $FP
                 #echo "$FIL never ran FETCH missing 1"
                 #ls -lHd $FIL
-                FETCH=true
-            fi
+                #FETCH=true
+            #fi
 
             FP="${PULSAR}/nsub_0_1_short/results_a.csv"
-            if [ ! -f $FP ]; then
+            #if [ ! -f $FP ]; then
                 #echo $FP
                 #echo "$FIL never ran FETCH missing 1"
                 #ls -lHd $FIL
-                FETCH=true
-            fi
+                #FETCH=true
+            #fi
 
 
             if [ "$FETCH" = false ]; then

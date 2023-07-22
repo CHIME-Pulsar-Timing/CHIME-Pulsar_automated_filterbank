@@ -15,7 +15,7 @@ def dispersion_delay(dm, f1, f2):
     """Return DM delay in seconds"""
     return DM_CONST * dm * (1.0 / f2 ** 2 - 1.0 / f1 ** 2)
 
-def prep_fetch_csv(filfile,dm,dm_range=5,rank=5):
+def prep_fetch_csv(filfile,dm,dm_range=10,rank=5):
     #get spegid_python3 speg
     from SPEGID_Python3 import SinglePulseEventGroup
     spegs = np.load('spegs.npy',allow_pickle=1)
