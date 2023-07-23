@@ -12,9 +12,13 @@ do
 done
 shift $(($OPTIND - 1))
 FILFILES=$@
-echo $FILFILES
 BATCH=false
 FETCH=false
+FETCH_0_5=false
+FETCH_S_0_5=false
+FETCH_0_1=false
+FETCH_S_0_1=false
+FETCH_1=false
 for FIL in $FILFILES;
 do
     #strip the extension
@@ -25,7 +29,6 @@ do
             #now finally check if results has been run
             if [ "$ALL" = true ]; then
                 FP="${PULSAR}/nsub_0_5/results_a.csv"
-                echo $PULSAR
                 if [ ! -f $FP ]; then
                     #echo $FP
                     #echo "$FIL never ran FETCH missing 0"
@@ -36,7 +39,7 @@ do
                 FP="${PULSAR}/nsub_short_0_5/results_a.csv"
                 if [ ! -f $FP ]; then
                     #echo $FP
-                    #echo "$FIL never ran FETCH missing 1"
+                    echo "$FIL never ran FETCH missing short 0 5"
                     #ls -lHd $FIL
                     FETCH_S_0_5=true
                     FETCH=true
@@ -69,10 +72,8 @@ do
                 FETCH=true
             fi
 
-
-
             if [ "$FETCH" = false ]; then
-                echo "$FIL finished everything nothing to see here..." >> completed.csv
+                echo "$FIL finished everything nothing to see here..."
             else
                 #check if cands is empty
                 LINES=$(cat "$PULSAR"/cands.csv | wc -l)
@@ -125,25 +126,44 @@ do
             #lets find all directories where we've run prep_fetch
             PROCESSED=$(find $AP -name 'cands.csv' -printf '%h\n' | sort -u)
             cd $PROCESSED
+
             if [ "$LOCAL" = true ]; then
                 $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -g 0 -n 20
             else
                 if [ "$FETCH_0_5" = true ]; then
+		    echo $FETCH_0_5
+		    echo submitting job for FETCH 0.5
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5
-                elif [ "$FETCH_S_0_5" = true ]; then
+		fi
+                if [ "$FETCH_S_0_5" = true ]; then
+		    echo $FETCH_S_0_5
+		    echo submitting job for FETCH S 0.5
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5 -s
-                elif [ "$FETCH_0_1" = true ]; then
+		fi
+                if [ "$FETCH_0_1" = true ]; then
+		    echo $FETCH_0_1
+		    echo submitting job for FETCH 0.1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1
-                elif [ "$FETCH_S_0_1" = true ]; then
+		fi
+                if [ "$FETCH_S_0_1" = true ]; then
+		    echo $FETCH_S_0_1
+		    echo submitting job for FETCH S 0.1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1 -s
-                elif [ "$FETCH_1" = true ]; then
+		fi
+                if [ "$FETCH_1" = true ]; then
+		    echo $FETCH_1
+		    echo submitting job for FETCH 1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 1
                 fi
             fi
             cd ..
         fi
     fi
-    
     BATCH=false
     FETCH=false
+    FETCH_0_5=false
+    FETCH_S_0_5=false
+    FETCH_0_1=false
+    FETCH_S_0_1=false
+    FETCH_1=false
 done

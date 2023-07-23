@@ -61,7 +61,7 @@ if [ "$TIME" == 0.1 ]; then
         python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_1 -r -n $n -ws 100 --gpu_id $GPU
     fi
 
-elif [ "$TIME" == 0.5]; then
+elif [ "$TIME" == 0.5 ]; then
     if [ "$SHORT" == true ]; then
         mkdir -p nsub_0_5
         echo "short 0.5"
@@ -73,7 +73,7 @@ elif [ "$TIME" == 0.5]; then
         python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_0_5 -r -n $n -ws 500 --gpu_id $GPU
     fi
 
-elif [ "$TIME" == 1]; then
+elif [ "$TIME" == 1 ]; then
     mkdir -p nsub_1
     python $AFP/your_candmaker.py -fs 256 -ts 256 -c cands.csv -o nsub_1 -r -n $n -ws 1000 --gpu_id $GPU
 fi
@@ -106,13 +106,13 @@ if [ "$TIME" == 0.1 ]; then
     else
         predict.py --data_dir nsub_0_1 --model a --probability 0.1 -g $GPU
     fi
-elif [ "$TIME" == 0.5]; then
+elif [ "$TIME" == 0.5 ]; then
     if [ "$SHORT" == true ]; then
         predict.py --data_dir nsub_short_0_5 --model a --probability 0.1 -g $GPU
     else
         predict.py --data_dir nsub_0_5 --model a --probability 0.1 -g $GPU
     fi
-elif [ "$TIME" == 1]; then
+elif [ "$TIME" == 1 ]; then
     predict.py --data_dir nsub_1 --model a --probability 0.1 -g $GPU
 fi
 
