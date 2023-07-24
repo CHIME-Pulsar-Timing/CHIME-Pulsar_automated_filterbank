@@ -199,14 +199,14 @@ def waterfall(rawdatafile, start, duration, dm=None, nbins=None, nsub=None,\
 def plot_waterfall(data, start, duration,
                    integrate_ts=False, integrate_spec=False, show_cb=False,
                    cmap_str="gist_yarg", sweep_dms=[], sweep_posns=[],
-                   ax_im=None, ax_ts=None, ax_spec=None, interactive=True):
+                   ax_im=None, ax_ts=None, ax_spec=None, interactive=True,interactive_masking=False):
     """ I want a docstring too!
     """
 
     # Set up axes
     if interactive:
         fig = plt.figure()
-        fig.canvas.set_window_title("Frequency vs. Time")
+        # fig.canvas.set_window_title("Frequency vs. Time")
 
     im_width = 0.6 if integrate_spec else 0.8
     im_height = 0.6 if integrate_ts else 0.8
@@ -221,12 +221,15 @@ def plot_waterfall(data, start, duration,
 
     # Ploting it up
     nbinlim = np.int(duration/data.dt)
-
-    img = ax_im.imshow(data.data[..., :nbinlim], aspect='auto',
-                cmap=matplotlib.cm.cmap_d[cmap_str],
-                interpolation='nearest', origin='upper',
-                extent=(data.starttime, data.starttime+ nbinlim*data.dt,
-                        data.freqs.min(), data.freqs.max()))
+    data_vals = data.data[..., :nbinlim]
+    if interactive_masking:
+        img = ax_im.imshow(data_vals,aspect = "auto",cmap='YlGnBu')
+    else:
+        img = ax_im.imshow(data_vals, aspect='auto',
+                    cmap='YlGnBu',
+                    interpolation='nearest', origin='upper',
+                    extent=(data.starttime, data.starttime+ nbinlim*data.dt,
+                            data.freqs.min(), data.freqs.max()))
     if show_cb:
         cb = ax_im.get_figure().colorbar(img)
         cb.set_label("Scaled signal intensity (arbitrary units)")
@@ -281,10 +284,56 @@ def plot_waterfall(data, start, duration,
             ax_ts.axvline(times[burst_bin]+spectrum_window,ls="--",c="grey")                  
 
     if interactive:
+        global masked_channels
+        masked_channels = []
+        data_vals = data.data[..., :nbinlim]
+        def key_press(event):
+            global start_mask, end_mask, masked_channels
+            # check if click is within plot boundaries
+            if event.key == "n":
+                if event.inaxes is not None:
+                    # get y value at clicked location
+                    y_val = event.ydata
+                    #get evenly spaced y values between fch1 and fch1 + nchan*foff
+                    y_vals = np.arange(data_vals.shape[0])
+                    print(y_val,y_vals)
+                    #figure out which y value is closest to the clicked y value
+                    closest_y_val = np.argmin(np.abs(y_vals - y_val))
+                    start_mask = closest_y_val
+                    print(f"Start mask at {closest_y_val}")
+            elif event.key == "m":
+                if event.inaxes is not None:
+                    # get y value at clicked location
+                    y_val = event.ydata
+                    #get evenly spaced y values between fch1 and fch1 + nchan*foff
+                    y_vals = np.arange(data_vals.shape[0])
+                    #figure out which y value is closest to the clicked y value
+                    closest_y_val = np.argmin(np.abs(y_vals - y_val))
+                    end_mask = closest_y_val
+                    print(f"End mask at {closest_y_val}")
+                if start_mask != -1 and end_mask != -1:
+                    start_ = min([start_mask,end_mask])
+                    end_ = max([start_mask,end_mask])
+                    to_mask = np.arange(start_,end_)
+                    print(f"Replacing rows {start_} to {end_} with median")
+                    data_vals[to_mask,:] = np.median(data_vals)
+                    ax_im.clear()
+                    ax_im.imshow(data_vals,aspect = "auto",cmap='YlGnBu')
+                    #plot the new data
+                    plt.gcf().canvas.draw_idle()
+                    start_mask = -1
+                    end_mask = -1
+                    masked_channels += list(to_mask)
+                    print_mask_chans = 1023-np.array(masked_channels)
+                    #print masked_channels as comma seperated values
+                    csv_mask_chans = ",".join([str(x) for x in print_mask_chans])
+                    print(f"Masked channels: {csv_mask_chans}")
+
+
         fig.suptitle("Frequency vs. Time")
         fig.canvas.mpl_connect('key_press_event',
                 lambda ev: (ev.key in ('q','Q') and plt.close(fig)))
-
+        cid = fig.canvas.mpl_connect('key_press_event', key_press)
         plt.show()
 
 def main():
@@ -318,7 +367,7 @@ def main():
     plot_waterfall(data, start, options.duration, integrate_ts=options.integrate_ts,
                    integrate_spec=options.integrate_spec, show_cb=options.show_cb, 
                    cmap_str=options.cmap, sweep_dms=options.sweep_dms, 
-                   sweep_posns=options.sweep_posns)
+                   sweep_posns=options.sweep_posns,interactive_masking=options.interactive_masking)
 
 if __name__=='__main__':
     parser = optparse.OptionParser(prog="waterfaller.py",
@@ -384,7 +433,7 @@ if __name__=='__main__':
                         default=None)
     parser.add_option('--extramask', dest='extra_mask', type='string',
                         help="The extra channels you want masked, on top of the rfifind mask files",
-                        default=None)
+                        default=np.array([]))
 
     parser.add_option('--mask', dest='mask', action="store_true",
                         help="Mask data using rfifind mask (Default: Don't mask).",
@@ -405,6 +454,9 @@ if __name__=='__main__':
     parser.add_option('--freq_mask', dest='freq_mask',
                         help="mask out certain frequencies",
                         default=None)
+    parser.add_option('--interactive_masking', dest='interactive_masking',
+                        help="mask out certain frequencies interactively",
+                        action='store_true', default=False)
     options, args = parser.parse_args()
     
     if not hasattr(options, 'start'):
