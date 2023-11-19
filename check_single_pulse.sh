@@ -73,7 +73,7 @@ do
             fi
 
             if [ "$FETCH" = false ]; then
-                echo "$FIL finished everything nothing to see here..."
+                echo "$FIL finished everything nothing to see here..." >> completed.csv
             else
                 #check if cands is empty
                 LINES=$(cat "$PULSAR"/cands.csv | wc -l)
@@ -87,11 +87,11 @@ do
                     ls -lHd $FIL
                 else
                     FETCH=false
-                    echo "${PULSAR} - cands file empty"
+                    echo "${PULSAR} - cands file empty" >> completed.csv
                 fi
             fi
         else
-            echo "$FIL never finished running single_pulse_search.py"
+            echo "$FIL never finished running single_pulse_search.py" 
             ls -hlHd $FIL
             BATCH=true
         fi
