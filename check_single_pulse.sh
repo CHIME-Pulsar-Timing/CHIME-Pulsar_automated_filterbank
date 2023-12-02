@@ -31,7 +31,7 @@ do
                 FP="${PULSAR}/nsub_0_5/results_a.csv"
                 if [ ! -f $FP ]; then
                     #echo $FP
-                    #echo "$FIL never ran FETCH missing 0"
+                    echo "$FIL never ran FETCH missing 0.5"
                     #ls -lHd $FIL
                     FETCH_0_5=true
                     FETCH=true
@@ -48,16 +48,16 @@ do
                 FP="${PULSAR}/nsub_0_1/results_a.csv"
                 if [ ! -f $FP ]; then
                     #echo $FP
-                    #echo "$FIL never ran FETCH missing 1"
+                    echo "$FIL never ran FETCH missing 0.1"
                     #ls -lHd $FIL
                     FETCH_0_1=true
                     FETCH=true
                 fi
 
-                FP="${PULSAR}/nsub_0_1_short/results_a.csv"
+                FP="${PULSAR}/nsub_short_0_1/results_a.csv"
                 if [ ! -f $FP ]; then
                     #echo $FP
-                    #echo "$FIL never ran FETCH missing 1"
+                    echo "$FIL never ran FETCH missing short 0.1"
                     #ls -lHd $FIL
                     FETCH_S_0_1=true
                     FETCH=true
@@ -66,12 +66,12 @@ do
             FP="${PULSAR}/nsub_1/results_a.csv"
             if [ ! -f $FP ]; then
                 #echo $FP
-                #echo "$FIL never ran FETCH missing 1"
+                echo "$FIL never ran FETCH missing 1"
                 #ls -lHd $FIL
                 FETCH_1=true
                 FETCH=true
             fi
-
+            echo $FETCH
             if [ "$FETCH" = false ]; then
                 echo "$FIL finished everything nothing to see here..." >> completed.csv
             else

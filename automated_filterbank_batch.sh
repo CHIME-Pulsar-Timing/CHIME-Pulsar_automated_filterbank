@@ -25,7 +25,7 @@ if [ "$LOCAL" != true ]; then
     module use /project/6004902/chimepsr-software/v1/environment-modules
     module load presto
     module load chime-psr
-    source ~/projects/rrg-istairs-ad/Your_161123/bin/activate
+    source ~/projects/rrg-istairs-ad/Your_021223/bin/activate
 else
     #set slurm tmpdir to current directory
     SLURM_TMPDIR='./'
