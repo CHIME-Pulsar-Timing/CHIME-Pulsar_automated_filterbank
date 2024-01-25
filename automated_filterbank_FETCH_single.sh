@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=1:00:00
+#SBATCH --time=7:00:00
 #SBATCH --mem=16GB
 #SBATCH --cpus-per-task=5
 #SBATCH --job-name=fetch
@@ -33,10 +33,10 @@ echo $GPU
 if [ "$LOCAL" != true ]; then
     #module use /project/6004902/chimepsr-software/v1/environment-modules
     module use /project/6004902/chimepsr-software/v1/environment-modules
+    #module load presto
     module load cuda
     source ~/projects/rrg-istairs-ad/CHIPSPIPE_CANDMAKER/bin/activate
     #module use /project/6004902/chimepsr-software/v1/environment-modules
-    #module load presto
     #module load chime-psr
     #source ~/projects/rrg-istairs-ad/adamdong/Your_161123/bin/activate
 fi
@@ -160,6 +160,8 @@ if [ "$LOCAL" != true ]; then
     #go backwards, deactivate everything
     module unload cuda
     deactivate
+    module unuse /project/6004902/chimepsr-software/v1/environment-modules
+
     #module unload chime-psr
     #module unload presto
     #module use /project/6004902/chimepsr-software/v1/environment-modules
@@ -191,7 +193,7 @@ fi
 
 #remove all the files that are irrelevant
 $AFP/clear_false_candidates.sh -i .
-
+chown -R adamdong:rrg-istairs-ad $SLURM_TMPDIR/nsub*
 if [ "$LOCAL" != true ]; then
     cp -r $SLURM_TMPDIR/nsub* $CAND_PATH/
 fi

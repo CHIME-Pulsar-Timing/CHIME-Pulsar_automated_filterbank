@@ -14,7 +14,7 @@ if fname.endswith(".fits"):
     fname_base = fname.replace(".fits","")
 else:
     fname_base = fname.replace(".fil","")
-chunk_size = 1*1024*1024*1024 #Bytes each (first number is gigabytes)
+chunk_size = 8*1024*1024*1024 #Bytes each (first number is gigabytes)
 
 filesize = os.path.getsize(fname)
 total_files = np.ceil(filesize/chunk_size)

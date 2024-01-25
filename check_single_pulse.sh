@@ -71,7 +71,6 @@ do
                 FETCH_1=true
                 FETCH=true
             fi
-            echo $FETCH
             if [ "$FETCH" = false ]; then
                 echo "$FIL finished everything nothing to see here..." >> completed.csv
             else
@@ -131,27 +130,22 @@ do
                 $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -g 0 -n 20
             else
                 if [ "$FETCH_0_5" = true ]; then
-		    echo $FETCH_0_5
 		    echo submitting job for FETCH 0.5
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5
 		fi
                 if [ "$FETCH_S_0_5" = true ]; then
-		    echo $FETCH_S_0_5
 		    echo submitting job for FETCH S 0.5
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5 -s
 		fi
                 if [ "$FETCH_0_1" = true ]; then
-		    echo $FETCH_0_1
 		    echo submitting job for FETCH 0.1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1
 		fi
                 if [ "$FETCH_S_0_1" = true ]; then
-		    echo $FETCH_S_0_1
 		    echo submitting job for FETCH S 0.1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1 -s
 		fi
                 if [ "$FETCH_1" = true ]; then
-		    echo $FETCH_1
 		    echo submitting job for FETCH 1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 1
                 fi

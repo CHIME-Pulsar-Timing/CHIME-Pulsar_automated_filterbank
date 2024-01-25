@@ -216,15 +216,12 @@ def cand2h5(cand_val):
         tsamp = cand.your_header.tsamp
         cand.min_samp = (args.ws/1000)//tsamp
         print(f"min width: {cand.min_samp} samples")
-        rfifind_mask = files[0].replace('.fil','_rfifind.mask')
-        masked_chans = maskfile(rfifind_mask,int(tcand/tsamp),int(cand.min_samp*2))
         if os.path.exists(str(kill_mask_path)):
             kill_mask = np.zeros(cand.nchans, dtype=np.bool_)
             kill_mask[kill_chans] = True
             cand.kill_mask = kill_mask
         print("Getting chunk")
         cand.get_chunk(for_preprocessing=True)
-
     if cand.format == "fil":
         cand.fp.close()
     logger.info("Got Chunk")
@@ -455,5 +452,5 @@ if __name__ == "__main__":
 
     with Pool(processes=values.nproc) as pool:
         pool.map(cand2h5, process_list)
-    # for p in process_list:
-        # cand2h5(p)
+    #for p in process_list:
+        #cand2h5(p)
