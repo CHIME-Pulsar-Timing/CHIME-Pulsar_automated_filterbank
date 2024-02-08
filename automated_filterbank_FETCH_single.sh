@@ -193,7 +193,7 @@ fi
 
 #remove all the files that are irrelevant
 $AFP/clear_false_candidates.sh -i .
-chown -R adamdong:rrg-istairs-ad $SLURM_TMPDIR/nsub*
+#chown -R adamdong:rrg-istairs-ad $SLURM_TMPDIR/nsub*
 if [ "$LOCAL" != true ]; then
     cp -r $SLURM_TMPDIR/nsub* $CAND_PATH/
 fi

@@ -95,7 +95,7 @@ if test -f "$p"; then
     tar -cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.singlepulse
-    chown -R adamdong:rrg-istairs-ad ${SLURM_TMPDIR}/*
+    #chown -R adamdong:rrg-istairs-ad ${SLURM_TMPDIR}/*
     if [ "$LOCAL" == true ]; then
     # clean up - not needed on compute canada, but nice to run clean up when on my own computer
         #gotta do this for some weird reason on my local machine
