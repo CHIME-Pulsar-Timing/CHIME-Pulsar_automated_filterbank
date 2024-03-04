@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=7:00:00
-#SBATCH --mem=16GB
-#SBATCH --cpus-per-task=5
+#SBATCH --time=1:00:00
+#SBATCH --mem=4GB
+#SBATCH --cpus-per-task=1
 #SBATCH --job-name=fetch
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
-#SBATCH --gres=gpu:v100l:1
+#SBATCH --gres=gpu:v100:1
 #the first argument is the tree to search down
 #run FETCH
 
@@ -32,10 +32,10 @@ echo $GPU
 
 if [ "$LOCAL" != true ]; then
     #module use /project/6004902/chimepsr-software/v1/environment-modules
-    module use /project/6004902/chimepsr-software/v1/environment-modules
+    module use /project/def-istairs/chimepsr-software/v1/environment-modules/
     #module load presto
     module load cuda
-    source ~/projects/rrg-istairs-ad/CHIPSPIPE_CANDMAKER/bin/activate
+    source /home/adamdong/projects/def-istairs/CHIPSPIPE_CANDMAKER/bin/activate
     #module use /project/6004902/chimepsr-software/v1/environment-modules
     #module load chime-psr
     #source ~/projects/rrg-istairs-ad/adamdong/Your_161123/bin/activate
@@ -160,12 +160,12 @@ if [ "$LOCAL" != true ]; then
     #go backwards, deactivate everything
     module unload cuda
     deactivate
-    module unuse /project/6004902/chimepsr-software/v1/environment-modules
+    module unuse /project/def-istairs/chimepsr-software/v1/environment-modules/
 
     #module unload chime-psr
     #module unload presto
     #module use /project/6004902/chimepsr-software/v1/environment-modules
-    source ~/projects/rrg-istairs-ad/CHIPSPIPE_FETCH/bin/activate
+    source ~/projects/def-istairs/CHIPSPIPE_FETCH/bin/activate
 else
     echo "running locally, make sure FETCH, Your and sigpyproc are installed!!"
     source ~/anaconda3/etc/profile.d/conda.sh

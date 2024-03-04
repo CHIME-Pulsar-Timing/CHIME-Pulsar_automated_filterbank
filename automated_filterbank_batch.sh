@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --account=rrg-istairs-ad
+#SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=10:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=16GB
 #SBATCH --ntasks=1
 #SBATCH --job-name=automated_filterbank
@@ -22,10 +22,10 @@ done
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
 EXT="${p##*.}"
 if [ "$LOCAL" != true ]; then
-    module use /project/6004902/chimepsr-software/v1/environment-modules
+    module use /project/def-istairs/chimepsr-software/v1/environment-modules/
     module load presto
     module load chime-psr
-    source ~/projects/rrg-istairs-ad/Your_021223/bin/activate
+    source ~/projects/def-istairs/your_240304/bin/activate
 else
     #set slurm tmpdir to current directory
     SLURM_TMPDIR='./'
