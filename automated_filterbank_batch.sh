@@ -2,7 +2,7 @@
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
 #SBATCH --time=1:00:00
-#SBATCH --mem=16GB
+#SBATCH --mem=4GB
 #SBATCH --ntasks=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
@@ -58,8 +58,8 @@ if test -f "$p"; then
         else
             if [ "$LOCAL" != true ]; then
                 DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
-                echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+                echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
+                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
             else
                 echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
                 python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
