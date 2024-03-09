@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=24:00:00
+#SBATCH --time=10:00:00
 #SBATCH --mem=16GB
 #SBATCH --ntasks=1
 #SBATCH --job-name=automated_filterbank
@@ -22,10 +22,10 @@ done
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
 EXT="${p##*.}"
 if [ "$LOCAL" != true ]; then
-    module use /project/6004902/modulefiles
+    module use /project/6004902/chimepsr-software/v1/environment-modules
     module load presto
     module load chime-psr
-    source ~/projects/rrg-istairs-ad/Your/bin/activate
+    source ~/projects/rrg-istairs-ad/Your_021223/bin/activate
 else
     #set slurm tmpdir to current directory
     SLURM_TMPDIR='./'
@@ -95,6 +95,7 @@ if test -f "$p"; then
     tar -cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.inf
     rm "${SLURM_TMPDIR}"/*DM*.singlepulse
+    #chown -R adamdong:rrg-istairs-ad ${SLURM_TMPDIR}/*
     if [ "$LOCAL" == true ]; then
     # clean up - not needed on compute canada, but nice to run clean up when on my own computer
         #gotta do this for some weird reason on my local machine

@@ -58,7 +58,7 @@ do
                 # code if not found
                 ln -s -f $PATH_PNG positive_bursts_0_1
                 echo "$CAND_PATH,$probability,$score" >> positive_bursts_0_1.csv
-            elif [[ $PATH_PNG == *"nsub_0_1_short/"* ]];
+            elif [[ $PATH_PNG == *"nsub_short_0_1/"* ]];
             then
                 # code if not found
                 ln -s -f $PATH_PNG positive_bursts_0_1_short

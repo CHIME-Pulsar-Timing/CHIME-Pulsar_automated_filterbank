@@ -21,10 +21,10 @@ done
 PULSAR=$(echo "$p" | rev | cut -f2- -d '.' | rev)
 EXT="${p##*.}"
 if [ "$LOCAL" != true ]; then
-    module use /project/6004902/modulefiles
+    source ~/util/load_presto.sh
     module load presto
     module load chime-psr
-    source ~/projects/rrg-istairs-ad/Your/bin/activate
+    source ~/rrat_or_not_width/bin/activate 
 else
     SLURM_JOB_ID=1
 fi

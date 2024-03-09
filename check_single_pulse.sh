@@ -32,7 +32,7 @@ do
                 FP="${PULSAR}/nsub_0_5/results_a.csv"
                 if [ ! -f $FP ]; then
                     #echo $FP
-                    #echo "$FIL never ran FETCH missing 0"
+                    echo "$FIL never ran FETCH missing 0.5"
                     #ls -lHd $FIL
                     FETCH_0_5=true
                     FETCH=true
@@ -49,16 +49,16 @@ do
                 FP="${PULSAR}/nsub_0_1/results_a.csv"
                 if [ ! -f $FP ]; then
                     #echo $FP
-                    #echo "$FIL never ran FETCH missing 1"
+                    echo "$FIL never ran FETCH missing 0.1"
                     #ls -lHd $FIL
                     FETCH_0_1=true
                     FETCH=true
                 fi
 
-                FP="${PULSAR}/nsub_0_1_short/results_a.csv"
+                FP="${PULSAR}/nsub_short_0_1/results_a.csv"
                 if [ ! -f $FP ]; then
                     #echo $FP
-                    #echo "$FIL never ran FETCH missing 1"
+                    echo "$FIL never ran FETCH missing short 0.1"
                     #ls -lHd $FIL
                     FETCH_S_0_1=true
                     FETCH=true
@@ -67,14 +67,13 @@ do
             FP="${PULSAR}/nsub_1/results_a.csv"
             if [ ! -f $FP ]; then
                 #echo $FP
-                #echo "$FIL never ran FETCH missing 1"
+                echo "$FIL never ran FETCH missing 1"
                 #ls -lHd $FIL
                 FETCH_1=true
                 FETCH=true
             fi
-
             if [ "$FETCH" = false ]; then
-                echo "$FIL finished everything nothing to see here..."
+                echo "$FIL finished everything nothing to see here..." >> completed.csv
             else
                 #check if cands is empty
                 LINES=$(cat "$PULSAR"/cands.csv | wc -l)
@@ -88,11 +87,11 @@ do
                     ls -lHd $FIL
                 else
                     FETCH=false
-                    echo "${PULSAR} - cands file empty"
+                    echo "${PULSAR} - cands file empty" >> completed.csv
                 fi
             fi
         else
-            echo "$FIL never finished running single_pulse_search.py"
+            echo "$FIL never finished running single_pulse_search.py" 
             ls -hlHd $FIL
             BATCH=true
         fi
@@ -136,28 +135,23 @@ do
                 # $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -t 0.1 -g 0 -s -n 5
             else
                 if [ "$FETCH_0_5" = true ]; then
-            echo $FETCH_0_5
-            echo submitting job for FETCH 0.5
+		    echo submitting job for FETCH 0.5
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5
         fi
                 if [ "$FETCH_S_0_5" = true ]; then
-            echo $FETCH_S_0_5
-            echo submitting job for FETCH S 0.5
+		    echo submitting job for FETCH S 0.5
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5 -s
         fi
                 if [ "$FETCH_0_1" = true ]; then
-            echo $FETCH_0_1
-            echo submitting job for FETCH 0.1
+		    echo submitting job for FETCH 0.1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1
         fi
                 if [ "$FETCH_S_0_1" = true ]; then
-            echo $FETCH_S_0_1
-            echo submitting job for FETCH S 0.1
+		    echo submitting job for FETCH S 0.1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1 -s
         fi
                 if [ "$FETCH_1" = true ]; then
-            echo $FETCH_1
-            echo submitting job for FETCH 1
+		    echo submitting job for FETCH 1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 1
                 fi
             fi

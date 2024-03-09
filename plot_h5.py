@@ -142,6 +142,7 @@ def plot_h5(
             else:
                 filename = h5_file[:-3] + ".png"
             plt.savefig(filename, bbox_inches="tight", dpi=300)
+            plt.close()
         else:
             plt.close()
 
