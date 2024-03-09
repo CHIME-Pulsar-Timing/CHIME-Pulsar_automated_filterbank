@@ -1,5 +1,6 @@
 #!/bin/bash
 #this file will run to check which filterbank files have been run and which have not
+ALL=false
 while getopts "bflad:" flag
 do
     case "${flag}" in
@@ -128,31 +129,35 @@ do
             cd $PROCESSED
 
             if [ "$LOCAL" = true ]; then
-                $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -g 0 -n 20
+                $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -t 1 -g 0 -n 20
+                # $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -t 0.5 -g 0 -n 5
+                # $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -t 0.5 -s -g 0 -n 5
+                # $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -t 0.1 -g 0 -n 5
+                # $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -l -i $PROCESSED -p $SCRIPT_DIR -t 0.1 -g 0 -s -n 5
             else
                 if [ "$FETCH_0_5" = true ]; then
-		    echo $FETCH_0_5
-		    echo submitting job for FETCH 0.5
+            echo $FETCH_0_5
+            echo submitting job for FETCH 0.5
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5
-		fi
+        fi
                 if [ "$FETCH_S_0_5" = true ]; then
-		    echo $FETCH_S_0_5
-		    echo submitting job for FETCH S 0.5
+            echo $FETCH_S_0_5
+            echo submitting job for FETCH S 0.5
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.5 -s
-		fi
+        fi
                 if [ "$FETCH_0_1" = true ]; then
-		    echo $FETCH_0_1
-		    echo submitting job for FETCH 0.1
+            echo $FETCH_0_1
+            echo submitting job for FETCH 0.1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1
-		fi
+        fi
                 if [ "$FETCH_S_0_1" = true ]; then
-		    echo $FETCH_S_0_1
-		    echo submitting job for FETCH S 0.1
+            echo $FETCH_S_0_1
+            echo submitting job for FETCH S 0.1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 0.1 -s
-		fi
+        fi
                 if [ "$FETCH_1" = true ]; then
-		    echo $FETCH_1
-		    echo submitting job for FETCH 1
+            echo $FETCH_1
+            echo submitting job for FETCH 1
                     sbatch $SCRIPT_DIR/automated_filterbank_FETCH_single.sh -i $PROCESSED -p $SCRIPT_DIR -t 1
                 fi
             fi

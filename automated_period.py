@@ -36,18 +36,19 @@ def get_burst_dict(csvname):
         burst_numbers = [float(num) for num in burst_str.split('_')\
                          if num.replace('.', '1').isdigit()]
         burst_info = burst_numbers[-5:]
-        mjd.append(burst_info[0])
-        burst_time.append(burst_info[1])
+        mjd.append(burst_info[1])
+        burst_time.append(burst_info[2])
         subband.append(burst_info[2])
         dm.append(burst_info[3])
         snr.append(burst_info[4])
-    return mjd,burst_time,subband,burst_info
+    return mjd,burst_time,dm,subband,burst_info
 
-def format_burst(mjd,burst_time,min_bursts=3,min_seperation=0):
+def format_burst(mjd,burst_time,min_bursts=2,min_seperation=0):
     umjd = set(mjd)
     mjd = np.array(mjd)
     burst_time = np.array(burst_time)
     p_array = []
+    mjd_arr = []
     for u in umjd:
         #check if there's more than 2 bursts for a specific mjd
         if np.sum(u==mjd)>=min_bursts:
@@ -59,15 +60,28 @@ def format_burst(mjd,burst_time,min_bursts=3,min_seperation=0):
                 if d<min_seperation:
                     print(u,':',np.sort(bt))
             p_array.append(bt)
+            mjd_arr.append(u)
 
-    return p_array
+    return p_array,mjd_arr
 
 import sys
-mjd,burst_time,subband,burst_info = get_burst_dict(sys.argv[1])
-p_array = format_burst(mjd,burst_time,min_seperation=2)
-
-rrat_period_multiday(p_array)
-
+mjd,burst_time,dm,subband,burst_info = get_burst_dict(sys.argv[1])
+p_array,mjd_arr = format_burst(mjd,burst_time,min_bursts=2,min_seperation=0)
+print(mjd_arr)
+print(p_array)
+rrat_period_multiday(p_array,numperiods=5000)
+periods = []
 for p in p_array:
     #get period individually
-    print(rrat_period(p))
+    period = rrat_period(p)
+    periods.append(period)
+import matplotlib.pyplot as plt
+plt.plot(mjd_arr,periods,'.')
+plt.xlabel('MJD')
+plt.ylabel('Period (s)')
+plt.show()
+plt.figure()
+plt.plot(mjd,dm,'.')
+plt.xlabel('MJD')
+plt.ylabel('DM')
+plt.show()
