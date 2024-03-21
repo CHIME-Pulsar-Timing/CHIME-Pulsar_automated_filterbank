@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --account=rrg-istairs-ad
 #SBATCH --export=NONE
-#SBATCH --time=10:00:00
-#SBATCH --mem=16GB
-#SBATCH --ntasks=1
+#SBATCH --time=1:00:00
+#SBATCH --mem-per-cpu=4096M
+#SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
