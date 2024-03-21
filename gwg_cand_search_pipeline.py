@@ -208,7 +208,7 @@ if __name__ == '__main__':
         os.chdir(slurm)
         slurm_dir = os.getcwd()
         logging.info(f"current cwd: {slurm_dir}")
-        fname = os.path.join(slurm_dir,fname)
+        # fname = os.path.join(slurm_dir,fname)
         logging.info(f"fname:{fname}")
 
     if os.path.islink(fil):
