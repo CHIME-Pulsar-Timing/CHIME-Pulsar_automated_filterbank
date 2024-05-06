@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=rrg-istairs-ad
+#SBATCH --account=def-istairs
 #SBATCH --export=NONE
 #SBATCH --time=6:00:00
 #SBATCH --mem-per-cpu=4096M
