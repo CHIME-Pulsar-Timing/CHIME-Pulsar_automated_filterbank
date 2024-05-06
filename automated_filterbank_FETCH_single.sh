@@ -32,12 +32,13 @@ echo $GPU
 
 if [ "$LOCAL" != true ]; then
     #module use /project/6004902/chimepsr-software/v1/environment-modules
-    module use /project/6004902/chimepsr-software/v1/environment-modules
+    module use /project/6004902/chimepsr-software/v2/environment-modules
+    #module use /project/6004902/chimepsr-software/v1/environment-modules
     #module load presto
     module load cuda
+    module load chime-psr
     source ~/projects/rrg-istairs-ad/CHIPSPIPE_CANDMAKER/bin/activate
     #module use /project/6004902/chimepsr-software/v1/environment-modules
-    #module load chime-psr
     #source ~/projects/rrg-istairs-ad/adamdong/Your_161123/bin/activate
 fi
 
@@ -158,9 +159,11 @@ echo "candidates made"
 echo "grading candidates"
 if [ "$LOCAL" != true ]; then
     #go backwards, deactivate everything
+    #
+    module unload chime-psr
     module unload cuda
     deactivate
-    module unuse /project/6004902/chimepsr-software/v1/environment-modules
+    module unuse /project/6004902/chimepsr-software/v2/environment-modules
 
     #module unload chime-psr
     #module unload presto
