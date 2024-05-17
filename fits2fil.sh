@@ -10,3 +10,5 @@
 
 source ~/util/load_presto.sh
 psrfits2fil.py -o "$2".fil -n 16 $1
+#downsample the data as well
+downsample_filterbank.py 16 $2.fil
