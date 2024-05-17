@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=rrg-istairs-ad
+#SBATCH --account=def-istairs
 #SBATCH --export=NONE
 #SBATCH --time=1:00:00
 #SBATCH --mem=8GB
@@ -10,9 +10,8 @@
 #This script aims to fix the dropped packets
 #load presto
 #uncomment on CC
-module use /project/6004902/modulefiles
+module use /project/6004902/chimepsr-software/v2/environment-modules 
 module load presto
-
 # check if CHIPSPIPE_DIR is set as an env variable, and use that if possible
 if [[ -z "${CHIPSPIPE_DIR}" ]];then
     # CHIPSPIPE_DIR isn't set, so use this default
