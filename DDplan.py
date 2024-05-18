@@ -174,11 +174,13 @@ def choose_downsamps(blocklen):
                 if x[-1] > 1.5*maxnewx:
                     newx.append(int(x[x>1.5*maxnewx].min()))
                 else:
-                    return newx
+                    return_val = np.array(newx)*16
+                    return return_val
             maxnewx = newx[-1]
-        return newx
+        return_val = np.array(newx)*16
     else:
-        return x
+        return_val = np.array(x)*16
+    return return_val
 
 def dm_smear(DM, BW, f_ctr, cDM=0.0):
     """
@@ -323,6 +325,7 @@ def dm_steps(loDM, hiDM, obs, cohdm=0.0, numsub=0, ok_smearing=0.0,
         while (BW_smear(allow_dDMs[index_dDMs+1], obs.BW, obs.f_ctr) < ff*eff_dt):
             index_dDMs += 1
         dDM = allow_dDMs[index_dDMs]
+        import pdb; pdb.set_trace()
         m = dedisp_method(obs, downsamp, methods[-1].hiDM,hiDM, dDM, numsub=numsub)
         if len(m.DMs)==0:
             continue

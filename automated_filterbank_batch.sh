@@ -30,7 +30,6 @@ else
     #set slurm tmpdir to current directory
     SLURM_TMPDIR='./'
     SLURM_JOB_ID=1
-
 fi
 # module load cuda
 
