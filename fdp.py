@@ -5,7 +5,6 @@ import sys
 import numpy as np
 import logging
 import matplotlib.pyplot as plt
-from presto import filterbank as fb
 log = logging.getLogger(__name__)
 
 fn = sys.argv[1]
@@ -16,7 +15,6 @@ nspecs = fil.nspec
 chunk_size = 30674
 thresh_sig = 4.5
 #loop through chunks
-nspecs = fil.nspec
 loop_iters = int(nspecs/chunk_size)
 fn_clean = fn.strip('.fil')
 fdp_fn = f"{fn_clean}_fdp.fil"
