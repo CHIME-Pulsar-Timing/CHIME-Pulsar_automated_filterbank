@@ -1,10 +1,11 @@
 from scipy.optimize import minimize
 from scipy.stats import median_abs_deviation as mad
 import numpy as np
-from presto import rfifind
 from matplotlib import pyplot as plt
 from presto.filterbank import FilterbankFile
 from presto import filterbank as fb
+from presto_without_presto import rfifind
+from rfifind_numpy_tools import write_new_mask_from
 import sys
 import numpy as np
 import logging
@@ -55,30 +56,6 @@ def spectral_kurtosis(data, N=1, d=None):
         d = (np.nanmean(data.ravel()) / np.nanstd(data)) ** 2
     return ((M * d * N) + 1) * ((M * S2 / (S1**2)) - 1) / (M - 1)
 
-def get_mask(rfimask, startsamp, N):
-    """Return an array of boolean values to act as a mask
-    for a Spectra object.
-
-    Inputs:
-        rfimask: An rfifind.rfifind object
-        startsamp: Starting sample
-        N: number of samples to read
-
-    Output:
-        mask: 2D numpy array of boolean values.
-            True represents an element that should be masked.
-    """
-    sampnums = np.arange(startsamp, startsamp + N)
-    blocknums = np.floor(sampnums / rfimask.ptsperint).astype("int")
-    mask = np.zeros((N, rfimask.nchan), dtype="bool")
-    for blocknum in np.unique(blocknums):
-        blockmask = np.zeros_like(mask[blocknums == blocknum])
-        chans_to_mask = rfimask.mask_zap_chans_per_int[blocknum]
-        if chans_to_mask.any():
-            blockmask[:, chans_to_mask] = True
-        mask[blocknums == blocknum] = blockmask
-    return mask.T
-
 def fit_model(x, a, A, freq, phase):
     # this will be a polynomial model with a sinusoidal with phase offset
     polynomial = np.polyval([a], x)
@@ -93,7 +70,7 @@ def loglikelihood(params, x, y):
 def remove_rfi(gsk,threshold,fit = True, plot_orig = True,plot_name=1):
     mask = np.zeros(len(gsk),dtype=bool)
     #mask all gsk above 5
-    mask[np.abs(gsk) > 5] = True
+    mask[np.abs(gsk) > 10] = True
     gsk[mask] = np.median(gsk[~mask])
     gsk = gsk.data
     gsk -= np.median(gsk)
@@ -114,9 +91,9 @@ def remove_rfi(gsk,threshold,fit = True, plot_orig = True,plot_name=1):
     # plt.xlabel("Channel")
     # plt.ylabel("Spectral Kurtosis")
     # if not fit:
-        # plt.legend()
-        # plt.savefig(f"SK_secondcut_{plot_name}.png")
-        # print("saved plot")
+    #     plt.legend()
+    #     plt.savefig(f"SK_secondcut_{plot_name}.png")
+    #     print("saved plot")
     x_fit = np.zeros_like(x)
     y_fit = np.zeros_like(gsk)
     # lets see if we can fit the data with fit_model
@@ -147,17 +124,15 @@ def remove_rfi(gsk,threshold,fit = True, plot_orig = True,plot_name=1):
     return x,subtracted_gsk, mask
 
 
-def perform_SK(fn,chunk_size):
+def perform_SK(fn,nints):
     fil = FilterbankFile(fn,mode='read')
     fn_clean = fn.strip('.fil')
-    gsk_fn = f"{fn_clean}_gsk.fil"
-    fb.create_filterbank_file(gsk_fn,fil.header,nbits=fil.header['nbits'])
-    new_fil = FilterbankFile(gsk_fn,mode='append')
     nspecs = fil.nspec
-    loop_iters = int(nspecs/chunk_size)
+    loop_iters = nints
+    chunk_size = nspecs//loop_iters
     # loop_iters = 5
-    prev_med = 0
-    prev_std = 0
+    print(f"chunk size is {chunk_size}")
+    rfimask = np.zeros((nints,int(fil.nchan)),dtype=bool)
     for i in range(loop_iters):
         s = i*chunk_size
         print(f"Processing chunk {i+1}/{loop_iters}")
@@ -174,30 +149,41 @@ def perform_SK(fn,chunk_size):
             # x,gsk,mask_second_pass = remove_rfi(gsk,threshold=2,fit=False,plot_orig=False,plot_name=f"{i}_{chunk_size}")
             mask = mask_first_pass
         else:
-            x,gsk,mask_first_pass = remove_rfi(gsk,threshold=2,fit=True,plot_orig=False,plot_name=f"{i}_{chunk_size}")
-            x,gsk,mask_second_pass = remove_rfi(gsk,threshold=2,fit=False,plot_orig=False,plot_name=f"{i}_{chunk_size}")
+            x,gsk,mask_first_pass = remove_rfi(gsk,threshold=3,fit=True,plot_orig=False,plot_name=f"{i}_{chunk_size}")
+            x,gsk,mask_second_pass = remove_rfi(gsk,threshold=3,fit=False,plot_orig=False,plot_name=f"{i}_{chunk_size}")
             mask = mask_first_pass | mask_second_pass
-        #get the median and std of non masked channels
-        #if everything is masked, replace with median values of last block
-        if sum(mask)==len(mask):
-            med = prev_med
-            std = prev_std
-        else:
-            med = np.median(_[~mask,:])
-            std = np.std(_[~mask,:])
-            prev_med = med
-            prev_std = std
-        #replace the mask with a normally distributed random number with the same median and std
-        #with shape (sum(mask), len(_[mask,:]))
-        _[mask,:] = np.random.normal(med,std,(np.sum(mask),len(_[0,:])))
-        new_fil.append_spectra(_.T)
+        #for some reason mask is reversed
+        rfimask[i,:] = mask[::-1]
     fil.close()
-    new_fil.close()
+    return np.array(rfimask)
+
+def load_rfi_mask(mask_fn,plot_name="initial_mask.png"):
+    rfimask = rfifind.rfifind(mask_fn)
+    nints = rfimask.nint
+    plt.figure()
+    plt.imshow(rfimask.mask,aspect="auto")
+    plt.colorbar()
+    plt.savefig(plot_name)
+
+    return rfimask,nints
 
 if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Compute the spectral kurtosis of a data file")
     parser.add_argument("fn", type=str, help="File name of the data")
-    parser.add_argument("block_size", type=int, help="block size (number of subints)")
     args = parser.parse_args()
-    perform_SK(args.fn,args.block_size)
+    #parse the basename of fn
+    basename = args.fn.split(".")[0]
+    #construct the mask filename
+    rfimask_fn = f"{basename}_rfifind.mask"
+    rfimask,nints = load_rfi_mask(rfimask_fn)
+    import os
+    #copy the original mask to a new file
+    os.system(f"cp {rfimask_fn} {basename}_original_rfifind.mask")
+    #plot the rfimask
+    plt.figure()
+    plt.imshow(rfimask.mask,aspect="auto")
+    plt.colorbar()
+    plt.savefig("initial_mask.png")
+    mask = perform_SK(args.fn,nints)
+    write_new_mask_from(basename+"_gsk_rfifind.mask", mask, rfimask, include_old=True, infstats_too=True)

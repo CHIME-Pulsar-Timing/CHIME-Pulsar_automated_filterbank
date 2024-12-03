@@ -56,7 +56,16 @@ def run_rfifind(fname,ext,dead_gpus=''):
                     logging.info(f'ignoring dead gpus {dgm}')
         else:
             logging.info("dead GPU mask is huge, it's probably wrong, ignore")
-
+    else:
+        #find our own deadgpu mask
+        from sigpyproc import readers as r
+        #load 10s of data
+        filf = r.FilReader(fname+ext)
+        tsamp = filf.header.tsamp
+        _ = filf.read_block(0,int(10/tsamp))
+        #find the data that has std of 0
+        stds = np.std(_,axis=1)
+        pipeline_config_mask = np.where(stds==0)[0]
     #conver pipeline config mask back into string
     ignore_chan_string = ''
     for i,chan in enumerate(pipeline_config_mask):
@@ -82,6 +91,18 @@ def run_rfifind(fname,ext,dead_gpus=''):
         [logging.info(f) for f in os.listdir('.')]
         sys.exit(1)
 
+def run_gsk(fname,ext):
+    from gsk import load_rfi_mask
+    from gsk import perform_SK
+    from rfifind_numpy_tools import write_new_mask_from
+    rfimask_fn = f"{fname}_rfifind.mask"
+    rfimask,nints = load_rfi_mask(rfimask_fn,"initial_mask.png")
+    import os
+    #copy the original mask to a new file
+    os.system(f"cp {rfimask_fn} {fname}_original_rfifind.mask")
+    mask = perform_SK(fname+ext,nints)
+    write_new_mask_from(rfimask_fn, mask, rfimask, include_old=True, infstats_too=True)
+    rfimask,nints = load_rfi_mask(rfimask_fn,"final_mask.png")
 
 def run_ddplan(fname,ext,dm,mask_name,ignorelist):
     from presto import infodata
@@ -197,11 +218,11 @@ if __name__ == '__main__':
         level=logging.DEBUG,
         force=True
     )
-    log = logging.getLogger('stdlogger')
-    sys.stdout = StreamToLogger(log,logging.INFO)
-    sys.stderr = StreamToLogger(log,logging.ERROR)
-    logging.info("test logging info")
-    print('Test to standard out')
+    # log = logging.getLogger('stdlogger')
+    # sys.stdout = StreamToLogger(log,logging.INFO)
+    # sys.stderr = StreamToLogger(log,logging.ERROR)
+    # logging.info("test logging info")
+    # print('Test to standard out')
 
     if slurm:
         #this is a change to the SLURM tmpdir directory
@@ -222,13 +243,10 @@ if __name__ == '__main__':
         logging.info("Running rfifind")
         ignore_chan_string = run_rfifind(fname,ext,dead_gpu)
         mask_name = "_rfifind.mask"
+
     if sk_mask:
-        logging.info("Running SK")
-        try:
-            mask_name = your_rfi_sk.merge_mask(fname+ext,fname+'_rfifind.mask',ignore_chan_string)
-        except:
-            logging.info("SK failed, just using rfifind mask")
-            mask_name = "_rfifind.mask"
+        run_gsk(fname,ext)
+
     if dedisp:
         #run ddplan
         logging.info("Running DDplan")
