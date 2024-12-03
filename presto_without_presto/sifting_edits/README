@@ -1,0 +1,12 @@
+ACCEL_sift.py and sifting.py are the originals
+
+sifting_DMprec.py specified a dm precision parameter and uses that in all of the strings / DM-finding
+ACCEL_sift_0.py works with that and also lets you specify DM precision.
+                it's also argparse-ified so you can pass in useful stuff on the command line rather than having to edit the script every time
+
+so far *does* still require actual presto
+sifting_DMprec has
+from presto import infodata
+from presto.presto import candidate_sigma
+
+the first would be fine to presto_without_presto, but I haven't figured out how to convert the wrapped presto.presto stuff
