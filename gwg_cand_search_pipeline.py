@@ -56,6 +56,18 @@ def run_rfifind(fname,ext,dead_gpus=''):
                     logging.info(f'ignoring dead gpus {dgm}')
         else:
             logging.info("dead GPU mask is huge, it's probably wrong, ignore")
+    else:
+        #find our own deadgpu mask
+        from sigpyproc import readers as r
+        #load 10s of data
+        filf = r.FilReader(fname+ext)
+        tsamp = filf.header.tsamp
+        _ = filf.read_block(0,int(10/tsamp))
+        #find the data that has std of 0
+        stds = np.std(_,axis=1)
+        pipeline_config_mask_sigpyproc = np.where(stds==0)[0]
+        pipeline_config_mask = 1023-pipeline_config_mask_sigpyproc
+
 
     #conver pipeline config mask back into string
     ignore_chan_string = ''
@@ -82,6 +94,32 @@ def run_rfifind(fname,ext,dead_gpus=''):
         [logging.info(f) for f in os.listdir('.')]
         sys.exit(1)
 
+def run_gsk(fname,ext):
+    from gsk import load_rfi_mask
+    from gsk import perform_SK
+    from rfifind_numpy_tools import write_new_mask_from
+    rfimask_fn = f"{fname}_rfifind.mask"
+    rfimask,nints = load_rfi_mask(rfimask_fn,"initial_mask.png")
+    import os
+    #copy the original mask to a new file
+    os.system(f"cp {rfimask_fn} {fname}_original_rfifind.mask")
+    mask = perform_SK(fname+ext,nints)
+    write_new_mask_from(rfimask_fn, mask, rfimask, include_old=True, infstats_too=True)
+    rfimask,nints = load_rfi_mask(rfimask_fn,"final_mask.png")
+
+def run_kc_iqrm(fname,ext,ignorechans):
+    #for now hardcode the link
+    ##this doesn't work and I'm going to give up on it
+    from gsk import load_rfi_mask
+    rfimask_fn = fname+"_rfifind.mask"
+    #copy the original mask to a new file
+    os.system(f"cp {rfimask_fn} {fname}_before_kc_rfifind.mask")
+    new_rfimask_name = "_0_rfifind.mask"
+    command = f"python ~/Documents/pulsar_code_bits_and_pieces/rfi_pipeline.py --option 0 --outfilename {fname}{new_rfimask_name} --rfac 16 --include_rfifind --ignorechans {ignorechans} {rfimask_fn}"
+    print(command)
+    run_kc_iqrm_cmd = subprocess.check_call([command], shell=True)
+    rfimask,nints = load_rfi_mask(rfimask_fn,"kc_mask.png")
+    return new_rfimask_name
 
 def run_ddplan(fname,ext,dm,mask_name,ignorelist):
     from presto import infodata
@@ -126,7 +164,7 @@ def run_ddplan(fname,ext,dm,mask_name,ignorelist):
 
 def run_sp(fname):
     #I set -m to 300, but I don't think I need 300 because it's in bins
-    sp_command = 'single_pulse_search.py -b %s*.dat' %(fname)
+    sp_command = 'single_pulse_search.py %s*.dat' %(fname)
     # sp_command = 'single_pulse_search.py %s*.dat' %(fname)
     logging.info(sp_command)
     failed=True
@@ -152,6 +190,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--sk_mask', action='store_true', help="apply a SK mask from 'your' onto the rfifind mask")
+    parser.add_argument('--kc_iqrm', action='store_true', help="apply a Kathryn's IQRM mask")
     parser.add_argument('--fil', type=str, help='Input filterbank file')
     parser.add_argument('--dedisp',action='store_true',help='Run prepsubband and dedisperse the data')
     parser.add_argument('--dm', type=float,help='DM of the candidate. This will determine the max DM to search for pulsar')
@@ -176,6 +215,7 @@ if __name__ == '__main__':
     dead_gpu = args.dead_gpu
     slurm=args.slurm
     sk_mask = args.sk_mask
+    kc_iqrm = args.kc_iqrm
     current_dir = os.getcwd()
     #get only the file name
     if fil.endswith(".fits"):
@@ -197,11 +237,11 @@ if __name__ == '__main__':
         level=logging.DEBUG,
         force=True
     )
-    log = logging.getLogger('stdlogger')
-    sys.stdout = StreamToLogger(log,logging.INFO)
-    sys.stderr = StreamToLogger(log,logging.ERROR)
-    logging.info("test logging info")
-    print('Test to standard out')
+    # log = logging.getLogger('stdlogger')
+    # sys.stdout = StreamToLogger(log,logging.INFO)
+    # sys.stderr = StreamToLogger(log,logging.ERROR)
+    # logging.info("test logging info")
+    # print('Test to standard out')
 
     if slurm:
         #this is a change to the SLURM tmpdir directory
@@ -223,12 +263,9 @@ if __name__ == '__main__':
         ignore_chan_string = run_rfifind(fname,ext,dead_gpu)
         mask_name = "_rfifind.mask"
     if sk_mask:
-        logging.info("Running SK")
-        try:
-            mask_name = your_rfi_sk.merge_mask(fname+ext,fname+'_rfifind.mask',ignore_chan_string)
-        except:
-            logging.info("SK failed, just using rfifind mask")
-            mask_name = "_rfifind.mask"
+        run_gsk(fname,ext)
+    if kc_iqrm:
+        mask_name = run_kc_iqrm(fname,ext,ignore_chan_string)
     if dedisp:
         #run ddplan
         logging.info("Running DDplan")

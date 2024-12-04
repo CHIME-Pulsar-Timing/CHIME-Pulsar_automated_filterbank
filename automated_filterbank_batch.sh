@@ -62,7 +62,7 @@ if test -f "$p"; then
                 python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
             else
                 echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
             fi
         fi
 
