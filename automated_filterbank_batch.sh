@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=6:00:00
+#SBATCH --time=12:00:00
 #SBATCH --mem-per-cpu=4096M
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -101,6 +101,9 @@ if test -f "$p"; then
         #gotta do this for some weird reason on my local machine
         touch "${PULSAR}"_singlepulse.ps
     else
+    	#chown everything to adamdong:rrg-istairs-ad
+	chown -R adamdong:rrg-istairs-ad ${SLURM_TMPDIR}/*
+
         cp -r ${SLURM_TMPDIR}/* .
     fi
     exit 0
