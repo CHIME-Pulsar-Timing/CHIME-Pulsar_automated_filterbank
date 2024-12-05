@@ -28,6 +28,11 @@ if [ "$LOCAL" != true ]; then
     source ~/projects/rrg-istairs-ad/Your_060524/bin/activate
 else
     #set slurm tmpdir to current directory
+    module use /project/6004902/chimepsr-software/v2/environment-modules
+    module load presto
+    module load chime-psr
+    source ~/projects/rrg-istairs-ad/Your_060524/bin/activate
+
     SLURM_TMPDIR='./'
     SLURM_JOB_ID=1
 
