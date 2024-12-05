@@ -111,12 +111,13 @@ def run_kc_iqrm(fname,ext,ignorechans):
     #for now hardcode the link
     ##this doesn't work and I'm going to give up on it
     from gsk import load_rfi_mask
+    import pathlib
+    path=pathlib.Path(__file__).parent.absolute()
     rfimask_fn = fname+"_rfifind.mask"
     #copy the original mask to a new file
     os.system(f"cp {rfimask_fn} {fname}_before_kc_rfifind.mask")
-    new_rfimask_name = "_0_rfifind.mask"
-    command = f"python ~/Documents/pulsar_code_bits_and_pieces/rfi_pipeline.py --option 0 --outfilename {fname}{new_rfimask_name} --rfac 16 --include_rfifind --ignorechans {ignorechans} {rfimask_fn}"
-    print(command)
+    new_rfimask_name = "_01234568_rfifind.mask"
+    command = f"python {path}/rfi_pipeline.py --option 0,1,2,3,4,5,6,8 --outfilename {fname}{new_rfimask_name} --rfac 16 --include_rfifind --ignorechans {ignorechans} {rfimask_fn}"
     run_kc_iqrm_cmd = subprocess.check_call([command], shell=True)
     rfimask,nints = load_rfi_mask(rfimask_fn,"kc_mask.png")
     return new_rfimask_name
