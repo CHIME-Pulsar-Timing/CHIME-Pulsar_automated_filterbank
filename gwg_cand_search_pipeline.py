@@ -40,6 +40,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 def run_rfifind(fname,ext,dead_gpus=''):
     pipeline_config_mask = pipeline_config.ignorelist.split(',')
     if dead_gpus!='':
+        #legacy code to combine deagpu and ignore list, we don't use this anymore
         dead_gpu_mask = dead_gpus.split(',')
         if len(dead_gpu_mask)<400:
             #combine the two masks
