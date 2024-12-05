@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=6:00:00
+#SBATCH --time=12:00:00
 #SBATCH --mem-per-cpu=4096M
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -59,7 +59,7 @@ if test -f "$p"; then
             if [ "$LOCAL" != true ]; then
                 DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
                 echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dead_gpu $DEAD_GPU --kc_iqrm --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --kc_iqrm --dead_gpu $DEAD_GPU --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
             else
                 echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
                 python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --kc_iqrm --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
@@ -101,6 +101,9 @@ if test -f "$p"; then
         #gotta do this for some weird reason on my local machine
         touch "${PULSAR}"_singlepulse.ps
     else
+    	#chown everything to adamdong:rrg-istairs-ad
+	chown -R adamdong:rrg-istairs-ad ${SLURM_TMPDIR}/*
+
         cp -r ${SLURM_TMPDIR}/* .
     fi
     exit 0

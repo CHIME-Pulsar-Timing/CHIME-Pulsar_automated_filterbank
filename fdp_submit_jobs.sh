@@ -1,5 +1,6 @@
 #!/bin/bash
-module use /project/6004902/modulefiles
+#module use /project/6004902/modulefiles
+module use /project/6004902/chimepsr-software/v2/environment-modules
 module load presto
 echo "$0"
 AFP="$(dirname $(readlink -f "$0"))"

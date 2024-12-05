@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=1:00:00
+#SBATCH --time=4:00:00
 #SBATCH --mem=4096M
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=fetch
@@ -180,23 +180,23 @@ echo "predicting candidates"
 if [ "$TIME" == 0.1 ]; then
     #see if $SHORT is true
     if [ "$SHORT" == true ]; then
-        predict.py --data_dir nsub_short_0_1 --model a --probability 0.1 -g $GPU
+        predict.py --data_dir nsub_short_0_1 --model a --probability 0.01 -g $GPU
     else
-        predict.py --data_dir nsub_0_1 --model a --probability 0.1 -g $GPU
+        predict.py --data_dir nsub_0_1 --model a --probability 0.01 -g $GPU
     fi
 elif [ "$TIME" == 0.5 ]; then
     if [ "$SHORT" == true ]; then
-        predict.py --data_dir nsub_short_0_5 --model a --probability 0.1 -g $GPU
+        predict.py --data_dir nsub_short_0_5 --model a --probability 0.01 -g $GPU
     else
-        predict.py --data_dir nsub_0_5 --model a --probability 0.1 -g $GPU
+        predict.py --data_dir nsub_0_5 --model a --probability 0.01 -g $GPU
     fi
 elif [ "$TIME" == 1 ]; then
-    predict.py --data_dir nsub_1 --model a --probability 0.1 -g $GPU
+    predict.py --data_dir nsub_1 --model a --probability 0.01 -g $GPU
 fi
 
 #remove all the files that are irrelevant
 $AFP/clear_false_candidates.sh -i .
-#chown -R adamdong:rrg-istairs-ad $SLURM_TMPDIR/nsub*
+chown -R adamdong:rrg-istairs-ad $SLURM_TMPDIR/nsub*
 if [ "$LOCAL" != true ]; then
     cp -r $SLURM_TMPDIR/nsub* $CAND_PATH/
 fi
