@@ -120,4 +120,4 @@ def prep_fetch_scale_fil(filfile,min_burst_time,max_burst_time,dm):
     return filfile,tsamp,bt
     
 if __name__=='__main__':
-    prep_fetch_csv(sys.argv[1],float(sys.argv[2]),rank=5)
+    prep_fetch_csv(sys.argv[1],float(sys.argv[2]),rank=10)
