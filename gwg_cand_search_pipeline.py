@@ -287,6 +287,6 @@ if __name__ == '__main__':
         from prep_fetch import prep_fetch_csv
         #this script needs the actual file name
         fname = fname.split('/')[-1]
-        prep_fetch_csv(fname+ext,float(source_dm),rank=5)
+        prep_fetch_csv(fname+ext,float(source_dm),rank=10)
 
     edit_mask(fname,ext,mask_name)
