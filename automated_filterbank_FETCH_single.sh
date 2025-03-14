@@ -17,7 +17,7 @@ n=5
 TIME=1
 SHORT=false
 SLACK=false
-while getopts "li:p:g:n:t:s:a" flag
+while getopts "li:p:g:n:t:s:z" flag
 do
     case "${flag}" in
         l) LOCAL=true;;
@@ -27,7 +27,7 @@ do
         n) n=$OPTARG;;
         t) TIME=$OPTARG;;
         s) SHORT=true;;
-        a) SLACK=true;;
+        z) SLACK=true;;
     esac
 done
 echo $GPU
