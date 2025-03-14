@@ -16,7 +16,8 @@ GPU=0
 n=5
 TIME=1
 SHORT=false
-while getopts "li:p:g:n:t:s" flag
+SLACK=false
+while getopts "li:p:g:n:t:s:a" flag
 do
     case "${flag}" in
         l) LOCAL=true;;
@@ -26,6 +27,7 @@ do
         n) n=$OPTARG;;
         t) TIME=$OPTARG;;
         s) SHORT=true;;
+        a) SLACK=true;;
     esac
 done
 echo $GPU
@@ -199,4 +201,11 @@ $AFP/clear_false_candidates.sh -i .
 #chown -R adamdong:rrg-istairs-ad $SLURM_TMPDIR/nsub*
 if [ "$LOCAL" != true ]; then
     cp -r $SLURM_TMPDIR/nsub* $CAND_PATH/
+fi
+
+#post to slack if required
+if [ "$SLACK" == true ]; then
+    echo "posting to slack"
+    cd $CAND_PATH
+    python $AFP/post_slack.py
 fi
