@@ -200,7 +200,7 @@ if __name__ == '__main__':
     parser.add_argument('--fetch',action='store_true',help='creates the FETCH files')
     parser.add_argument('--rfifind',action='store_true',help='Runs rfifind using the configuration in pipeline config')
     parser.add_argument('--dead_gpu',type=str,default='',help='use this option if you want to input a mask for dead GPUs')
-    parser.add_argument('--slurm',type=str,help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
+    parser.add_argument('--slurm',type=str,default='.',help='specifies the root folder to output to, this can be useful on computecanada to reduce IO of files, we use the ${SLURM_TMPDIR} on CC')
     parser.add_argument("--log",type=str,help="name of file to write log to",default="automated_filterbank_batch_")
 
 
@@ -238,12 +238,6 @@ if __name__ == '__main__':
         level=logging.DEBUG,
         force=True
     )
-    # log = logging.getLogger('stdlogger')
-    # sys.stdout = StreamToLogger(log,logging.INFO)
-    # sys.stderr = StreamToLogger(log,logging.ERROR)
-    # logging.info("test logging info")
-    # print('Test to standard out')
-
     if slurm:
         #this is a change to the SLURM tmpdir directory
         os.chdir(slurm)
