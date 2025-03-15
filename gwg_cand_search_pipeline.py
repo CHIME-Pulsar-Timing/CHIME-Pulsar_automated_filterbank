@@ -5,7 +5,6 @@ import argparse
 import re
 import pipeline_config
 import sys
-import your_rfi_sk
 import logging
 
 #create a fake stream logger to redirect stdout and stderr
