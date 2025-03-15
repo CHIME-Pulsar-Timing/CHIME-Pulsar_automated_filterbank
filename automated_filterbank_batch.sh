@@ -16,20 +16,11 @@ source /home/pulsar_rhel8/pulsar.bash
 if test -f "$p"; then
     #rename it FIL
     FIL=$p
-    n=0
-    #basically try catch
-    until [ "$n" -ge 1 ]
     echo $EXT
     if [ $EXT == "fits" ]; then
-        python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --sk_mask --kc_iqrm --dedisp --fil $FIL && break
+        python $AFP/gwg_cand_search_pipeline.py --dm $DM --rfifind --sk_mask --kc_iqrm --dedisp --fil $FIL
     else
 
-    #ANYTHING BEYOND HERE IS DEBUGGING
-    #FETCH and SPEGID are slow so lets like ignore that for now
-    n=$((n+1))
-    echo "ERRORS IN PROCESSING CHECK LOGS OR ENABLE DEBUGGING"
-    exit 1
-    #remove the extra fil files
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     echo "ALL DONE"
     exit 0
