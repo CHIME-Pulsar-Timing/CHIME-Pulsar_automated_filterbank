@@ -143,7 +143,11 @@ def perform_SK(fn,nints):
             e = nspecs
         get_size = e-s
         _, hdr = get_filterbank_data_window(fn, s, get_size)
-        gsk = spectral_kurtosis(_.T,N=512,d=0.5)
+        try:
+            gsk = spectral_kurtosis(_.T,N=512,d=0.5)
+        except:
+            #because of the change to sigpyproc, this is a safety
+            gsk = spectral_kurtosis(_.data.T,N=512,d=0.5)
         if chunk_size < 45:
             x,gsk,mask_first_pass = remove_rfi(gsk,threshold=2,fit=False,plot_orig=True,plot_name=f"{i}_{chunk_size}")
             # x,gsk,mask_second_pass = remove_rfi(gsk,threshold=2,fit=False,plot_orig=False,plot_name=f"{i}_{chunk_size}")
