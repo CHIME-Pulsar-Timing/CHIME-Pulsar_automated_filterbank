@@ -74,7 +74,9 @@ def run_rfifind(fname, ext, dead_gpus=""):
             #this is because sigpyproc got updated and broke things
             stds = np.std(_.data, axis=1)
         pipeline_config_mask_sigpyproc = np.where(stds == 0)[0]
-        pipeline_config_mask = 1023 - pipeline_config_mask_sigpyproc
+        if filf.header.foff < 0:
+            #channels are backwards in this case
+            pipeline_config_mask = filf.header.nchans - pipeline_config_mask_sigpyproc
 
     # conver pipeline config mask back into string
     ignore_chan_string = ""
@@ -83,6 +85,7 @@ def run_rfifind(fname, ext, dead_gpus=""):
             ignore_chan_string = str(chan)
         else:
             ignore_chan_string = ignore_chan_string + "," + str(chan)
+    #for now lets ignore it
     logging.info(f"RFIFIND out fname {fname}")
     if ignore_chan_string == "":
         # don't have any ignore channels if there's no zaplist
@@ -141,7 +144,7 @@ def run_kc_iqrm(fname, ext, ignorechans):
     return new_rfimask_name
 
 
-def run_ddplan(fname, ext, dm, mask_name, ignorelist):
+def run_ddplan(fname, ext, dm, mask_name, ignorelist, dm_range = 20):
     from presto import infodata
 
     # run the ddplan in my current directory, it's got the rfi masking included
@@ -155,10 +158,10 @@ def run_ddplan(fname, ext, dm, mask_name, ignorelist):
     else:
         subband = numchan
     if dm > 26.1:
-        dml = dm - 20
+        dml = dm - dm_range
     else:
         dml = 6.1
-    dmh = dm + 20
+    dmh = dm + dm_range
     # run the ddplan that lies within the directory of this file because the default presto one can't do masks
     path = pathlib.Path(__file__).parent.absolute()
     # ignorechan= pipeline_config.ignorechan
@@ -240,6 +243,11 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--dm",
+        type=float,
+        help="DM of the candidate. This will determine the max DM to search for pulsar",
+    )
+    parser.add_argument(
+        "--dm_range",
         type=float,
         help="DM of the candidate. This will determine the max DM to search for pulsar",
     )
@@ -345,7 +353,7 @@ if __name__ == "__main__":
         else:
             # run ddplan
             logging.info("Running DDplan")
-            run_ddplan(fname, ext, source_dm, mask_name, ignorelist=ignore_chan_string)
+            run_ddplan(fname, ext, source_dm, mask_name, ignorelist=ignore_chan_string, dm_range=args.dm_range)
     if sp:
         logging.info("Running single pulse search")
         run_sp(fname)
