@@ -7,7 +7,7 @@
 #SBATCH --job-name=automated_filterbank
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
-set -euo pipefail
+#set -euo pipefail
 LOCAL=false
 while getopts "ld:a:p:" flag
 do
@@ -28,6 +28,10 @@ if [ "$LOCAL" != true ]; then
     source ~/projects/rrg-istairs-ad/Your_060524/bin/activate
 else
     #set slurm tmpdir to current directory
+    module use /project/6004902/chimepsr-software/v2/environment-modules
+    module load presto
+    module load chime-psr
+    source ~/projects/rrg-istairs-ad/Your_060524/bin/activate
     SLURM_TMPDIR='./'
     SLURM_JOB_ID=1
 
@@ -98,7 +102,7 @@ if test -f "$p"; then
         touch "${PULSAR}"_singlepulse.ps
     else
     	#chown everything to adamdong:rrg-istairs-ad
-	chown -R adamdong:rrg-istairs-ad ${SLURM_TMPDIR}/*
+	#chown -R adamdong:rrg-istairs-ad ${SLURM_TMPDIR}/*
 
         cp -r ${SLURM_TMPDIR}/* .
     fi
