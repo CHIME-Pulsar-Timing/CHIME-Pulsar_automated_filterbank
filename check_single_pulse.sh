@@ -108,7 +108,7 @@ do
             SCRIPT_DIR="$(dirname $(readlink -f $0))"
             #this will send the batch job and after it's done sent the fetch job
             if [ "$LOCAL" = true ]; then
-                $SCRIPT_DIR/process_all_fil.sh -l -d $DM -f $FIL
+                $SCRIPT_DIR/process_all_fil.sh -l -d $DM -f $FIL &
 		#sleep every 10 seconds so you don't run too many things at once
 		sleep 30
             else

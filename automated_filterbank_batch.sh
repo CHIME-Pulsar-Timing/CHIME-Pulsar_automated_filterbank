@@ -54,7 +54,8 @@ if test -f "$p"; then
         if [ $EXT == "fits" ]; then
             #set dead gpu string to empty if using fits
             echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-            python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+            # python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+            python $AFP/gwg_cand_search_pipeline.py --rfifind --sk_mask --kc_iqrm --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         else
                 # DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
                 echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --kc_iqrm --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
@@ -84,7 +85,7 @@ if test -f "$p"; then
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     # rm "${SLURM_TMPDIR}"/$FIL
     #remove the .dat files
-    rm "${SLURM_TMPDIR}"/*.dat
+    # rm "${SLURM_TMPDIR}"/*.dat
     #tarball the infs and singlepulse files
     tar -cf "${SLURM_TMPDIR}/${PULSAR}_singlepulse.tar" "${SLURM_TMPDIR}/"*.singlepulse
     tar -cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
