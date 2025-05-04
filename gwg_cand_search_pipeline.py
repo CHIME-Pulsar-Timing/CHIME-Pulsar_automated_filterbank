@@ -75,7 +75,7 @@ def run_rfifind(fname, ext, dead_gpus=""):
         pipeline_config_mask_sigpyproc = np.where(stds == 0)[0]
         if filf.header.foff < 0:
             #channels are backwards in this case
-            pipeline_config_mask = filf.header.nchans - pipeline_config_mask_sigpyproc
+            pipeline_config_mask = filf.header.nchans - 1 - pipeline_config_mask_sigpyproc
 
     # conver pipeline config mask back into string
     ignore_chan_string = ""
@@ -249,6 +249,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dm_range",
         type=float,
+        default=20,
         help="DM of the candidate. This will determine the max DM to search for pulsar",
     )
     parser.add_argument("--sp", action="store_true", help="Run single pulse search")
