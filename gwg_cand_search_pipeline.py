@@ -249,6 +249,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dm_range",
         type=float,
+        default=20,
         help="DM of the candidate. This will determine the max DM to search for pulsar",
     )
     parser.add_argument("--sp", action="store_true", help="Run single pulse search")
