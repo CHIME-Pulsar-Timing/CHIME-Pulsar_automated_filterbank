@@ -197,7 +197,7 @@ def dedisperse_data(fname, ext, rfi_ext, dm):
         import traceback; print(traceback.format_exc())
         sys.exit(1)
 
-def run_ffa(fname,period_min=0.01, period_max=5):
+def run_ffa(fname,period_min=0.01, period_max=0.1):
     from riptide import TimeSeries
     from riptide import ffa_search
     # get a list of all dedispersed inf files
