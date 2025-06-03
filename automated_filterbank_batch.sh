@@ -89,7 +89,7 @@ if test -f "$p"; then
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     # rm "${SLURM_TMPDIR}"/$FIL
     #remove the .dat files
-    # rm "${SLURM_TMPDIR}"/*.dat
+    rm "${SLURM_TMPDIR}"/*.dat
     #tarball the infs and singlepulse files
     tar -cf "${SLURM_TMPDIR}/${PULSAR}_singlepulse.tar" "${SLURM_TMPDIR}/"*.singlepulse
     tar -cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
