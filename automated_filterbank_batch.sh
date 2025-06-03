@@ -63,7 +63,7 @@ if test -f "$p"; then
         else
                 # DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
                 echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --kc_iqrm --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --kc_iqrm --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+                python $AFP/gwg_cand_search_pipeline.py --FFA --dm $DM --speg --fetch --rfifind --sk_mask --kc_iqrm --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         fi
 
         #ANYTHING BEYOND HERE IS DEBUGGING
@@ -89,7 +89,7 @@ if test -f "$p"; then
     PULSAR=$(echo "$FIL" | cut -f 1 -d '.')
     # rm "${SLURM_TMPDIR}"/$FIL
     #remove the .dat files
-    # rm "${SLURM_TMPDIR}"/*.dat
+    rm "${SLURM_TMPDIR}"/*.dat
     #tarball the infs and singlepulse files
     tar -cf "${SLURM_TMPDIR}/${PULSAR}_singlepulse.tar" "${SLURM_TMPDIR}/"*.singlepulse
     tar -cf "${SLURM_TMPDIR}/${PULSAR}_inf.tar" "${SLURM_TMPDIR}/"*DM*.inf
