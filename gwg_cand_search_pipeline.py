@@ -60,9 +60,8 @@ def run_rfifind(fname, ext, dead_gpus=""):
         else:
             logging.info("dead GPU mask is huge, it's probably wrong, ignore")
     else:
-        # find our own deadgpu mask
+       # find our own deadgpu mask
         from sigpyproc import readers as r
-
         # load 10s of data
         filf = r.FilReader(fname + ext)
         tsamp = filf.header.tsamp
@@ -76,7 +75,7 @@ def run_rfifind(fname, ext, dead_gpus=""):
         pipeline_config_mask_sigpyproc = np.where(stds == 0)[0]
         if filf.header.foff < 0:
             #channels are backwards in this case
-            pipeline_config_mask = filf.header.nchans - pipeline_config_mask_sigpyproc
+            pipeline_config_mask = filf.header.nchans - 1 - pipeline_config_mask_sigpyproc
 
     # conver pipeline config mask back into string
     ignore_chan_string = ""
@@ -97,6 +96,7 @@ def run_rfifind(fname, ext, dead_gpus=""):
     else:
         rfifind_command = f"rfifind -blocks {pipeline_config.rfiblocks} -ignorechan {ignore_chan_string} -o {fname} {fname}{ext}"
     logging.info(rfifind_command)
+    print(rfifind_command)
     try:
         run_rfifind_cmd = subprocess.check_call([rfifind_command], shell=True)
         return ignore_chan_string

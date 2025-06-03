@@ -2,5 +2,5 @@
 AFP="$(dirname $(readlink -f $0))"
 for FIL in $@
 do
-    python $AFP/generate_rfi_mask.py $FIL &
+    python $AFP/gwg_cand_search_pipeline.py --rfifind --sk_mask --kc_iqrm --fil $FIL &
 done
