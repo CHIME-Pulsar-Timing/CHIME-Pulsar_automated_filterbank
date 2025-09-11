@@ -7,7 +7,7 @@
 #SBATCH --job-name=fetch
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
-#SBATCH --gres=gpu:v100l:1
+#SBATCH --gres=gpu:h100:1
 #the first argument is the tree to search down
 #run FETCH
 
