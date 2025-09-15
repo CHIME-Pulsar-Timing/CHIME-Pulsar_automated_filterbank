@@ -45,7 +45,7 @@ def cpu_dedisp_dmt(cand, args):
     # cand.your_header.time_decimation_factor = downfact
     # cand.tsamp = cand.your_header.tsamp
     # cand.data = _decimate(cand.data,decimate_factor = downfact,axis=0)
-    cand.dmtime(target = "GPU", range_dm = args.range_dm)
+    cand.dmtime(target = "CPU", range_dm = args.range_dm)
     print("Made DMT")
 
     cand.dedisperse()
