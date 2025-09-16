@@ -1,18 +1,17 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=4:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=4096M
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=fetch
 #SBATCH --output=%x-%j.out
 #SBATCH --error=%x-%j.err
-#SBATCH --gres=gpu:h100:1
 #the first argument is the tree to search down
 #run FETCH
 
 LOCAL=false
-GPU=0
+GPU=-1
 n=5
 TIME=1
 SHORT=false
@@ -37,7 +36,7 @@ if [ "$LOCAL" != true ]; then
     module use /project/6004902/chimepsr-software/v2/environment-modules
     #module use /project/6004902/chimepsr-software/v1/environment-modules
     #module load presto
-    module load cuda
+    #module load cuda
     module load chime-psr
     source ~/projects/rrg-istairs-ad/CHIPSPIPE_CANDMAKER/bin/activate
     #module use /project/6004902/chimepsr-software/v1/environment-modules
@@ -163,7 +162,7 @@ if [ "$LOCAL" != true ]; then
     #go backwards, deactivate everything
     #
     module unload chime-psr
-    module unload cuda
+    #module unload cuda
     deactivate
     module unuse /project/6004902/chimepsr-software/v2/environment-modules
 
