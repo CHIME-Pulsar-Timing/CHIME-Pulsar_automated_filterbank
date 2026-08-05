@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=def-istairs
 #SBATCH --export=NONE
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mem-per-cpu=4096M
 #SBATCH --cpus-per-task=1
 #SBATCH --job-name=automated_filterbank
@@ -63,7 +63,7 @@ if test -f "$p"; then
         else
                 # DEAD_GPU=$(get_bad_channel_list.py --fmt presto --type filterbank $FIL)
                 echo "python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --kc_iqrm --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break"
-                python $AFP/gwg_cand_search_pipeline.py --dm $DM --speg --fetch --rfifind --sk_mask --kc_iqrm --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
+                python $AFP/gwg_cand_search_pipeline.py --FFA --dm $DM --speg --fetch --rfifind --sk_mask --kc_iqrm --dedisp --sp --fil $FIL --slurm "${SLURM_TMPDIR}" && break
         fi
 
         #ANYTHING BEYOND HERE IS DEBUGGING

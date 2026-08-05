@@ -197,6 +197,30 @@ def dedisperse_data(fname, ext, rfi_ext, dm):
         import traceback; print(traceback.format_exc())
         sys.exit(1)
 
+def run_ffa(fname,period_min=0.01, period_max=0.1):
+    from riptide import TimeSeries
+    from riptide import ffa_search
+    # get a list of all dedispersed inf files
+    dd_files = glob.glob(f"{fname}_dedisp_DM*.inf")
+    for dd_file in dd_files:
+        ts = TimeSeries.from_presto_inf(dd_file)
+        tsamp = ts.tsamp
+        allowable_bin_mins = np.array([2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
+        arg_allowable = np.argwhere(period_min > (allowable_bin_mins * tsamp)).flatten()
+        max_allowable_bin_min = allowable_bin_mins[arg_allowable[-1]]
+        ts, pgram = ffa_search(
+            ts,
+            period_min=period_min,
+            period_max=period_max,
+            bins_min=max_allowable_bin_min,
+            bins_max=int(max_allowable_bin_min * 1.1),
+        )
+
+        #save the pgram results
+        np.save(f"{dd_file}_pgram.npy", pgram)
+
+
+
 
 def run_sp(fname):
     # I set -m to 300, but I don't think I need 300 because it's in bins
@@ -282,6 +306,13 @@ if __name__ == "__main__":
         action="store_true",
         help="only run the pipeline for one DM, this is useful for testing the pipeline",
     )
+    parser.add_argument(
+        "--FFA",
+        action="store_true",
+        help="runs riptide FFA on the dedispersed data, this is useful for finding periodic sources",
+    )
+
+
 
     args = parser.parse_args()
 
@@ -297,6 +328,7 @@ if __name__ == "__main__":
     sk_mask = args.sk_mask
     kc_iqrm = args.kc_iqrm
     one_dm = args.one_dm
+    FFA = args.FFA
 
     current_dir = os.getcwd()
     # get only the file name
@@ -355,6 +387,12 @@ if __name__ == "__main__":
             # run ddplan
             logging.info("Running DDplan")
             run_ddplan(fname, ext, source_dm, mask_name, ignorelist=ignore_chan_string, dm_range=args.dm_range)
+
+    if FFA:
+        # run FFA
+        logging.info("Running FFA")
+        run_ffa(fname)
+
     if sp:
         logging.info("Running single pulse search")
         run_sp(fname)
